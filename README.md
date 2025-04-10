@@ -1,8 +1,19 @@
 # MLS Spec
 
+[![Crates.io](https://img.shields.io/crates/v/mls-spec.svg)](https://crates.io/crates/mls-spec)
+[![docs.rs](https://docs.rs/mls-spec/badge.svg)](https://docs.rs/mls-spec)
+
+## Description
+
 This crate is a repository of MLS / RFC9420-related data structures.
 
 It is designed to be used as a base for implementations, and contains all the wire-format related structures to be able to build a RFC9420-compliant implementation.
+
+## Documentation
+
+Here: [https://docs.rs/mls-spec](https://docs.rs/mls-spec)
+
+## Details
 
 All sensitive pieces of data are wrapped in a `SensitiveBytes` newtype, which takes care of being zeroization-on-drop
 and has constant-time equality checks using `subtle` to make a best-effort attempt at protecting against side-channel attacks.
