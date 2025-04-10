@@ -1,7 +1,7 @@
 [package]
 name = "mls-spec"
 version = "1.0.0"
-description = "MLS / RFC9420 specification definitions"
+description = "This crate is a repository of MLS / RFC9420-related data structures."
 readme = "README.md"
 documentation = "https://docs.rs/mls-spec"
 repository = "https://github.com/OtaK/mls-spec"
@@ -10,6 +10,7 @@ keywords = ["mls", "e2ee", "rfc9420", "spec", "tlspl"]
 categories = ["cryptography", "parser-implementations", "encoding"]
 authors = ["Mathieu Amiot <amiot.mathieu@gmail.com>"]
 edition = "2024"
+include = ["src/**/*", "LICENSE-*", "README.md"]
 
 [features]
 # default = []
