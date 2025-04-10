@@ -1,5 +1,5 @@
 use crate::{
-    group::{proposals::Proposal, ProposalRef},
+    group::{ProposalRef, proposals::Proposal},
     tree::UpdatePath,
 };
 

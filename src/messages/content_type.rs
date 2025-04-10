@@ -1,6 +1,6 @@
 use crate::{
-    group::{commits::Commit, proposals::Proposal},
     MlsSpecError,
+    group::{commits::Commit, proposals::Proposal},
 };
 
 #[derive(

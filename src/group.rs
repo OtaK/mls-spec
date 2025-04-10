@@ -1,8 +1,8 @@
 use crate::{
+    SensitiveBytes,
     credential::Credential,
     crypto::SignaturePublicKey,
     defs::{CredentialType, ExtensionType, ProposalType},
-    SensitiveBytes,
 };
 
 pub mod commits;

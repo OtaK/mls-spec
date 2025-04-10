@@ -1,7 +1,7 @@
 use crate::{
-    defs::LeafIndex,
-    tree::{leaf_node::LeafNode, NodeType, ParentNode},
     SensitiveBytes,
+    defs::LeafIndex,
+    tree::{NodeType, ParentNode, leaf_node::LeafNode},
 };
 
 pub type ParentNodeHash = SensitiveBytes;

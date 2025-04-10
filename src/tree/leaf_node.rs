@@ -1,9 +1,9 @@
 use crate::{
+    SensitiveBytes,
     credential::Credential,
     crypto::{HpkePublicKey, HpkePublicKeyRef, SignaturePublicKey, SignaturePublicKeyRef},
     defs::{Capabilities, LeafIndex},
-    group::{extensions::Extension, KeyPackageLifetime},
-    SensitiveBytes,
+    group::{KeyPackageLifetime, extensions::Extension},
 };
 
 #[derive(

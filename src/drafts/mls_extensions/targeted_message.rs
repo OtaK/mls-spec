@@ -1,7 +1,7 @@
 use crate::{
-    defs::{labels::KdfLabelKind, Epoch, LeafIndex},
-    group::GroupId,
     SensitiveBytes,
+    defs::{Epoch, LeafIndex, labels::KdfLabelKind},
+    group::GroupId,
 };
 
 #[derive(

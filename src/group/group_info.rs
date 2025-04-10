@@ -1,11 +1,11 @@
 use crate::{
+    SensitiveBytes,
     crypto::Mac,
     defs::{LeafIndex, ProtocolVersion},
     group::extensions::{Extension, ExternalPub, RatchetTreeExtension},
     key_schedule::GroupContext,
     messages::MlsMessage,
     tree::RatchetTree,
-    SensitiveBytes,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, tls_codec::TlsSerialize, tls_codec::TlsSize)]

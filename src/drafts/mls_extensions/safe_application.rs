@@ -1,12 +1,12 @@
 use std::collections::BTreeMap;
 
 use crate::{
+    SensitiveBytes, ToPrefixedLabel,
     defs::{
-        labels::{PublicKeyEncryptionLabel, SignatureLabel},
         ProtocolVersion,
+        labels::{PublicKeyEncryptionLabel, SignatureLabel},
     },
     key_schedule::PreSharedKeyId,
-    SensitiveBytes, ToPrefixedLabel,
 };
 
 pub type ComponentId = u32;

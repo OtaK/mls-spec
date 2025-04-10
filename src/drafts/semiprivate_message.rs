@@ -1,10 +1,10 @@
 use crate::{
+    SensitiveBytes,
     credential::Credential,
     crypto::{HpkeCiphertext, HpkePublicKey},
     defs::{Epoch, LeafIndex, WireFormat},
     group::HashReference,
     messages::ReuseGuard,
-    SensitiveBytes,
 };
 
 use super::mls_extensions::safe_application::{Component, ComponentId};
@@ -122,10 +122,10 @@ pub struct KeyForExternalReceiverRef<'a> {
 
 pub mod messages {
     use crate::{
-        defs::Epoch,
-        group::{commits::Commit, proposals::Proposal, GroupId, GroupIdRef},
-        messages::{ContentType, ContentTypeInner, FramedContentAuthData, PrivateMessageContent},
         SensitiveBytes,
+        defs::Epoch,
+        group::{GroupId, GroupIdRef, commits::Commit, proposals::Proposal},
+        messages::{ContentType, ContentTypeInner, FramedContentAuthData, PrivateMessageContent},
     };
 
     use super::{KeyForExternalReceiver, KeyForExternalReceiverRef};
@@ -189,9 +189,9 @@ pub mod messages {
                     commit: Commit::tls_deserialize(bytes)?,
                 },
                 _ => {
-                    return Err(tls_codec::Error::DecodingError(
-                        format!("Tried to deserialize a {content_type}, which is invalid for a SemiPrivateMessage"),
-                    ))
+                    return Err(tls_codec::Error::DecodingError(format!(
+                        "Tried to deserialize a {content_type}, which is invalid for a SemiPrivateMessage"
+                    )));
                 }
             };
             let auth =

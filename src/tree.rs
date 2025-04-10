@@ -2,10 +2,10 @@ pub mod hashes;
 pub mod leaf_node;
 
 use crate::{
+    SensitiveBytes,
     crypto::{HpkeCiphertext, HpkePublicKey},
     defs::LeafIndex,
     tree::{hashes::ParentNodeHash, leaf_node::LeafNode},
-    SensitiveBytes,
 };
 
 #[derive(

@@ -1,10 +1,10 @@
 use crate::{
+    SensitiveBytes,
     defs::{CiphersuiteId, LeafIndex, ProposalType, ProtocolVersion},
-    group::{extensions::Extension, GroupId},
+    group::{GroupId, extensions::Extension},
     key_package::KeyPackage,
     key_schedule::{GroupContext, PreSharedKeyId},
     tree::leaf_node::LeafNode,
-    SensitiveBytes,
 };
 
 #[derive(

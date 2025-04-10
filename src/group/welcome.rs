@@ -1,10 +1,10 @@
 use crate::{
+    SensitiveBytes,
     crypto::HpkeCiphertext,
     defs::{CiphersuiteId, ProtocolVersion},
     group::KeyPackageRef,
     key_schedule::PreSharedKeyId,
     messages::{MlsMessage, MlsMessageContent},
-    SensitiveBytes,
 };
 
 #[derive(

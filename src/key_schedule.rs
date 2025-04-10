@@ -1,9 +1,9 @@
 use crate::{
-    defs::{labels::KdfLabelKind, CiphersuiteId, Epoch, ProtocolVersion, WireFormat},
-    group::{extensions::Extension, ExternalSender, GroupId, RequiredCapabilities},
+    SensitiveBytes,
+    defs::{CiphersuiteId, Epoch, ProtocolVersion, WireFormat, labels::KdfLabelKind},
+    group::{ExternalSender, GroupId, RequiredCapabilities, extensions::Extension},
     messages::FramedContent,
     tree::TreeHash,
-    SensitiveBytes,
 };
 
 #[derive(

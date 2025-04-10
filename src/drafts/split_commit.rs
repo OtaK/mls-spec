@@ -3,7 +3,7 @@ use crate::{
     defs::{ProtocolVersion, WireFormat},
     group::commits::ProposalOrRef,
     messages::{MlsMessage, MlsMessageContent},
-    tree::{leaf_node::LeafNode, UpdatePathNode},
+    tree::{UpdatePathNode, leaf_node::LeafNode},
 };
 
 pub const WIRE_FORMAT_MLS_SPLIT_COMMIT: u16 = 0xFFCC; // TODO: Pending IANA assignment

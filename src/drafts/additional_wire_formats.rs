@@ -1,9 +1,9 @@
 use crate::{
+    SensitiveBytes,
     crypto::Mac,
     defs::{Epoch, WireFormat},
     group::GroupId,
     messages::{ContentType, ContentTypeInner, FramedContentAuthData, Sender},
-    SensitiveBytes,
 };
 
 pub const WIRE_FORMAT_MLS_MESSAGE_WITHOUT_AAD: u16 = 0xFADF; // TODO: Waiting for IANA registration

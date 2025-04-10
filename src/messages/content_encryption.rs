@@ -65,7 +65,7 @@ impl PrivateMessageContent {
             ContentType::Reserved => {
                 return Err(tls_codec::Error::DecodingError(
                     "Tried to deserialize a ContentType::RESERVED, which is invalid".into(),
-                ))
+                ));
             }
             ContentType::Application => ContentTypeInner::Application {
                 application_data: crate::tlspl::bytes::tls_deserialize(bytes)?,

@@ -1,4 +1,4 @@
-use crate::{defs::CiphersuiteId, key_schedule::PreSharedKeyId, SensitiveBytes, ToPrefixedLabel};
+use crate::{SensitiveBytes, ToPrefixedLabel, defs::CiphersuiteId, key_schedule::PreSharedKeyId};
 
 pub type Mac = SensitiveBytes;
 pub type HpkePublicKey = SensitiveBytes;

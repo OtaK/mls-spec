@@ -9,7 +9,7 @@ license = "MIT OR Apache-2.0"
 keywords = ["mls", "e2ee", "rfc9420", "spec", "tlspl"]
 categories = ["cryptography", "parser-implementations", "encoding"]
 authors = ["Mathieu Amiot <amiot.mathieu@gmail.com>"]
-edition = "2021"
+edition = "2024"
 
 [features]
 # default = []
@@ -40,7 +40,7 @@ draft-pham-mls-additional-wire-formats = [
 
 [dependencies]
 thiserror = "2"
-miette = "7"
+miette = { version = "7", git = "https://github.com/zkat/miette.git", rev = "59c81617de8650a6ff3b193b41b4297e560726a0" } # until 7.6 is released, this is needed to avoid having thiserror 1.x laying around
 async-trait = "0.1"
 strum = { version = "0.27", features = ["derive"] }
 tls_codec = { version = "0.4", features = ["derive", "mls"] }

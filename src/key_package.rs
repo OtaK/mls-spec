@@ -1,9 +1,9 @@
 use crate::{
+    SensitiveBytes,
     defs::{CiphersuiteId, ProtocolVersion},
-    group::{extensions::Extension, KeyPackageRef},
+    group::{KeyPackageRef, extensions::Extension},
     messages::MlsMessage,
     tree::leaf_node::LeafNode,
-    SensitiveBytes,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, tls_codec::TlsSerialize, tls_codec::TlsSize)]

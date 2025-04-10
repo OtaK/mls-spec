@@ -1,9 +1,9 @@
 use crate::{
+    SensitiveBytes,
     crypto::Mac,
     defs::WireFormat,
     group::GroupId,
     messages::{ContentType, FramedContent, FramedContentAuthData, FramedContentTBS, Sender},
-    SensitiveBytes,
 };
 
 use super::{AuthenticatedContent, AuthenticatedContentRef};

@@ -21,7 +21,9 @@ pub enum MlsSpecError {
     #[error("Trying to build a FramedContentTBS but the GroupContext hasn't been provided")]
     #[diagnostic(code(mls_spec::missing_ctx))]
     FramedContentTBSMissingGroupContext,
-    #[error("A reserved value has been used. While we do have definitions for them, they're not supposed to be used in-protocol")]
+    #[error(
+        "A reserved value has been used. While we do have definitions for them, they're not supposed to be used in-protocol"
+    )]
     #[diagnostic(code(mls_spec::reserved_value_usage))]
     ReservedValueUsage,
     #[error("You have tried to use an invalid value spec-wise")]

@@ -1,8 +1,8 @@
 use crate::{
+    SensitiveBytes,
     credential::Credential,
     crypto::{SignaturePublicKey, SignaturePublicKeyRef},
     defs::CiphersuiteId,
-    SensitiveBytes,
 };
 
 pub const MULTI_CREDENTIAL: u16 = 0x0003;

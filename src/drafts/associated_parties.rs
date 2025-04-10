@@ -1,9 +1,9 @@
 use crate::{
+    SensitiveBytes,
     crypto::{HpkePublicKey, HpkePublicKeyRef},
     defs::SenderIndex,
     group::ExternalSender,
     key_schedule::GroupContext,
-    SensitiveBytes,
 };
 
 use super::mls_extensions::safe_application::{Component, ComponentId};
@@ -127,7 +127,7 @@ pub mod proposals {
 }
 
 pub mod key_schedule {
-    use crate::{defs::LeafIndex, key_schedule::GroupContext, SensitiveBytes};
+    use crate::{SensitiveBytes, defs::LeafIndex, key_schedule::GroupContext};
 
     use super::AssociatedPartyEntry;
 

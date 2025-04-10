@@ -1,5 +1,5 @@
 use color_eyre::eyre::Result;
-use mls_spec::{test_utils::assertions::assert_eq_err, Parsable as _};
+use mls_spec::{Parsable as _, test_utils::assertions::assert_eq_err};
 
 #[derive(Debug, serde::Deserialize)]
 pub struct DeserializationVector {

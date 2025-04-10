@@ -1,13 +1,13 @@
 use tls_codec::Deserialize;
 
 use crate::{
+    MlsSpecError, MlsSpecResult, SensitiveBytes,
     crypto::Mac,
     defs::{Epoch, ProposalType, ProtocolVersion, WireFormat},
-    group::{group_info::GroupInfo, welcome::Welcome, GroupId},
+    group::{GroupId, group_info::GroupInfo, welcome::Welcome},
     key_package::KeyPackage,
     key_schedule::{ConfirmedTranscriptHashInput, GroupContext},
     messages::{ContentType, ContentTypeInner, PrivateMessage, PublicMessage, Sender, SenderType},
-    MlsSpecError, MlsSpecResult, SensitiveBytes,
 };
 
 #[derive(

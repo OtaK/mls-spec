@@ -1,5 +1,5 @@
 use crate::{
-    defs::LeafIndex, group::welcome::Welcome, messages::MlsMessage, tree::TreeNode, SensitiveBytes,
+    SensitiveBytes, defs::LeafIndex, group::welcome::Welcome, messages::MlsMessage, tree::TreeNode,
 };
 
 ///
