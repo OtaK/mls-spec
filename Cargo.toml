@@ -1,0 +1,78 @@
+[package]
+name = "mls-spec"
+version = "1.0.0"
+description = "MLS / RFC9420 specification definitions"
+readme = "README.md"
+documentation = "https://docs.rs/mls-spec"
+repository = "https://github.com/OtaK/mls-spec"
+license = "MIT OR Apache-2.0"
+keywords = ["mls", "e2ee", "rfc9420", "spec", "tlspl"]
+categories = ["cryptography", "parser-implementations", "encoding"]
+authors = ["Mathieu Amiot <amiot.mathieu@gmail.com>"]
+edition = "2021"
+
+[features]
+# default = []
+default = ["mls-extensions"]
+hazmat = ["dep:hex"]
+test-vectors = []
+test-utils = ["dep:pretty_assertions", "dep:color-eyre", "dep:postcard"]
+serde = ["dep:serde", "dep:serde_repr", "tls_codec/serde", "zeroize/serde"]
+tlspl-utils = []
+mls-rs-compat = ["dep:mls-rs-codec"]
+mls-extensions = ["draft-ietf-mls-extensions"] # Prep transition from draft to RFC
+# MLS-related drafts implemented in-tree
+draft-ietf-mls-extensions = []
+draft-ietf-mls-extensions-content-advertisement-parse = [
+    "draft-ietf-mls-extensions",
+    "dep:mediatype",
+]
+draft-ietf-mls-combiner = ["draft-ietf-mls-extensions"] # draft-01++
+draft-kiefer-mls-light = [] # draft-02
+draft-kohbrok-mls-associated-parties = ["draft-ietf-mls-extensions"] # draft-00++
+draft-mahy-mls-ratchet-tree-options = [] # draft-01
+draft-mahy-mls-semiprivatemessage = ["draft-ietf-mls-extensions"] # draft-04++
+draft-mahy-mls-sd-cwt-credential = [] # draft-00
+draft-mularczyk-mls-splitcommit = [] # draft-00
+draft-pham-mls-additional-wire-formats = [
+    "draft-ietf-mls-extensions",
+] # draft-00++
+
+[dependencies]
+thiserror = "2"
+miette = "7"
+async-trait = "0.1"
+strum = { version = "0.27", features = ["derive"] }
+tls_codec = { version = "0.4", features = ["derive", "mls"] }
+static_assertions = "1.1"
+subtle = "2.6"
+zeroize = { version = "1.8", features = ["derive"] }
+hex = { version = "0.4", optional = true }
+mediatype = { version = "0.19", default-features = false, optional = true }
+serde = { version = "1", features = ["derive"], optional = true }
+serde_repr = { version = "0.1", optional = true }
+mls-rs-codec = { version = "0.6", optional = true }
+pretty_assertions = { version = "1.4", optional = true }
+color-eyre = { version = "0.6", optional = true }
+postcard = { version = "1", features = ["use-std"], optional = true }
+
+[target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))'.dependencies]
+js-sys = "0.3"
+
+[[test]]
+name = "spec-test-vectors"
+required-features = ["test-utils", "test-vectors", "serde"]
+harness = false
+
+[dev-dependencies]
+mls-spec = { path = ".", features = ["test-utils", "test-vectors", "serde"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0", features = ["preserve_order"] }
+tokio = { version = "1", features = ["full"] }
+pretty_assertions = "1.4"
+color-eyre = "0.6"
+libtest-mimic = "0.8"
+convert_case = "0.8"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing-error = "0.2"
+faster-hex = { version = "0.10", features = ["serde"] }
