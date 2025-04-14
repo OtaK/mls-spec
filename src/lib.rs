@@ -1,4 +1,5 @@
 #![allow(clippy::unnecessary_cast, non_upper_case_globals, non_camel_case_types)]
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
 #![doc = include_str!("../README.md")]
 mod error;
 pub use self::error::*;

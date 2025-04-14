@@ -23,6 +23,7 @@ There's also some definitions for the follwing drafted extensions, enabled by th
 - [`draft-ietf-mls-extensions`](https://www.ietf.org/archive/id/draft-ietf-mls-extensions-06.html) @ draft-06
   - `mls-extensions` has content-advertisement parsing, this pulls an additional dependency (`mediatype`) with this feature flag: `draft-ietf-mls-extensions-content-advertisement-parse`. If you do the MIME parsing yourself, you can ignore this flag.
 - [`draft-mahy-mls-ratchet-tree-options`](https://www.ietf.org/archive/id/draft-mahy-mls-ratchet-tree-options-01.html) @ draft-01
+- [`draft-mahy-mls-sd-cwt-credential`](https://www.ietf.org/archive/id/draft-mahy-mls-sd-cwt-credential-00.html) @ draft-00
 - [`draft-mularczyk-mls-splitcommit`](https://www.ietf.org/archive/id/draft-mularczyk-mls-splitcommit-00.html) @ draft-00
 - [`draft-kiefer-mls-light`](https://www.ietf.org/archive/id/draft-kiefer-mls-light-02.html) @ draft-02
 
