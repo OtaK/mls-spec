@@ -1,5 +1,7 @@
 use crate::defs::{Generation, SenderIndex};
 
+use super::safe_application::Component;
+
 #[derive(
     Debug,
     Clone,
@@ -10,8 +12,14 @@ use crate::defs::{Generation, SenderIndex};
     tls_codec::TlsSize,
 )]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct AppAckProposal {
+pub struct AppAck {
     pub received_ranges: Vec<MessageRange>,
+}
+
+impl Component for AppAck {
+    fn component_id() -> super::safe_application::ComponentId {
+        super::APP_ACK_ID
+    }
 }
 
 #[derive(

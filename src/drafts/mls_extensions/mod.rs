@@ -2,6 +2,7 @@ use safe_application::ComponentId;
 
 pub mod app_ack;
 pub mod content_advertisement;
+pub mod last_resort_keypackage;
 pub mod multi_credentials;
 pub mod safe_application;
 pub mod self_remove;

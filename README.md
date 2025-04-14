@@ -36,6 +36,8 @@ The following drafts were modified by extrapolating the current status of `mls-e
   - [`draft-mahy-mls-semiprivatemessage`](https://www.ietf.org/archive/id/draft-mahy-mls-semiprivatemessage-04.html) @ draft-04++
   - [`draft-pham-mls-additional-wire-formats`](https://www.ietf.org/archive/id/draft-pham-mls-additional-wire-formats-00.html) @ draft-00++
 
+Please note that all the `drafts` are semver-excluded.
+
 Additionally, this crate makes use of RustCrypto's `tls_codec` crate, and has a `mls-rs` compatibility layer (gated under the `mls-rs-compat` feature)
 that allows to transcode `mls-spec` to `mls-rs` types and vice-versa.
 

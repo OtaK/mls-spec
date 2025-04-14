@@ -385,26 +385,30 @@ pub struct ApplicationData {
 
 pub type AppEphemeral = ApplicationData;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, tls_codec::TlsSerialize, tls_codec::TlsSize)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub struct SafeAadItemRefOld<'a> {
-    pub component_id: &'a ComponentId,
-    #[tls_codec(with = "crate::tlspl::bytes")]
-    pub aad_item_data: &'a [u8],
-}
-
 #[derive(Debug, Clone, PartialEq, Eq, tls_codec::TlsSerialize, tls_codec::TlsSize)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[cfg_attr(feature = "serde", serde(transparent))]
 pub struct SafeAadItemRef<'a>(ComponentDataRef<'a>);
 
-impl SafeAadItemRef<'_> {
+impl<'a> SafeAadItemRef<'a> {
     pub fn component_id(&self) -> &ComponentId {
         self.0.component_id
     }
 
     pub fn aad_item_data(&self) -> &[u8] {
         self.0.data
+    }
+
+    pub fn from_item_data<C: Component>(
+        component_id: &'a ComponentId,
+        aad_item_data: &'a [u8],
+    ) -> Option<Self> {
+        (&C::component_id() == component_id).then(|| {
+            SafeAadItemRef(ComponentDataRef {
+                component_id,
+                data: aad_item_data,
+            })
+        })
     }
 }
 
@@ -433,8 +437,33 @@ pub struct SafeAadRef<'a> {
     pub aad_items: &'a [&'a SafeAadItemRef<'a>],
 }
 
+impl SafeAadRef<'_> {
+    pub fn is_ordered_and_unique(&self) -> bool {
+        let mut iter = self.aad_items.iter().peekable();
+
+        while let Some(item) = iter.next() {
+            let Some(next) = iter.peek() else {
+                continue;
+            };
+
+            if item.component_id() >= next.component_id() {
+                return false;
+            }
+        }
+
+        true
+    }
+}
+
+impl<'a> From<&'a [&'a SafeAadItemRef<'a>]> for SafeAadRef<'a> {
+    fn from(aad_items: &'a [&'a SafeAadItemRef<'a>]) -> Self {
+        Self { aad_items }
+    }
+}
+
 #[derive(
     Debug,
+    Default,
     Clone,
     PartialEq,
     Eq,
@@ -495,12 +524,49 @@ pub struct ComponentsList {
     pub component_ids: Vec<ComponentId>,
 }
 
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    tls_codec::TlsSerialize,
+    tls_codec::TlsDeserialize,
+    tls_codec::TlsSize,
+)]
+pub struct AppComponents(pub ComponentsList);
+
+impl Component for AppComponents {
+    fn component_id() -> ComponentId {
+        super::APP_COMPONENTS_ID
+    }
+}
+
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    tls_codec::TlsSerialize,
+    tls_codec::TlsDeserialize,
+    tls_codec::TlsSize,
+)]
+pub struct SafeAadComponent(pub ComponentsList);
+
+impl Component for SafeAadComponent {
+    fn component_id() -> ComponentId {
+        super::SAFE_AAD_ID
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::collections::BTreeMap;
 
-    use super::{ApplicationDataDictionary, SafeAad};
-    use crate::generate_roundtrip_test;
+    use super::{ApplicationDataDictionary, Component, SafeAad, SafeAadItemRef, SafeAadRef};
+    use crate::{
+        drafts::mls_extensions::last_resort_keypackage::LastResortKeyPackage,
+        generate_roundtrip_test,
+    };
 
     generate_roundtrip_test!(can_roundtrip_appdatadict, {
         ApplicationDataDictionary {
@@ -521,4 +587,20 @@ mod tests {
             ])),
         }
     });
+
+    #[test]
+    fn can_build_safe_aad() {
+        let mut safe_aad = SafeAad::default();
+        safe_aad
+            .insert_or_update_component(&LastResortKeyPackage)
+            .unwrap();
+
+        let cid = LastResortKeyPackage::component_id();
+        let aad_item_ref =
+            SafeAadItemRef::from_item_data::<LastResortKeyPackage>(&cid, &[]).unwrap();
+
+        let items = &[&aad_item_ref];
+        let safe_ref = SafeAadRef::from(items.as_slice());
+        assert!(safe_ref.is_ordered_and_unique());
+    }
 }

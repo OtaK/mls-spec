@@ -1,3 +1,5 @@
+use super::safe_application::{Component, ComponentId, ComponentsList};
+
 #[derive(
     Debug,
     Clone,
@@ -77,6 +79,23 @@ pub struct MediaTypeList {
 
 pub type AcceptedMediaTypes = MediaTypeList;
 pub type RequiredMediaTypes = MediaTypeList;
+
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    tls_codec::TlsSerialize,
+    tls_codec::TlsDeserialize,
+    tls_codec::TlsSize,
+)]
+pub struct ContentMediaTypes(pub ComponentsList);
+
+impl Component for ContentMediaTypes {
+    fn component_id() -> ComponentId {
+        super::CONTENT_MEDIA_TYPES_ID
+    }
+}
 
 #[derive(
     Debug,
