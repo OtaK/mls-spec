@@ -1,6 +1,6 @@
 [package]
 name = "mls-spec"
-version = "1.0.2"
+version = "1.0.3"
 description = "This crate is a repository of MLS / RFC9420-related data structures."
 readme = "README.md"
 documentation = "https://docs.rs/mls-spec"
@@ -62,7 +62,7 @@ draft-pham-mls-additional-wire-formats = [
 
 [dependencies]
 thiserror = "2"
-miette = { version = "7", git = "https://github.com/zkat/miette.git", rev = "59c81617de8650a6ff3b193b41b4297e560726a0" } # until 7.6 is released, this is needed to avoid having thiserror 1.x laying around
+miette = "7"
 async-trait = "0.1"
 strum = { version = "0.27", features = ["derive"] }
 tls_codec = { version = "0.4", features = ["derive", "mls"] }
@@ -70,7 +70,7 @@ static_assertions = "1.1"
 subtle = "2.6"
 zeroize = { version = "1.8", features = ["derive"] }
 hex = { version = "0.4", optional = true }
-mediatype = { version = "0.19", default-features = false, optional = true }
+mediatype = { version = "0.20", default-features = false, optional = true }
 serde = { version = "1", features = ["derive"], optional = true }
 serde_repr = { version = "0.1", optional = true }
 mls-rs-codec = { version = "0.6", optional = true }
