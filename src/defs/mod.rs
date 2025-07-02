@@ -131,6 +131,11 @@ impl ProposalType {
             Self::ADD | Self::REMOVE | Self::PSK | Self::REINIT | Self::GROUP_CONTEXT_EXTENSIONS
         );
 
+        #[cfg(feature = "draft-ietf-mls-extensions")]
+        {
+            allowed |= matches!(self.0, Self::APP_DATA_UPDATE | Self::APP_EPHEMERAL);
+        }
+
         allowed
     }
 
