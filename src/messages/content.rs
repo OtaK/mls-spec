@@ -263,6 +263,10 @@ impl MlsMessageContent {
         match self {
             MlsMessageContent::MlsPublicMessage(pub_msg) => Some((&pub_msg.content.content).into()),
             MlsMessageContent::MlsPrivateMessage(priv_msg) => Some(priv_msg.content_type),
+            #[cfg(feature = "draft-mahy-mls-semiprivatemessage")]
+            MlsMessageContent::MlsSemiPrivateMessage(semi_priv_msg) => {
+                Some(semi_priv_msg.content_type)
+            }
             #[cfg(feature = "draft-mularczyk-mls-splitcommit")]
             MlsMessageContent::MlsSplitCommitMessage(message) => {
                 message.split_commit_message.content.content_type()
@@ -283,6 +287,26 @@ impl MlsMessageContent {
             #[cfg(feature = "draft-mularczyk-mls-splitcommit")]
             MlsMessageContent::MlsSplitCommitMessage(message) => {
                 message.split_commit_message.content.proposal_type()
+            }
+            _ => None,
+        }
+    }
+
+    pub fn authenticated_data(&self) -> Option<&[u8]> {
+        match self {
+            MlsMessageContent::MlsPublicMessage(public_message) => {
+                Some(&public_message.content.authenticated_data)
+            }
+            MlsMessageContent::MlsPrivateMessage(private_message) => {
+                Some(&private_message.authenticated_data)
+            }
+            #[cfg(feature = "draft-mahy-mls-semiprivatemessage")]
+            MlsMessageContent::MlsSemiPrivateMessage(semi_priv_msg) => {
+                Some(&semi_priv_msg.authenticated_data)
+            }
+            #[cfg(feature = "draft-mularczyk-mls-splitcommit")]
+            MlsMessageContent::MlsSplitCommitMessage(message) => {
+                message.split_commit_message.content.authenticated_data()
             }
             _ => None,
         }
