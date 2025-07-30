@@ -1,6 +1,6 @@
 [package]
 name = "mls-spec"
-version = "1.0.3"
+version = "1.0.4"
 description = "This crate is a repository of MLS / RFC9420-related data structures."
 readme = "README.md"
 documentation = "https://docs.rs/mls-spec"
