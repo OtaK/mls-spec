@@ -11,6 +11,7 @@ use crate::{
     Clone,
     PartialEq,
     Eq,
+    Hash,
     tls_codec::TlsDeserialize,
     tls_codec::TlsSerialize,
     tls_codec::TlsSize,
@@ -20,7 +21,7 @@ pub struct RatchetTreeExtension {
     pub ratchet_tree: RatchetTree,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u16)]
 pub enum Extension {
@@ -218,6 +219,7 @@ ref_forward_tls_impl!(Extension);
     Clone,
     PartialEq,
     Eq,
+    Hash,
     tls_codec::TlsSerialize,
     tls_codec::TlsDeserialize,
     tls_codec::TlsSize,
@@ -227,7 +229,7 @@ pub struct ExternalPub {
     pub external_pub: HpkePublicKey,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ArbitraryExtension {
     pub extension_id: ExtensionType,

@@ -49,7 +49,7 @@ impl PublicMessage {
         }
     }
 
-    pub fn as_authenticated_content(&self) -> AuthenticatedContentRef {
+    pub fn as_authenticated_content(&self) -> AuthenticatedContentRef<'_> {
         AuthenticatedContentRef {
             wire_format: &Self::AUTH_CONTENT_REF_WF,
             content: &self.content,

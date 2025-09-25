@@ -35,7 +35,7 @@ pub struct MediaType {
 
 #[cfg(feature = "draft-ietf-mls-extensions-content-advertisement-parse")]
 impl MediaType {
-    pub fn to_parsed_repr(&self) -> crate::MlsSpecResult<mediatype::MediaType> {
+    pub fn to_parsed_repr(&self) -> crate::MlsSpecResult<mediatype::MediaType<'_>> {
         let mt = std::str::from_utf8(&self.media_type)
             .map_err(|_| crate::MlsSpecError::ContentAdvertisementUtf8ParameterError)?;
 

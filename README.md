@@ -24,6 +24,7 @@ There's also some definitions for the follwing drafted extensions, enabled by th
   - `mls-extensions` has content-advertisement parsing, this pulls an additional dependency (`mediatype`) with this feature flag: `draft-ietf-mls-extensions-content-advertisement-parse`. If you do the MIME parsing yourself, you can ignore this flag.
 - [`draft-mahy-mls-ratchet-tree-options`](https://www.ietf.org/archive/id/draft-mahy-mls-ratchet-tree-options-01.html) @ draft-01
 - [`draft-mahy-mls-sd-cwt-credential`](https://www.ietf.org/archive/id/draft-mahy-mls-sd-cwt-credential-00.html) @ draft-00
+- [`draft-mahy-mls-semiprivatemessage`](https://www.ietf.org/archive/id/draft-mahy-mls-semiprivatemessage-05.html) @ draft-05
 - [`draft-mularczyk-mls-splitcommit`](https://www.ietf.org/archive/id/draft-mularczyk-mls-splitcommit-00.html) @ draft-00
 - [`draft-kiefer-mls-light`](https://www.ietf.org/archive/id/draft-kiefer-mls-light-02.html) @ draft-02
 
@@ -31,9 +32,8 @@ The following drafts were modified by extrapolating the current status of `mls-e
 
 - The following are assumed that they will move from Safe Extensions to a Safe Applications Component and associated cryptographic operations (`DeriveExtensionSecret` => `DeriveApplicationSecret` etc)
   - [`draft-kohbrok-mls-associated-parties`](https://www.ietf.org/archive/id/draft-kohbrok-mls-associated-parties-00.html) @ draft-00++
-  - [`draft-ietf-mls-combiner`](https://www.ietf.org/archive/id/draft-ietf-mls-combiner-00.html) @ draft-00++
+  - [`draft-ietf-mls-combiner`](https://www.ietf.org/archive/id/draft-ietf-mls-combiner-01.html) @ draft-01++
 - The following assumes that with the disappearance of Safe WireFormats & the introduction of WireFormat negociation through `[supported|required]_wire_formats`, those drafts will fall back to de facto WireFormats and have been modified in accordance
-  - [`draft-mahy-mls-semiprivatemessage`](https://www.ietf.org/archive/id/draft-mahy-mls-semiprivatemessage-04.html) @ draft-04++
   - [`draft-pham-mls-additional-wire-formats`](https://www.ietf.org/archive/id/draft-pham-mls-additional-wire-formats-00.html) @ draft-00++
 
 Please note that all the `drafts` are semver-excluded.

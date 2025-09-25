@@ -367,7 +367,7 @@ pub struct AuthenticatedContentRef<'a> {
 }
 
 impl AuthenticatedContent {
-    pub fn confirmed_transcript_hash_input(&self) -> ConfirmedTranscriptHashInput {
+    pub fn confirmed_transcript_hash_input(&self) -> ConfirmedTranscriptHashInput<'_> {
         ConfirmedTranscriptHashInput {
             wire_format: &self.wire_format,
             content: &self.content,
@@ -375,7 +375,7 @@ impl AuthenticatedContent {
         }
     }
 
-    pub fn as_ref(&self) -> AuthenticatedContentRef {
+    pub fn as_ref(&self) -> AuthenticatedContentRef<'_> {
         AuthenticatedContentRef {
             wire_format: &self.wire_format,
             content: &self.content,

@@ -106,7 +106,7 @@ pub(crate) mod testing {
         ($testname:ident, $iv:expr) => {
             #[test]
             fn $testname() -> color_eyre::eyre::Result<()> {
-                crate::test_utils::testing::roundtrip(&$iv, stringify!($testname))?;
+                $crate::test_utils::testing::roundtrip(&$iv, stringify!($testname))?;
                 Ok(())
             }
         };

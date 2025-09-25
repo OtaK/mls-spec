@@ -87,6 +87,7 @@ impl ComponentOperationLabel {
     Clone,
     PartialEq,
     Eq,
+    Hash,
     tls_codec::TlsSerialize,
     tls_codec::TlsDeserialize,
     tls_codec::TlsSize,
@@ -99,7 +100,7 @@ pub struct ComponentData {
 }
 
 impl ComponentData {
-    pub fn as_ref(&self) -> ComponentDataRef {
+    pub fn as_ref(&self) -> ComponentDataRef<'_> {
         ComponentDataRef {
             component_id: &self.component_id,
             data: &self.data,
@@ -119,7 +120,7 @@ pub struct ComponentDataRef<'a> {
 ///
 /// Also takes extra care to make sure that the `serde` representation when serialized
 /// is equivalent to the TLS-PL version of it
-#[derive(Debug, Default, Clone, PartialEq, Eq)]
+#[derive(Debug, Default, Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(
     feature = "serde",
@@ -238,6 +239,7 @@ impl Into<Vec<ComponentData>> for ComponentDataMap {
     Clone,
     PartialEq,
     Eq,
+    Hash,
     tls_codec::TlsSize,
     tls_codec::TlsDeserialize,
     tls_codec::TlsSerialize,
@@ -248,7 +250,7 @@ pub struct ApplicationDataDictionary {
 }
 
 impl ApplicationDataDictionary {
-    pub fn iter_components(&self) -> impl Iterator<Item = ComponentDataRef> {
+    pub fn iter_components(&self) -> impl Iterator<Item = ComponentDataRef<'_>> {
         self.component_data
             .iter()
             .map(|(component_id, data)| ComponentDataRef { component_id, data })
@@ -403,12 +405,10 @@ impl<'a> SafeAadItemRef<'a> {
         component_id: &'a ComponentId,
         aad_item_data: &'a [u8],
     ) -> Option<Self> {
-        (&C::component_id() == component_id).then(|| {
-            SafeAadItemRef(ComponentDataRef {
-                component_id,
-                data: aad_item_data,
-            })
-        })
+        (&C::component_id() == component_id).then_some(SafeAadItemRef(ComponentDataRef {
+            component_id,
+            data: aad_item_data,
+        }))
     }
 }
 
@@ -417,6 +417,7 @@ impl<'a> SafeAadItemRef<'a> {
     Clone,
     PartialEq,
     Eq,
+    Hash,
     tls_codec::TlsSerialize,
     tls_codec::TlsDeserialize,
     tls_codec::TlsSize,
@@ -426,7 +427,7 @@ impl<'a> SafeAadItemRef<'a> {
 pub struct SafeAadItem(ComponentData);
 
 impl SafeAadItem {
-    pub fn as_ref(&self) -> SafeAadItemRef {
+    pub fn as_ref(&self) -> SafeAadItemRef<'_> {
         SafeAadItemRef(self.0.as_ref())
     }
 }
@@ -467,6 +468,7 @@ impl<'a> From<&'a [&'a SafeAadItemRef<'a>]> for SafeAadRef<'a> {
     Clone,
     PartialEq,
     Eq,
+    Hash,
     tls_codec::TlsSerialize,
     tls_codec::TlsDeserialize,
     tls_codec::TlsSize,
@@ -477,7 +479,7 @@ pub struct SafeAad {
 }
 
 impl SafeAad {
-    pub fn iter_components(&self) -> impl Iterator<Item = SafeAadItemRef> {
+    pub fn iter_components(&self) -> impl Iterator<Item = SafeAadItemRef<'_>> {
         self.aad_items
             .iter()
             .map(|(component_id, data)| SafeAadItemRef(ComponentDataRef { component_id, data }))
@@ -501,6 +503,7 @@ impl SafeAad {
     Clone,
     PartialEq,
     Eq,
+    Hash,
     tls_codec::TlsSerialize,
     tls_codec::TlsDeserialize,
     tls_codec::TlsSize,

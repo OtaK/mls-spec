@@ -21,6 +21,7 @@ pub struct KeyPackageTBS<'a> {
     Clone,
     PartialEq,
     Eq,
+    Hash,
     zeroize::Zeroize,
     zeroize::ZeroizeOnDrop,
     tls_codec::TlsSerialize,
@@ -42,7 +43,7 @@ pub struct KeyPackage {
 }
 
 impl KeyPackage {
-    pub fn to_tbs(&self) -> KeyPackageTBS {
+    pub fn to_tbs(&self) -> KeyPackageTBS<'_> {
         KeyPackageTBS {
             version: &self.version,
             cipher_suite: &self.cipher_suite,
@@ -60,7 +61,7 @@ impl KeyPackage {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, zeroize::Zeroize, zeroize::ZeroizeOnDrop)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, zeroize::Zeroize, zeroize::ZeroizeOnDrop)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KeyPackageWithRef {
     pub keypackage_ref: KeyPackageRef,

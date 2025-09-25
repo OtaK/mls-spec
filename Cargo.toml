@@ -31,7 +31,7 @@ features = [
 rustdoc-args = ["--cfg", "docsrs", "--generate-link-to-definition"]
 
 [features]
-default = []
+default = ["mls-extensions"]
 hazmat = ["dep:hex"]
 test-vectors = []
 test-utils = ["dep:pretty_assertions", "dep:color-eyre", "dep:postcard"]
@@ -53,7 +53,7 @@ draft-kohbrok-mls-associated-parties = [
     "draft-ietf-mls-extensions",
 ] # draft-00++
 draft-mahy-mls-ratchet-tree-options = [] # draft-01
-draft-mahy-mls-semiprivatemessage = ["draft-ietf-mls-extensions"] # draft-04++
+draft-mahy-mls-semiprivatemessage = ["draft-ietf-mls-extensions"] # draft-05
 draft-mahy-mls-sd-cwt-credential = [] # draft-00
 draft-mularczyk-mls-splitcommit = [] # draft-00
 draft-pham-mls-additional-wire-formats = [
@@ -73,7 +73,7 @@ hex = { version = "0.4", optional = true }
 mediatype = { version = "0.20", default-features = false, optional = true }
 serde = { version = "1", features = ["derive"], optional = true }
 serde_repr = { version = "0.1", optional = true }
-mls-rs-codec = { version = "0.6", optional = true }
+mls-rs-codec = { version = "0.7", optional = true }
 pretty_assertions = { version = "1.4", optional = true }
 color-eyre = { version = "0.6", optional = true }
 postcard = { version = "1", features = ["use-std"], optional = true }

@@ -38,7 +38,7 @@ pub struct AssociatedPartyEntry {
 }
 
 impl AssociatedPartyEntry {
-    pub fn to_tbs(&self) -> AssociatedPartyEntryTBS {
+    pub fn to_tbs(&self) -> AssociatedPartyEntryTBS<'_> {
         AssociatedPartyEntryTBS {
             encryption_key: &self.encryption_key,
             external_sender_index: &self.external_sender_index,
