@@ -2,7 +2,6 @@ pub const CREDENTIAL_SD_CWT: u16 = 0x0005;
 pub const CREDENTIAL_SD_JWT: u16 = 0x0006;
 
 #[derive(
-    Debug,
     Clone,
     PartialEq,
     Eq,
@@ -15,6 +14,14 @@ pub const CREDENTIAL_SD_JWT: u16 = 0x0006;
 pub struct SdCwtCredential {
     #[tls_codec(with = "crate::tlspl::bytes")]
     pub sd_kbt: Vec<u8>,
+}
+
+impl std::fmt::Debug for SdCwtCredential {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("SdCwtCredential")
+            .field("sd_kbt", &hex::encode(&self.sd_kbt))
+            .finish()
+    }
 }
 
 #[derive(

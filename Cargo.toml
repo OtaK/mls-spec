@@ -32,7 +32,7 @@ rustdoc-args = ["--cfg", "docsrs", "--generate-link-to-definition"]
 
 [features]
 default = []
-hazmat = ["dep:hex"]
+hazmat = []
 test-vectors = []
 test-utils = ["dep:pretty_assertions", "dep:color-eyre", "dep:postcard"]
 serde = ["dep:serde", "dep:serde_repr", "tls_codec/serde", "zeroize/serde"]
@@ -69,7 +69,7 @@ tls_codec = { version = "0.4", features = ["derive", "mls"] }
 static_assertions = "1.1"
 subtle = "2.6"
 zeroize = { version = "1.8", features = ["derive"] }
-hex = { version = "0.4", optional = true }
+hex = "0.4"
 mediatype = { version = "0.20", default-features = false, optional = true }
 serde = { version = "1", features = ["derive"], optional = true }
 serde_repr = { version = "0.1", optional = true }
