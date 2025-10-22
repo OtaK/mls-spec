@@ -93,7 +93,9 @@ impl_spec_enum! {
     #[cfg(feature = "draft-ietf-mls-extensions")]
     REQUIRED_WIRE_FORMATS = crate::drafts::mls_extensions::EXTENSION_REQUIRED_WIRE_FORMATS,
     #[cfg(feature = "draft-ietf-mls-extensions")]
-    TARGETED_MESSAGES_CAPABILITY = crate::drafts::mls_extensions::EXTENSION_TARGETED_MESSAGES_CAPABILITY
+    TARGETED_MESSAGES_CAPABILITY = crate::drafts::mls_extensions::EXTENSION_TARGETED_MESSAGES_CAPABILITY,
+    #[cfg(feature = "draft-mahy-mls-ratchet-tree-options")]
+    RATCHET_TREE_SOURCE_DOMAINS = crate::drafts::ratchet_tree_options::EXTENSION_RATCHET_TREE_SOURCE_DOMAINS
 }
 
 impl Default for ExtensionType {

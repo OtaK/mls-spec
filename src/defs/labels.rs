@@ -16,7 +16,7 @@ pub enum SignatureLabel {
     #[cfg(feature = "draft-ietf-mls-extensions")]
     TargetedMessagesTBS,
     #[cfg(feature = "draft-ietf-mls-extensions")]
-    ComponentOperationLabel,
+    CredentialBindingTBS,
     #[cfg(feature = "draft-kohbrok-mls-associated-parties")]
     AssociatedPartyEntryTBS,
     #[cfg(feature = "test-vectors")]
@@ -45,9 +45,6 @@ impl ToPrefixedLabel for SignatureLabel {}
 pub enum PublicKeyEncryptionLabel {
     UpdatePathNode,
     Welcome,
-    #[cfg(feature = "draft-ietf-mls-extensions")]
-    #[strum(serialize = "Application")]
-    SafeApp,
     #[cfg(feature = "draft-mahy-mls-semiprivatemessage")]
     SemiPrivateMessageReceiver,
     #[cfg(feature = "test-vectors")]
@@ -150,11 +147,8 @@ pub enum KdfLabelKind {
     #[strum(serialize = "hpqmls_export")]
     HpqMlsExport,
     #[cfg(feature = "draft-ietf-mls-extensions")]
-    #[strum(serialize = "ApplicationExport {component_id} {label}")]
-    ApplicationExport {
-        component_id: crate::drafts::mls_extensions::safe_application::ComponentId,
-        label: String,
-    },
+    #[strum(serialize = "application_export")]
+    ApplicationExportSecret,
     #[cfg(feature = "test-vectors")]
     #[strum(serialize = "DeriveTreeSecret")]
     TestVectorDeriveTreeSecret,
@@ -166,20 +160,6 @@ pub enum KdfLabelKind {
     TestVectorExpandWithLabel,
     #[strum(serialize = "{0}")]
     Arbitrary(String),
-}
-
-#[cfg(feature = "draft-ietf-mls-extensions")]
-impl KdfLabelKind {
-    #[must_use]
-    pub fn to_application_export(
-        &self,
-        component_id: crate::drafts::mls_extensions::safe_application::ComponentId,
-    ) -> Self {
-        Self::ApplicationExport {
-            component_id,
-            label: self.to_string(),
-        }
-    }
 }
 
 impl ToPrefixedLabel for KdfLabelKind {

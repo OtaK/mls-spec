@@ -44,6 +44,10 @@ pub enum Extension {
     RequiredWireFormats(crate::drafts::mls_extensions::safe_application::WireFormats),
     #[cfg(feature = "draft-ietf-mls-extensions")]
     TargetedMessagesCapability,
+    #[cfg(feature = "draft-mahy-mls-ratchet-tree-options")]
+    RatchetTreeSourceDomains(
+        crate::drafts::ratchet_tree_options::RatchetTreeSourceDomainsExtension,
+    ),
     Arbitrary(ArbitraryExtension),
 }
 
@@ -63,6 +67,8 @@ impl From<&Extension> for ExtensionType {
             Extension::RequiredWireFormats(_) => ExtensionType::REQUIRED_WIRE_FORMATS,
             #[cfg(feature = "draft-ietf-mls-extensions")]
             Extension::TargetedMessagesCapability => ExtensionType::TARGETED_MESSAGES_CAPABILITY,
+            #[cfg(feature = "draft-mahy-mls-ratchet-tree-options")]
+            Extension::RatchetTreeSourceDomains(_) => ExtensionType::RATCHET_TREE_SOURCE_DOMAINS,
             Extension::Arbitrary(ArbitraryExtension { extension_id, .. }) => {
                 (**extension_id) as u16
             }
@@ -101,6 +107,8 @@ impl Extension {
             ExtensionType::REQUIRED_WIRE_FORMATS => Self::RequiredWireFormats(<_>::tls_deserialize_exact(&extension_data)?),
             #[cfg(feature = "draft-ietf-mls-extensions")]
             ExtensionType::TARGETED_MESSAGES_CAPABILITY => Self::TargetedMessagesCapability,
+            #[cfg(feature = "draft-mahy-mls-ratchet-tree-options")]
+            ExtensionType::RATCHET_TREE_SOURCE_DOMAINS => Self::RatchetTreeSourceDomains(<_>::tls_deserialize_exact(&extension_data)?),
             _ => Self::Arbitrary(ArbitraryExtension {
                 extension_id: ExtensionType::new_unchecked(extension_id),
                 extension_data,
@@ -142,6 +150,10 @@ impl tls_codec::Size for Extension {
             }
             #[cfg(feature = "draft-ietf-mls-extensions")]
             Extension::TargetedMessagesCapability => tls_serialized_len_as_vlvec(0),
+            #[cfg(feature = "draft-mahy-mls-ratchet-tree-options")]
+            Extension::RatchetTreeSourceDomains(rtsd) => {
+                tls_serialized_len_as_vlvec(rtsd.tls_serialized_len())
+            }
             Extension::Arbitrary(ArbitraryExtension { extension_data, .. }) => {
                 tls_serialized_len_as_vlvec(extension_data.len())
             }
@@ -180,6 +192,8 @@ impl tls_codec::Serialize for Extension {
             }
             #[cfg(feature = "draft-ietf-mls-extensions")]
             Extension::TargetedMessagesCapability => [0u8; 0].tls_serialize(&mut extension_data)?,
+            #[cfg(feature = "draft-mahy-mls-ratchet-tree-options")]
+            Extension::RatchetTreeSourceDomains(rtsd) => rtsd.tls_serialize(&mut extension_data)?,
             Extension::Arbitrary(ArbitraryExtension {
                 extension_data: arbitrary_ext_data,
                 ..

@@ -20,11 +20,11 @@ and has constant-time equality checks using `subtle` to make a best-effort attem
 
 There's also some definitions for the follwing drafted extensions, enabled by the matching `feature`:
 
-- [`draft-ietf-mls-extensions`](https://www.ietf.org/archive/id/draft-ietf-mls-extensions-06.html) @ draft-06
+- [`draft-ietf-mls-extensions`](https://www.ietf.org/archive/id/draft-ietf-mls-extensions-08.html) @ draft-08
   - `mls-extensions` has content-advertisement parsing, this pulls an additional dependency (`mediatype`) with this feature flag: `draft-ietf-mls-extensions-content-advertisement-parse`. If you do the MIME parsing yourself, you can ignore this flag.
-- [`draft-mahy-mls-ratchet-tree-options`](https://www.ietf.org/archive/id/draft-mahy-mls-ratchet-tree-options-01.html) @ draft-01
-- [`draft-mahy-mls-sd-cwt-credential`](https://www.ietf.org/archive/id/draft-mahy-mls-sd-cwt-credential-00.html) @ draft-00
-- [`draft-mahy-mls-semiprivatemessage`](https://www.ietf.org/archive/id/draft-mahy-mls-semiprivatemessage-05.html) @ draft-05
+- [`draft-mahy-mls-ratchet-tree-options`](https://www.ietf.org/archive/id/draft-mahy-mls-ratchet-tree-options-03.html) @ draft-03
+- [`draft-mahy-mls-sd-cwt-credential`](https://www.ietf.org/archive/id/draft-mahy-mls-sd-cwt-credential-01.html) @ draft-01
+- [`draft-mahy-mls-semiprivatemessage`](https://www.ietf.org/archive/id/draft-mahy-mls-semiprivatemessage-06.html) @ draft-06
 - [`draft-mularczyk-mls-splitcommit`](https://www.ietf.org/archive/id/draft-mularczyk-mls-splitcommit-00.html) @ draft-00
 - [`draft-kiefer-mls-light`](https://www.ietf.org/archive/id/draft-kiefer-mls-light-02.html) @ draft-02
 

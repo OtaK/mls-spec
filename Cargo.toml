@@ -42,7 +42,7 @@ mls-extensions = [
     "draft-ietf-mls-extensions",
 ] # Prep transition from draft to RFC
 # MLS-related drafts implemented in-tree
-draft-ietf-mls-extensions = []
+draft-ietf-mls-extensions = [] # draft-08
 draft-ietf-mls-extensions-content-advertisement-parse = [
     "draft-ietf-mls-extensions",
     "dep:mediatype",
@@ -52,9 +52,9 @@ draft-kiefer-mls-light = [] # draft-02
 draft-kohbrok-mls-associated-parties = [
     "draft-ietf-mls-extensions",
 ] # draft-00++
-draft-mahy-mls-ratchet-tree-options = [] # draft-01
-draft-mahy-mls-semiprivatemessage = ["draft-ietf-mls-extensions"] # draft-05
-draft-mahy-mls-sd-cwt-credential = [] # draft-00
+draft-mahy-mls-ratchet-tree-options = [] # draft-03
+draft-mahy-mls-semiprivatemessage = ["draft-ietf-mls-extensions"] # draft-06
+draft-mahy-mls-sd-cwt-credential = [] # draft-01
 draft-mularczyk-mls-splitcommit = [] # draft-00
 draft-pham-mls-additional-wire-formats = [
     "draft-ietf-mls-extensions",

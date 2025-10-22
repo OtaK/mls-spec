@@ -1,15 +1,26 @@
 use std::collections::BTreeMap;
 
-use crate::{
-    SensitiveBytes, ToPrefixedLabel,
-    defs::{
-        ProtocolVersion,
-        labels::{PublicKeyEncryptionLabel, SignatureLabel},
-    },
-    key_schedule::PreSharedKeyId,
-};
+use crate::{SensitiveBytes, key_schedule::PreSharedKeyId};
 
 pub type ComponentId = u32;
+
+pub const COMPONENT_ID_GREASE_VALUES: [ComponentId; 15] = [
+    0x0000_0A0A,
+    0x0000_1A1A,
+    0x0000_2A2A,
+    0x0000_3A3A,
+    0x0000_4A4A,
+    0x0000_5A5A,
+    0x0000_6A6A,
+    0x0000_7A7A,
+    0x0000_8A8A,
+    0x0000_9A9A,
+    0x0000_AAAA,
+    0x0000_BABA,
+    0x0000_CACA,
+    0x0000_DADA,
+    0x0000_EAEA,
+];
 
 pub trait Component: crate::Parsable + crate::Serializable {
     fn component_id() -> ComponentId;
@@ -37,6 +48,50 @@ pub trait Component: crate::Parsable + crate::Serializable {
 #[derive(
     Debug,
     Clone,
+    Copy,
+    Default,
+    PartialEq,
+    Eq,
+    strum::IntoStaticStr,
+    strum::EnumString,
+    strum::Display,
+)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[repr(u8)]
+pub enum ComponentOperationBaseLabel {
+    #[default]
+    Application = 0x00,
+}
+
+impl tls_codec::Size for ComponentOperationBaseLabel {
+    fn tls_serialized_len(&self) -> usize {
+        crate::tlspl::string::tls_serialized_len(self.into())
+    }
+}
+
+impl tls_codec::Serialize for ComponentOperationBaseLabel {
+    fn tls_serialize<W: std::io::Write>(&self, writer: &mut W) -> Result<usize, tls_codec::Error> {
+        crate::tlspl::string::tls_serialize(self.into(), writer)
+    }
+}
+
+impl tls_codec::Deserialize for ComponentOperationBaseLabel {
+    fn tls_deserialize<R: std::io::Read>(bytes: &mut R) -> Result<Self, tls_codec::Error>
+    where
+        Self: Sized,
+    {
+        <Self as std::str::FromStr>::from_str(&crate::tlspl::string::tls_deserialize(bytes)?)
+            .map_err(|_| {
+                tls_codec::Error::DecodingError(
+                    "Unknown Value in ComponentOperationBaseLabel".into(),
+                )
+            })
+    }
+}
+
+#[derive(
+    Debug,
+    Clone,
     PartialEq,
     Eq,
     tls_codec::TlsSerialize,
@@ -45,41 +100,10 @@ pub trait Component: crate::Parsable + crate::Serializable {
 )]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ComponentOperationLabel {
-    #[tls_codec(with = "crate::tlspl::bytes")]
-    label: Vec<u8>,
+    pub base_label: ComponentOperationBaseLabel,
     pub component_id: ComponentId,
     #[tls_codec(with = "crate::tlspl::bytes")]
-    pub context: Vec<u8>,
-}
-
-impl ComponentOperationLabel {
-    /// This follows the spec for the following construct: <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-06.html#name-hybrid-public-key-encryptio>
-    pub fn new_with_context_for_hpke(component_id: ComponentId, context: Vec<u8>) -> Self {
-        Self {
-            label: PublicKeyEncryptionLabel::SafeApp
-                .to_prefixed_string(ProtocolVersion::default())
-                .into_bytes(),
-            component_id,
-            context,
-        }
-    }
-
-    /// This follows the spec for the following construct: <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-06.html#name-hybrid-public-key-encryptio>
-    pub fn new_for_signature(
-        label: SignatureLabel,
-        component_id: ComponentId,
-        context: Vec<u8>,
-    ) -> (Self, SignatureLabel) {
-        let col = Self {
-            label: label
-                .to_prefixed_string(ProtocolVersion::default())
-                .into_bytes(),
-            component_id,
-            context,
-        };
-
-        (col, SignatureLabel::ComponentOperationLabel)
-    }
+    pub label: Vec<u8>,
 }
 
 #[derive(

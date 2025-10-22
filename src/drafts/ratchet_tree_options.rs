@@ -3,6 +3,53 @@ use crate::{group::extensions::Extension, tree::RatchetTree};
 #[derive(
     Debug,
     Clone,
+    PartialEq,
+    Eq,
+    Hash,
+    tls_codec::TlsSerialize,
+    tls_codec::TlsDeserialize,
+    tls_codec::TlsSize,
+)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct Domain {
+    #[tls_codec(with = "crate::tlspl::string")]
+    pub domain: String,
+}
+
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    Hash,
+    tls_codec::TlsSerialize,
+    tls_codec::TlsDeserialize,
+    tls_codec::TlsSize,
+)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct DomainList {
+    pub domains: Vec<Domain>,
+}
+
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    Hash,
+    tls_codec::TlsSerialize,
+    tls_codec::TlsDeserialize,
+    tls_codec::TlsSize,
+)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[repr(transparent)]
+pub struct RatchetTreeSourceDomainsExtension(pub DomainList);
+
+pub const EXTENSION_RATCHET_TREE_SOURCE_DOMAINS: u16 = 0xF4C0;
+
+#[derive(
+    Debug,
+    Clone,
     Copy,
     PartialEq,
     Eq,
