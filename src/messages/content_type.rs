@@ -23,8 +23,12 @@ pub enum ContentType {
     Application = 0x01,
     Proposal = 0x02,
     Commit = 0x03,
+    #[cfg(feature = "draft-mahy-mls-new-content-types")]
+    Status = crate::drafts::new_content_types::CONTENT_TYPE_STATUS,
+    #[cfg(feature = "draft-mahy-mls-new-content-types")]
+    Ephemeral = crate::drafts::new_content_types::CONTENT_TYPE_EPHEMERAL,
     #[cfg(feature = "draft-mularczyk-mls-splitcommit")]
-    SplitCommit = 0x04,
+    SplitCommit = crate::drafts::split_commit::CONTENT_TYPE_SPLIT_COMMIT,
 }
 
 impl TryFrom<u8> for ContentType {
@@ -36,8 +40,12 @@ impl TryFrom<u8> for ContentType {
             0x01 => Self::Application,
             0x02 => Self::Proposal,
             0x03 => Self::Commit,
+            #[cfg(feature = "draft-mahy-mls-new-content-types")]
+            crate::drafts::new_content_types::CONTENT_TYPE_STATUS => Self::Status,
+            #[cfg(feature = "draft-mahy-mls-new-content-types")]
+            crate::drafts::new_content_types::CONTENT_TYPE_EPHEMERAL => Self::Ephemeral,
             #[cfg(feature = "draft-mularczyk-mls-splitcommit")]
-            0x04 => Self::SplitCommit,
+            crate::drafts::split_commit::CONTENT_TYPE_SPLIT_COMMIT => Self::SplitCommit,
             _ => return Err(MlsSpecError::InvalidContentType),
         };
 
@@ -71,6 +79,18 @@ pub enum ContentTypeInner {
     SplitCommit {
         split_commit: crate::drafts::split_commit::SplitCommit,
     },
+    #[cfg(feature = "draft-mahy-mls-new-content-types")]
+    #[tls_codec(discriminant = "ContentType::Status")]
+    Status {
+        #[tls_codec(with = "crate::tlspl::bytes")]
+        application_data: Vec<u8>,
+    },
+    #[cfg(feature = "draft-mahy-mls-new-content-types")]
+    #[tls_codec(discriminant = "ContentType::Ephemeral")]
+    Ephemeral {
+        #[tls_codec(with = "crate::tlspl::bytes")]
+        application_data: Vec<u8>,
+    },
 }
 
 impl From<&ContentTypeInner> for ContentType {
@@ -81,6 +101,10 @@ impl From<&ContentTypeInner> for ContentType {
             ContentTypeInner::Commit { .. } => ContentType::Commit,
             #[cfg(feature = "draft-mularczyk-mls-splitcommit")]
             ContentTypeInner::SplitCommit { .. } => ContentType::SplitCommit,
+            #[cfg(feature = "draft-mahy-mls-new-content-types")]
+            ContentTypeInner::Status { .. } => ContentType::Status,
+            #[cfg(feature = "draft-mahy-mls-new-content-types")]
+            ContentTypeInner::Ephemeral { .. } => ContentType::Ephemeral,
         }
     }
 }

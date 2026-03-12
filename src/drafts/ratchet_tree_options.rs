@@ -88,14 +88,9 @@ pub enum RatchetTreeOption {
     HttpsUri {
         #[tls_codec(with = "crate::tlspl::string")]
         ratchet_tree_url: String,
-        #[tls_codec(with = "crate::tlspl::bytes")]
-        tree_signature: Vec<u8>,
     },
     #[tls_codec(discriminant = "RatchetTreeRepresentation::OutOfBand")]
-    OutOfBand {
-        #[tls_codec(with = "crate::tlspl::bytes")]
-        tree_signature: Vec<u8>,
-    },
+    OutOfBand,
     #[tls_codec(discriminant = "RatchetTreeRepresentation::DistributionService")]
     DistributionService,
 }

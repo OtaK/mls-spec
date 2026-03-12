@@ -1,5 +1,6 @@
 use crate::{
     defs::{Epoch, Generation, LeafIndex},
+    group::GroupIdRef,
     messages::{ContentType, ContentTypeInner, FramedContentAuthData},
 };
 
@@ -76,6 +77,14 @@ impl PrivateMessageContent {
             ContentType::Commit => ContentTypeInner::Commit {
                 commit: <_>::tls_deserialize(bytes)?,
             },
+            #[cfg(feature = "draft-mahy-mls-new-content-types")]
+            ContentType::Status => ContentTypeInner::Status {
+                application_data: crate::tlspl::bytes::tls_deserialize(bytes)?,
+            },
+            #[cfg(feature = "draft-mahy-mls-new-content-types")]
+            ContentType::Ephemeral => ContentTypeInner::Ephemeral {
+                application_data: crate::tlspl::bytes::tls_deserialize(bytes)?,
+            },
             #[cfg(feature = "draft-mularczyk-mls-splitcommit")]
             ContentType::SplitCommit => ContentTypeInner::SplitCommit {
                 split_commit: <_>::tls_deserialize(bytes)?,
@@ -110,7 +119,7 @@ impl PrivateMessageContent {
 #[derive(Debug, Clone, PartialEq, Eq, tls_codec::TlsSerialize, tls_codec::TlsSize)]
 pub struct PrivateContentAAD<'a> {
     #[tls_codec(with = "crate::tlspl::bytes")]
-    pub group_id: &'a [u8],
+    pub group_id: GroupIdRef<'a>,
     pub epoch: &'a Epoch,
     pub content_type: &'a ContentType,
     #[tls_codec(with = "crate::tlspl::bytes")]
@@ -160,7 +169,7 @@ pub struct SenderData {
 /// ````
 #[derive(Debug, Clone, PartialEq, Eq, tls_codec::TlsSerialize, tls_codec::TlsSize)]
 pub struct SenderDataAAD<'a> {
-    pub group_id: &'a [u8],
+    pub group_id: GroupIdRef<'a>,
     pub epoch: &'a Epoch,
     pub content_type: &'a ContentType,
 }

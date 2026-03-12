@@ -2,24 +2,10 @@ use std::collections::BTreeMap;
 
 use crate::{SensitiveBytes, key_schedule::PreSharedKeyId};
 
-pub type ComponentId = u32;
+pub type ComponentId = u16;
 
-pub const COMPONENT_ID_GREASE_VALUES: [ComponentId; 15] = [
-    0x0000_0A0A,
-    0x0000_1A1A,
-    0x0000_2A2A,
-    0x0000_3A3A,
-    0x0000_4A4A,
-    0x0000_5A5A,
-    0x0000_6A6A,
-    0x0000_7A7A,
-    0x0000_8A8A,
-    0x0000_9A9A,
-    0x0000_AAAA,
-    0x0000_BABA,
-    0x0000_CACA,
-    0x0000_DADA,
-    0x0000_EAEA,
+pub const COMPONENT_ID_GREASE_VALUES: [ComponentId; 8] = [
+    0x0A0A, 0x1A1A, 0x2A2A, 0x3A3A, 0x4A4A, 0x5A5A, 0x6A6A, 0x7A7A,
 ];
 
 pub trait Component: crate::Parsable + crate::Serializable {
@@ -46,21 +32,16 @@ pub trait Component: crate::Parsable + crate::Serializable {
 }
 
 #[derive(
-    Debug,
-    Clone,
-    Copy,
-    Default,
-    PartialEq,
-    Eq,
-    strum::IntoStaticStr,
-    strum::EnumString,
-    strum::Display,
+    Debug, Clone, Default, PartialEq, Eq, strum::IntoStaticStr, strum::EnumString, strum::Display,
 )]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u8)]
 pub enum ComponentOperationBaseLabel {
     #[default]
-    Application = 0x00,
+    #[strum(serialize = "MLS Component")]
+    MlsComponent,
+    /// Other cases. Unlikely to ever happen but whatever!
+    Custom(String),
 }
 
 impl tls_codec::Size for ComponentOperationBaseLabel {
@@ -80,12 +61,8 @@ impl tls_codec::Deserialize for ComponentOperationBaseLabel {
     where
         Self: Sized,
     {
-        <Self as std::str::FromStr>::from_str(&crate::tlspl::string::tls_deserialize(bytes)?)
-            .map_err(|_| {
-                tls_codec::Error::DecodingError(
-                    "Unknown Value in ComponentOperationBaseLabel".into(),
-                )
-            })
+        let raw_str = crate::tlspl::string::tls_deserialize(bytes)?;
+        Ok(Self::try_from(raw_str.as_str()).unwrap_or(Self::Custom(raw_str)))
     }
 }
 

@@ -92,10 +92,12 @@ impl_spec_enum! {
     SUPPORTED_WIRE_FORMATS = crate::drafts::mls_extensions::EXTENSION_SUPPORTED_WIRE_FORMATS,
     #[cfg(feature = "draft-ietf-mls-extensions")]
     REQUIRED_WIRE_FORMATS = crate::drafts::mls_extensions::EXTENSION_REQUIRED_WIRE_FORMATS,
-    #[cfg(feature = "draft-ietf-mls-extensions")]
-    TARGETED_MESSAGES_CAPABILITY = crate::drafts::mls_extensions::EXTENSION_TARGETED_MESSAGES_CAPABILITY,
     #[cfg(feature = "draft-mahy-mls-ratchet-tree-options")]
-    RATCHET_TREE_SOURCE_DOMAINS = crate::drafts::ratchet_tree_options::EXTENSION_RATCHET_TREE_SOURCE_DOMAINS
+    RATCHET_TREE_SOURCE_DOMAINS = crate::drafts::ratchet_tree_options::EXTENSION_RATCHET_TREE_SOURCE_DOMAINS,
+    #[cfg(feature = "draft-mahy-mls-new-content-types")]
+    SUPPORTED_CONTENT_TYPES = crate::drafts::new_content_types::EXTENSION_SUPPORTED_CONTENT_TYPES,
+    #[cfg(feature = "draft-mahy-mls-new-content-types")]
+    REQUIRED_CONTENT_TYPES = crate::drafts::new_content_types::EXTENSION_REQUIRED_CONTENT_TYPES
 }
 
 impl Default for ExtensionType {
@@ -194,14 +196,18 @@ impl_spec_enum! {
     MLS_WELCOME = 0x0003,
     MLS_GROUP_INFO = 0x0004,
     MLS_KEY_PACKAGE = 0x0005,
-    #[cfg(feature = "draft-ietf-mls-extensions")]
-    MLS_TARGETED_MESSAGE = crate::drafts::mls_extensions::WIRE_FORMAT_MLS_TARGETED_MESSAGE,
+    #[cfg(feature = "draft-ietf-mls-targeted-messages")]
+    MLS_TARGETED_MESSAGE = crate::drafts::targeted_messages::WIRE_FORMAT_MLS_TARGETED_MESSAGE,
     #[cfg(feature = "draft-mahy-mls-semiprivatemessage")]
     MLS_SEMIPRIVATE_MESSAGE = crate::drafts::semiprivate_message::WIRE_FORMAT_MLS_SEMIPRIVATE_MESSAGE,
     #[cfg(feature = "draft-mularczyk-mls-splitcommit")]
     MLS_SPLIT_COMMIT = crate::drafts::split_commit::WIRE_FORMAT_MLS_SPLIT_COMMIT,
     #[cfg(feature = "draft-pham-mls-additional-wire-formats")]
-    MLS_MESSAGE_WITHOUT_AAD = crate::drafts::additional_wire_formats::WIRE_FORMAT_MLS_MESSAGE_WITHOUT_AAD
+    MLS_MESSAGE_WITHOUT_AAD = crate::drafts::additional_wire_formats::WIRE_FORMAT_MLS_MESSAGE_WITHOUT_AAD,
+    #[cfg(feature = "draft-mahy-mls-private-external")]
+    MLS_PRIVATE_EXTERNAL_MESSAGE = crate::drafts::private_external::WIRE_FORMAT_MLS_PRIVATE_EXTERNAL_MESSAGE,
+    #[cfg(feature = "draft-kohbrok-mls-leaf-operation-intents")]
+    MLS_LEAF_OPERATION_INTENT = crate::drafts::leaf_operation_intents::WIRE_FORMAT_MLS_LEAF_OPERATION_INTENT
 }
 
 #[derive(

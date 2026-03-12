@@ -6,11 +6,13 @@ use crate::{
     tree::{UpdatePathNode, leaf_node::LeafNode},
 };
 
-pub const WIRE_FORMAT_MLS_SPLIT_COMMIT: u16 = 0xFFCC; // TODO: Pending IANA assignment
+pub const WIRE_FORMAT_MLS_SPLIT_COMMIT: u16 = 0xFF5C; // TODO: Pending IANA assignment
 static_assertions::const_assert!(
     *WireFormat::RESERVED_PRIVATE_USE_RANGE.start() <= WIRE_FORMAT_MLS_SPLIT_COMMIT
         && WIRE_FORMAT_MLS_SPLIT_COMMIT <= *WireFormat::RESERVED_PRIVATE_USE_RANGE.end()
 );
+
+pub const CONTENT_TYPE_SPLIT_COMMIT: u8 = 0xF5;
 
 #[derive(
     Debug,

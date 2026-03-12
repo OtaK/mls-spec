@@ -97,6 +97,11 @@ pub(crate) mod testing {
             let value3 = postcard::from_bytes(&value3_bytes)?;
             super::assertions::assert_eq_err!(value, &value3);
             println!("==== --> [{ctx}] serde+postcard OK");
+
+            let value4_bytes = serde_json::to_vec(&value)?;
+            let value4 = serde_json::from_slice(&value4_bytes)?;
+            super::assertions::assert_eq_err!(value, &value4);
+            println!("==== --> [{ctx}] serde+json OK");
         }
         Ok(())
     }
