@@ -244,9 +244,9 @@ pub enum MlsMessageContent {
     GroupInfo(GroupInfo),
     #[tls_codec(discriminant = "WireFormat::MLS_KEY_PACKAGE")]
     KeyPackage(KeyPackage),
-    #[cfg(feature = "draft-ietf-mls-extensions")]
+    #[cfg(feature = "draft-ietf-mls-targeted-messages")]
     #[tls_codec(discriminant = "WireFormat::MLS_TARGETED_MESSAGE")]
-    MlsTargetedMessage(crate::drafts::mls_extensions::targeted_message::TargetedMessage),
+    MlsTargetedMessage(crate::drafts::targeted_messages::TargetedMessage),
     #[cfg(feature = "draft-mahy-mls-semiprivatemessage")]
     #[tls_codec(discriminant = "WireFormat::MLS_SEMIPRIVATE_MESSAGE")]
     MlsSemiPrivateMessage(crate::drafts::semiprivate_message::messages::SemiPrivateMessage),
@@ -256,6 +256,12 @@ pub enum MlsMessageContent {
     #[cfg(feature = "draft-pham-mls-additional-wire-formats")]
     #[tls_codec(discriminant = "WireFormat::MLS_MESSAGE_WITHOUT_AAD")]
     MlsMessageWithoutAad(crate::drafts::additional_wire_formats::MessageWithoutAad),
+    #[cfg(feature = "draft-mahy-mls-private-external")]
+    #[tls_codec(discriminant = "WireFormat::MLS_PRIVATE_EXTERNAL_MESSAGE")]
+    MlsPrivateExternalMessage(crate::drafts::private_external::PrivateExternalMessage),
+    #[cfg(feature = "draft-kohbrok-mls-leaf-operation-intents")]
+    #[tls_codec(discriminant = "WireFormat::MLS_LEAF_OPERATION_INTENT")]
+    MlsLeafOperationIntent(crate::drafts::leaf_operation_intents::LeafOperationIntent),
 }
 
 impl MlsMessageContent {
@@ -271,6 +277,8 @@ impl MlsMessageContent {
             MlsMessageContent::MlsSplitCommitMessage(message) => {
                 message.split_commit_message.content.content_type()
             }
+            #[cfg(feature = "draft-mahy-mls-private-external")]
+            MlsMessageContent::MlsPrivateExternalMessage(message) => Some(message.content_type),
             _ => None,
         }
     }
@@ -308,6 +316,10 @@ impl MlsMessageContent {
             MlsMessageContent::MlsSplitCommitMessage(message) => {
                 message.split_commit_message.content.authenticated_data()
             }
+            #[cfg(feature = "draft-mahy-mls-private-external")]
+            MlsMessageContent::MlsPrivateExternalMessage(message) => {
+                Some(&message.authenticated_data)
+            }
             _ => None,
         }
     }
@@ -330,7 +342,7 @@ impl Into<WireFormat> for &MlsMessageContent {
             MlsMessageContent::KeyPackage(_) => {
                 WireFormat::new_unchecked(WireFormat::MLS_KEY_PACKAGE)
             }
-            #[cfg(feature = "draft-ietf-mls-extensions")]
+            #[cfg(feature = "draft-ietf-mls-targeted-messages")]
             MlsMessageContent::MlsTargetedMessage(_) => {
                 WireFormat::new_unchecked(WireFormat::MLS_TARGETED_MESSAGE)
             }
@@ -345,6 +357,14 @@ impl Into<WireFormat> for &MlsMessageContent {
             #[cfg(feature = "draft-pham-mls-additional-wire-formats")]
             MlsMessageContent::MlsMessageWithoutAad(_) => {
                 WireFormat::new_unchecked(WireFormat::MLS_MESSAGE_WITHOUT_AAD)
+            }
+            #[cfg(feature = "draft-mahy-mls-private-external")]
+            MlsMessageContent::MlsPrivateExternalMessage(_) => {
+                WireFormat::new_unchecked(WireFormat::MLS_PRIVATE_EXTERNAL_MESSAGE)
+            }
+            #[cfg(feature = "draft-kohbrok-mls-leaf-operation-intents")]
+            MlsMessageContent::MlsLeafOperationIntent(_) => {
+                WireFormat::new_unchecked(WireFormat::MLS_LEAF_OPERATION_INTENT)
             }
         }
     }

@@ -8,11 +8,7 @@ use crate::{
 
 use super::mls_extensions::safe_application::{Component, ComponentId};
 
-pub const COMPONENT_ID: ComponentId = 0xFAAE_0000; // TODO: Waiting for IANA registration
-static_assertions::const_assert!(
-    *super::mls_extensions::COMPONENT_RESERVED_PRIVATE_RANGE.start() <= COMPONENT_ID
-        && COMPONENT_ID <= *super::mls_extensions::COMPONENT_RESERVED_PRIVATE_RANGE.end()
-);
+pub const COMPONENT_ID: ComponentId = 0x0007;
 
 #[derive(Debug, Clone, PartialEq, Eq, tls_codec::TlsSize, tls_codec::TlsSerialize)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]

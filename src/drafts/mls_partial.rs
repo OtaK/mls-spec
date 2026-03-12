@@ -57,7 +57,7 @@ pub struct MembershipProof {
 /// struct {
 ///     T message;
 ///     MembershipProof sender_membership_proof;
-/// } SenderAuthenticatedMessage;
+/// } SenderAuthenticatedMessage<T>;
 /// ```
 ///
 #[derive(

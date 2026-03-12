@@ -110,5 +110,5 @@ impl Component for ContentMediaTypes {
 pub struct ApplicationFraming {
     pub media_type: MediaType,
     #[tls_codec(with = "crate::tlspl::bytes")]
-    pub application_content: Vec<u8>,
+    pub inner_application_content: Vec<u8>,
 }

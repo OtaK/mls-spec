@@ -1,4 +1,9 @@
-#![allow(clippy::unnecessary_cast, non_upper_case_globals, non_camel_case_types)]
+#![allow(
+    clippy::unnecessary_cast,
+    non_upper_case_globals,
+    non_camel_case_types,
+    unused_assignments
+)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![doc = include_str!("../README.md")]
 mod error;

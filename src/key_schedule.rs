@@ -220,7 +220,7 @@ pub struct ResumptionPsk {
     #[zeroize(skip)]
     pub usage: ResumptionPskUsage,
     #[tls_codec(with = "crate::tlspl::bytes")]
-    pub psk_group_id: Vec<u8>,
+    pub psk_group_id: GroupId,
     pub psk_epoch: Epoch,
 }
 

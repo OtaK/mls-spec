@@ -28,8 +28,8 @@ static_assertions::const_assert!(
 )]
 #[repr(u8)]
 pub enum MessageWithoutAadType {
-    PublicMessage = 0,
-    PrivateMessage = 1,
+    PublicMessage = 0x00,
+    PrivateMessage = 0x01,
 }
 
 ///

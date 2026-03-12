@@ -13,12 +13,16 @@ pub enum SignatureLabel {
     LeafNodeTBS,
     KeyPackageTBS,
     GroupInfoTBS,
-    #[cfg(feature = "draft-ietf-mls-extensions")]
+    #[cfg(feature = "draft-ietf-mls-targeted-messages")]
     TargetedMessagesTBS,
     #[cfg(feature = "draft-ietf-mls-extensions")]
     CredentialBindingTBS,
     #[cfg(feature = "draft-kohbrok-mls-associated-parties")]
     AssociatedPartyEntryTBS,
+    #[cfg(feature = "draft-mahy-mls-private-external")]
+    ExternalEncryptionInfoTBS,
+    #[cfg(feature = "draft-kohbrok-mls-leaf-operation-intents")]
+    LeafOperationIntentTBS,
     #[cfg(feature = "test-vectors")]
     #[strum(serialize = "SignWithLabel")]
     TestVectorSignWithLabel,
@@ -47,6 +51,10 @@ pub enum PublicKeyEncryptionLabel {
     Welcome,
     #[cfg(feature = "draft-mahy-mls-semiprivatemessage")]
     SemiPrivateMessageReceiver,
+    #[cfg(feature = "draft-mahy-mls-private-external")]
+    PrivateExternalMessageContent,
+    #[cfg(feature = "draft-ietf-mls-targeted-messages")]
+    TargetedMessageData,
     #[cfg(feature = "test-vectors")]
     #[strum(serialize = "EncryptWithLabel")]
     TestVectorEncryptWithLabel,
@@ -67,6 +75,9 @@ pub enum HashReferenceKind {
     KeyPackageRef,
     #[strum(serialize = "Proposal Reference")]
     ProposalRef,
+    #[cfg(feature = "draft-kohbrok-mls-leaf-operation-intents")]
+    #[strum(serialize = "LeafNode Reference")]
+    LeafNodeRef,
     #[cfg(feature = "test-vectors")]
     #[strum(serialize = "RefHash")]
     TestVectorRefHash,
@@ -108,6 +119,10 @@ pub enum KdfLabelKind {
     Authentication,
     Application,
     Handshake,
+    #[cfg(feature = "draft-mahy-mls-new-content-types")]
+    Status,
+    #[cfg(feature = "draft-mahy-mls-new-content-types")]
+    Ephemeral,
     Tree,
     Nonce,
     Key,
@@ -116,10 +131,10 @@ pub enum KdfLabelKind {
     Node,
     #[strum(serialize = "derived psk")]
     DerivedPsk,
-    #[cfg(feature = "draft-ietf-mls-extensions")]
+    #[cfg(feature = "draft-ietf-mls-targeted-messages")]
     #[strum(serialize = "targeted message psk")]
     TargetedMessagePsk,
-    #[cfg(feature = "draft-ietf-mls-extensions")]
+    #[cfg(feature = "draft-ietf-mls-targeted-messages")]
     #[strum(serialize = "targeted message sender auth data")]
     TargetedMessageSenderAuthData,
     #[cfg(feature = "draft-kohbrok-mls-associated-parties")]
@@ -143,12 +158,12 @@ pub enum KdfLabelKind {
     #[cfg(feature = "draft-kohbrok-mls-associated-parties")]
     #[strum(serialize = "AP Commit Base Secret")]
     AssociatedPartyCommitBaseSecret,
-    #[cfg(feature = "draft-ietf-mls-combiner")]
-    #[strum(serialize = "hpqmls_export")]
-    HpqMlsExport,
     #[cfg(feature = "draft-ietf-mls-extensions")]
     #[strum(serialize = "application_export")]
     ApplicationExportSecret,
+    #[cfg(feature = "draft-mahy-mls-private-external")]
+    #[strum(serialize = "external encryption")]
+    ExternalEncryption,
     #[cfg(feature = "test-vectors")]
     #[strum(serialize = "DeriveTreeSecret")]
     TestVectorDeriveTreeSecret,

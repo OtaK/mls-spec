@@ -14,6 +14,8 @@ pub mod welcome;
 pub type HashReference = SensitiveBytes;
 pub type ProposalRef = HashReference;
 pub type KeyPackageRef = HashReference;
+#[cfg(feature = "draft-kohbrok-mls-leaf-operation-intents")]
+pub type LeafNodeRef = HashReference;
 
 pub type GroupId = Vec<u8>;
 pub type GroupIdRef<'a> = &'a [u8];

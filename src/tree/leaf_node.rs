@@ -3,7 +3,7 @@ use crate::{
     credential::Credential,
     crypto::{HpkePublicKey, HpkePublicKeyRef, SignaturePublicKey, SignaturePublicKeyRef},
     defs::{Capabilities, LeafIndex},
-    group::{KeyPackageLifetime, extensions::Extension},
+    group::{GroupIdRef, KeyPackageLifetime, extensions::Extension},
 };
 
 #[derive(
@@ -60,7 +60,7 @@ impl From<&LeafNodeSource> for LeafNodeSourceType {
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct LeafNodeMemberInfo<'a> {
     #[tls_codec(with = "crate::tlspl::bytes")]
-    pub group_id: &'a [u8],
+    pub group_id: GroupIdRef<'a>,
     pub leaf_index: LeafIndex,
 }
 

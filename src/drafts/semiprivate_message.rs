@@ -3,13 +3,13 @@ use crate::{
     credential::Credential,
     crypto::{HpkeCiphertext, HpkePublicKey},
     defs::{Epoch, LeafIndex, WireFormat},
-    group::HashReference,
+    group::{GroupIdRef, HashReference},
     messages::ReuseGuard,
 };
 
 use super::mls_extensions::safe_application::{Component, ComponentId};
 
-pub const EXTERNAL_RECEIVERS_COMPONENT_ID: ComponentId = 0xFEEE_0000; // TODO: Waiting for IANA registration
+pub const EXTERNAL_RECEIVERS_COMPONENT_ID: ComponentId = 0xFEEE; // TODO: Waiting for IANA registration
 static_assertions::const_assert!(
     *super::mls_extensions::COMPONENT_RESERVED_PRIVATE_RANGE.start()
         <= EXTERNAL_RECEIVERS_COMPONENT_ID
@@ -92,7 +92,7 @@ pub struct PerMessageKeyAndNonces {
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct SemiPrivateMessageContext<'a> {
     #[tls_codec(with = "crate::tlspl::bytes")]
-    pub group_id: &'a [u8],
+    pub group_id: GroupIdRef<'a>,
     pub epoch: &'a Epoch,
     #[tls_codec(with = "crate::tlspl::bytes")]
     pub partial_context_hash: &'a [u8],
