@@ -1,6 +1,6 @@
 [package]
 name = "mls-spec"
-version = "2.0.0"
+version = "2.0.1"
 description = "This crate is a repository of MLS / RFC9420-related data structures."
 readme = "README.md"
 documentation = "https://docs.rs/mls-spec"
@@ -30,8 +30,8 @@ all-drafts = [
     "draft-ietf-mls-combiner",
     "draft-ietf-mls-partial",
     "draft-ietf-mls-targeted-messages",
+    "draft-ietf-mls-ratchet-tree-options",
     "draft-kohbrok-mls-associated-parties",
-    "draft-mahy-mls-ratchet-tree-options",
     "draft-mahy-mls-semiprivatemessage",
     "draft-mahy-mls-sd-cwt-credential",
     "draft-mahy-mls-private-external",
@@ -57,16 +57,17 @@ draft-ietf-mls-extensions-content-advertisement-parse = [
 ]
 draft-ietf-mls-combiner = ["draft-ietf-mls-extensions"] # draft-02++ @ git:c511d87
 draft-ietf-mls-targeted-messages = [] # draft-00
-draft-ietf-mls-partial = [] # draft-00
+draft-ietf-mls-partial = [] # draft-02
+draft-ietf-mls-ratchet-tree-options = [] # draft-00
 draft-kohbrok-mls-associated-parties = [
     "draft-ietf-mls-extensions",
 ] # draft-00++
 draft-kohbrok-mls-leaf-operation-intents = [] # draft-01
 draft-mahy-mls-new-content-types = [] # draft-00
 draft-mahy-mls-private-external = [] # draft-00
-draft-mahy-mls-ratchet-tree-options = [] # draft-04
+draft-mahy-mls-ratchet-tree-options = ["draft-ietf-mls-ratchet-tree-options"] # draft-04 == ietf-draft-00 alias
 draft-mahy-mls-semiprivatemessage = ["draft-ietf-mls-extensions"] # draft-06
-draft-mahy-mls-sd-cwt-credential = [] # draft-01
+draft-mahy-mls-sd-cwt-credential = [] # draft-02
 draft-mularczyk-mls-splitcommit = [] # draft-00
 draft-pham-mls-additional-wire-formats = [
     "draft-ietf-mls-extensions",

@@ -75,9 +75,9 @@ pub enum APQInfoUpdateData {
     #[tls_codec(discriminant = 0x00)]
     FullUpdate { new_apq_info: APQInfo },
     #[tls_codec(discriminant = 0x01)]
-    NewTraditionalEpoch { epoch: Epoch },
+    NewTraditionalEpoch { new_traditional_epoch: Epoch },
     #[tls_codec(discriminant = 0x02)]
-    NewPostQuantumEpoch { epoch: Epoch },
+    NewPostQuantumEpoch { new_post_quantum_epoch: Epoch },
 }
 
 #[derive(
@@ -155,7 +155,7 @@ pub struct APQGroupInfo {
     pub post_quantum_group_info: GroupInfo,
 }
 
-#[cfg(feature = "draft-mahy-mls-ratchet-tree-options")]
+#[cfg(feature = "draft-ietf-mls-ratchet-tree-options")]
 #[derive(
     Debug,
     Clone,

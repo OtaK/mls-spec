@@ -9,7 +9,7 @@ use crate::{
 
 use super::mls_extensions::safe_application::{Component, ComponentId};
 
-pub const EXTERNAL_RECEIVERS_COMPONENT_ID: ComponentId = 0xFEEE; // TODO: Waiting for IANA registration
+pub const EXTERNAL_RECEIVERS_COMPONENT_ID: ComponentId = 0xFEEE; // TODO: Waiting for IANA registration (suggested 0x0008)
 static_assertions::const_assert!(
     *super::mls_extensions::COMPONENT_RESERVED_PRIVATE_RANGE.start()
         <= EXTERNAL_RECEIVERS_COMPONENT_ID

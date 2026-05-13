@@ -92,7 +92,7 @@ impl_spec_enum! {
     SUPPORTED_WIRE_FORMATS = crate::drafts::mls_extensions::EXTENSION_SUPPORTED_WIRE_FORMATS,
     #[cfg(feature = "draft-ietf-mls-extensions")]
     REQUIRED_WIRE_FORMATS = crate::drafts::mls_extensions::EXTENSION_REQUIRED_WIRE_FORMATS,
-    #[cfg(feature = "draft-mahy-mls-ratchet-tree-options")]
+    #[cfg(feature = "draft-ietf-mls-ratchet-tree-options")]
     RATCHET_TREE_SOURCE_DOMAINS = crate::drafts::ratchet_tree_options::EXTENSION_RATCHET_TREE_SOURCE_DOMAINS,
     #[cfg(feature = "draft-mahy-mls-new-content-types")]
     SUPPORTED_CONTENT_TYPES = crate::drafts::new_content_types::EXTENSION_SUPPORTED_CONTENT_TYPES,

@@ -14,7 +14,7 @@ pub mod mls_partial;
 pub mod new_content_types;
 #[cfg(feature = "draft-mahy-mls-private-external")]
 pub mod private_external;
-#[cfg(feature = "draft-mahy-mls-ratchet-tree-options")]
+#[cfg(feature = "draft-ietf-mls-ratchet-tree-options")]
 pub mod ratchet_tree_options;
 #[cfg(feature = "draft-mahy-mls-sd-cwt-credential")]
 pub mod sd_cwt_credential;
