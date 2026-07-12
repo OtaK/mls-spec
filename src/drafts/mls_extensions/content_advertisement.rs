@@ -1,36 +1,20 @@
+use std::borrow::Cow;
+
 use super::safe_application::{Component, ComponentId, ComponentsList};
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Parameter {
-    #[tls_codec(with = "crate::tlspl::bytes")]
-    pub parameter_name: Vec<u8>,
-    #[tls_codec(with = "crate::tlspl::bytes")]
-    pub parameter_value: Vec<u8>,
+pub struct Parameter<'a> {
+    pub parameter_name: Cow<'a, [u8]>,
+    pub parameter_value: Cow<'a, [u8]>,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct MediaType {
-    #[tls_codec(with = "crate::tlspl::bytes")]
-    pub media_type: Vec<u8>,
-    pub parameters: Vec<Parameter>,
+pub struct MediaType<'a> {
+    #[cfg_attr(feature = "serde", serde(alias = "type"))]
+    pub media_type: Cow<'a, [u8]>,
+    pub parameters: Vec<Parameter<'a>>,
 }
 
 #[cfg(feature = "draft-ietf-mls-extensions-content-advertisement-parse")]
@@ -63,52 +47,27 @@ impl MediaType {
     }
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct MediaTypeList {
-    pub media_types: Vec<MediaType>,
+pub struct MediaTypeList<'a> {
+    pub media_type_list: Vec<MediaType<'a>>,
 }
 
-pub type AcceptedMediaTypes = MediaTypeList;
-pub type RequiredMediaTypes = MediaTypeList;
+pub type AcceptedMediaTypes<'a> = MediaTypeList<'a>;
+pub type RequiredMediaTypes<'a> = MediaTypeList<'a>;
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 pub struct ContentMediaTypes(pub ComponentsList);
 
-impl Component for ContentMediaTypes {
+impl<'a> Component<'a> for ContentMediaTypes {
     fn component_id() -> ComponentId {
         super::CONTENT_MEDIA_TYPES_ID
     }
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ApplicationFraming {
-    pub media_type: MediaType,
-    #[tls_codec(with = "crate::tlspl::bytes")]
-    pub inner_application_content: Vec<u8>,
+pub struct ApplicationFraming<'a> {
+    pub media_type: MediaType<'a>,
+    pub inner_application_content: Cow<'a, [u8]>,
 }

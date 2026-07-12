@@ -3,7 +3,7 @@ use crate::{
     credential::Credential,
     crypto::{HpkeCiphertext, HpkePublicKey},
     defs::{Epoch, LeafIndex, WireFormat},
-    group::{GroupIdRef, HashReference},
+    group::{GroupId, HashReference},
     messages::ReuseGuard,
 };
 
@@ -23,38 +23,22 @@ static_assertions::const_assert!(
         && WIRE_FORMAT_MLS_SEMIPRIVATE_MESSAGE <= *WireFormat::RESERVED_PRIVATE_USE_RANGE.end()
 );
 
-pub type ExternalReceiverRef = HashReference;
+pub type ExternalReceiverRef<'a> = HashReference<'a>;
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ExternalReceiver {
-    pub external_receiver_public_key: HpkePublicKey,
-    pub credential: Credential,
+pub struct ExternalReceiver<'a> {
+    pub external_receiver_public_key: HpkePublicKey<'a>,
+    pub credential: Credential<'a>,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ExternalReceivers {
-    pub external_receivers: Vec<ExternalReceiver>,
+pub struct ExternalReceivers<'a> {
+    pub external_receivers: Vec<ExternalReceiver<'a>>,
 }
 
-impl Component for ExternalReceivers {
+impl<'a> Component<'a> for ExternalReceivers<'a> {
     fn component_id() -> ComponentId {
         EXTERNAL_RECEIVERS_COMPONENT_ID
     }
@@ -71,133 +55,111 @@ impl Component for ExternalReceivers {
 /// } PerMessageKeyAndNonces;
 /// ```
 ///
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct PerMessageKeyAndNonces {
-    pub key: SensitiveBytes,
-    pub nonce: SensitiveBytes,
+pub struct PerMessageKeyAndNonces<'a> {
+    pub key: SensitiveBytes<'a>,
+    pub nonce: SensitiveBytes<'a>,
     pub reuse_guard: ReuseGuard,
     pub sender_leaf_index: LeafIndex,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, tls_codec::TlsSerialize, tls_codec::TlsSize)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplSerialize, thalassa::TlsplSize)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct SemiPrivateMessageContext<'a> {
-    #[tls_codec(with = "crate::tlspl::bytes")]
-    pub group_id: GroupIdRef<'a>,
+    pub group_id: GroupId<'a>,
     pub epoch: &'a Epoch,
-    #[tls_codec(with = "crate::tlspl::bytes")]
     pub partial_context_hash: &'a [u8],
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct KeyForExternalReceiver {
-    pub external_receiver_ref: ExternalReceiverRef,
-    pub encrypted_keys_and_nonces: HpkeCiphertext,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, tls_codec::TlsSerialize, tls_codec::TlsSize)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub struct KeyForExternalReceiverRef<'a> {
-    pub external_receiver_ref: &'a ExternalReceiverRef,
-    pub encrypted_keys_and_nonces: &'a HpkeCiphertext,
+pub struct KeyForExternalReceiver<'a> {
+    pub external_receiver_ref: ExternalReceiverRef<'a>,
+    pub encrypted_keys_and_nonces: HpkeCiphertext<'a>,
 }
 
 pub mod messages {
+    use thalassa::{TlsplDeserialize, error::TlsplReadError, io::Read};
+
     use crate::{
-        SensitiveBytes,
+        CRATE_NAME, SensitiveBytes,
         defs::Epoch,
-        group::{GroupId, GroupIdRef, commits::Commit, proposals::Proposal},
-        messages::{ContentType, ContentTypeInner, FramedContentAuthData, PrivateMessageContent},
+        group::{GroupId, commits::Commit, proposals::Proposal},
+        messages::{ContentType, ContentTypeInner, FramedContentAuthData},
     };
 
-    use super::{KeyForExternalReceiver, KeyForExternalReceiverRef};
+    use super::KeyForExternalReceiver;
 
-    #[derive(Debug, Clone, PartialEq, Eq, tls_codec::TlsSerialize, tls_codec::TlsSize)]
+    #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplSerialize, thalassa::TlsplSize)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize))]
     pub struct SemiPrivateContentAad<'a> {
-        #[tls_codec(with = "crate::tlspl::bytes")]
-        pub group_id: GroupIdRef<'a>,
+        pub group_id: GroupId<'a>,
         pub epoch: &'a Epoch,
         pub content_type: &'a ContentType,
-        #[tls_codec(with = "crate::tlspl::bytes")]
         pub authenticated_data: &'a [u8],
-        #[tls_codec(with = "crate::tlspl::bytes")]
         pub partial_context_hash: &'a [u8],
-        pub keys_for_external_receivers: &'a [KeyForExternalReceiverRef<'a>],
-        #[tls_codec(with = "crate::tlspl::bytes")]
+        pub keys_for_external_receivers: &'a [KeyForExternalReceiver<'a>],
         pub framed_content_tbs_hash: &'a [u8],
     }
 
     #[derive(Debug, Clone, PartialEq, Eq)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-    pub struct SemiPrivateMessageContent {
-        pub inner: ContentTypeInner,
-        pub auth: FramedContentAuthData,
+    pub struct SemiPrivateMessageContent<'a> {
+        pub inner: ContentTypeInner<'a>,
+        pub auth: FramedContentAuthData<'a>,
         pub padding_len: usize,
     }
 
-    impl tls_codec::Size for SemiPrivateMessageContent {
-        fn tls_serialized_len(&self) -> usize {
-            self.inner.tls_serialized_len() + self.auth.tls_serialized_len() + self.padding_len
+    impl thalassa::TlsplSize for SemiPrivateMessageContent<'_> {
+        #[inline]
+        fn tlspl_serialized_len(&self) -> usize {
+            self.inner.tlspl_serialized_len() + self.auth.tlspl_serialized_len() + self.padding_len
         }
     }
 
-    impl tls_codec::Serialize for SemiPrivateMessageContent {
-        fn tls_serialize<W: std::io::Write>(
+    impl thalassa::TlsplSerialize for SemiPrivateMessageContent<'_> {
+        #[inline]
+        fn tlspl_serialize_to<W: thalassa::io::Write>(
             &self,
             writer: &mut W,
-        ) -> Result<usize, tls_codec::Error> {
-            let mut written = 0;
-            written += self.inner.tls_serialize(writer)?;
-            written += self.auth.tls_serialize(writer)?;
-            writer.write_all(&vec![0u8; self.padding_len][..])?;
-            written += self.padding_len;
+        ) -> thalassa::error::TlsplWriteResult<usize> {
+            let written = self.inner.tlspl_serialize_to(writer)?
+                + self.auth.tlspl_serialize_to(writer)?
+                + self.padding_len;
+            writer.write_all(&vec![0u8; self.padding_len])?;
+
             Ok(written)
         }
     }
 
-    impl SemiPrivateMessageContent {
-        pub fn tls_deserialize_with_content_type<R: std::io::Read>(
-            bytes: &mut R,
+    impl<'a> SemiPrivateMessageContent<'a> {
+        pub fn tls_deserialize_with_content_type<R: Read<'a>>(
+            reader: &mut R,
             content_type: ContentType,
-        ) -> Result<Self, tls_codec::Error> {
-            use tls_codec::Deserialize as _;
-
+        ) -> Result<Self, TlsplReadError> {
             let inner = match content_type {
                 ContentType::Proposal => ContentTypeInner::Proposal {
-                    proposal: Proposal::tls_deserialize(bytes)?,
+                    proposal: Proposal::tlspl_deserialize_from(reader)?,
                 },
                 ContentType::Commit => ContentTypeInner::Commit {
-                    commit: Commit::tls_deserialize(bytes)?,
+                    commit: Commit::tlspl_deserialize_from(reader)?,
                 },
                 _ => {
-                    return Err(tls_codec::Error::DecodingError(format!(
-                        "Tried to deserialize a {content_type}, which is invalid for a SemiPrivateMessage"
-                    )));
+                    return Err(TlsplReadError::custom(
+                        CRATE_NAME,
+                        format!(
+                            "Tried to deserialize a {content_type}, which is invalid for a SemiPrivateMessage"
+                        ),
+                    ));
                 }
             };
-            let auth =
-                FramedContentAuthData::tls_deserialize_with_content_type(bytes, content_type)?;
+            let auth = FramedContentAuthData::tlspl_deserialize_from_with_content_type(
+                reader,
+                content_type,
+            )?;
 
-            let padding_len = PrivateMessageContent::consume_padding(bytes)?;
+            let padding_len = crate::consume_padding(reader)?;
 
             Ok(Self {
                 inner,
@@ -207,25 +169,17 @@ pub mod messages {
         }
     }
 
-    #[derive(
-        Debug,
-        Clone,
-        PartialEq,
-        Eq,
-        tls_codec::TlsSerialize,
-        tls_codec::TlsDeserialize,
-        tls_codec::TlsSize,
-    )]
+    #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-    pub struct SemiPrivateMessage {
-        pub group_id: GroupId,
+    pub struct SemiPrivateMessage<'a> {
+        pub group_id: GroupId<'a>,
         pub epoch: Epoch,
         pub content_type: ContentType,
-        pub authenticated_data: SensitiveBytes,
-        pub partial_context_hash: SensitiveBytes,
-        pub keys_for_external_receivers: Vec<KeyForExternalReceiver>,
-        pub framed_content_tbs_hash: SensitiveBytes,
-        pub encrypted_sender_data: SensitiveBytes,
-        pub ciphertext: SensitiveBytes,
+        pub authenticated_data: SensitiveBytes<'a>,
+        pub partial_context_hash: SensitiveBytes<'a>,
+        pub keys_for_external_receivers: Vec<KeyForExternalReceiver<'a>>,
+        pub framed_content_tbs_hash: SensitiveBytes<'a>,
+        pub encrypted_sender_data: SensitiveBytes<'a>,
+        pub ciphertext: SensitiveBytes<'a>,
     }
 }

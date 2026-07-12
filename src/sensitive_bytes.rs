@@ -1,15 +1,21 @@
-use crate::macros::ref_forward_tls_impl;
+use std::borrow::Cow;
 
 /// Container that ser/deserializes to TLS Variable-Length bytes
 /// and implements zeroizing & constant-time equality checks
-#[derive(Clone, Default, Ord, PartialOrd, zeroize::Zeroize, zeroize::ZeroizeOnDrop)]
+#[derive(Clone, Default, Ord, PartialOrd, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(transparent)]
-pub struct SensitiveBytes(Vec<u8>);
+pub struct SensitiveBytes<'a>(Cow<'a, [u8]>);
 
-impl SensitiveBytes {
+impl SensitiveBytes<'_> {
+    #[inline]
+    pub fn to_vec(&self) -> Vec<u8> {
+        self.0.to_vec()
+    }
+
+    #[inline]
     pub fn as_slice(&self) -> &[u8] {
-        self.0.as_slice()
+        &*self.0
     }
 
     pub fn ct_eq_slice(&self, slice: impl AsRef<[u8]>) -> bool {
@@ -19,98 +25,89 @@ impl SensitiveBytes {
 
     pub fn clear(&mut self) {
         use zeroize::Zeroize as _;
-        self.0.zeroize();
-        self.0.clear();
+        // Upgrade to an owned container first
+        let _ = self.0.to_mut();
+        // Zeroize memory
+        self.zeroize();
+        let owned_ref = self.0.to_mut();
+        // Clear & shrink the vec
+        owned_ref.clear();
+        owned_ref.shrink_to_fit();
     }
 }
 
-impl std::hash::Hash for SensitiveBytes {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.0.hash(state);
+impl zeroize::Zeroize for SensitiveBytes<'_> {
+    fn zeroize(&mut self) {
+        match &mut self.0 {
+            Cow::Borrowed(_) => {} // Borrowed, not up to us to zeroize
+            Cow::Owned(vec) => vec.zeroize(),
+        }
+    }
+}
+
+impl Drop for SensitiveBytes<'_> {
+    fn drop(&mut self) {
+        use zeroize::Zeroize as _;
+        self.zeroize();
     }
 }
 
 #[cfg(not(feature = "hazmat"))]
-impl std::fmt::Debug for SensitiveBytes {
+impl std::fmt::Debug for SensitiveBytes<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "[REDACTED]")
     }
 }
 
 #[cfg(not(feature = "hazmat"))]
-impl std::fmt::Display for SensitiveBytes {
+impl std::fmt::Display for SensitiveBytes<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "[REDACTED]")
     }
 }
 
 #[cfg(feature = "hazmat")]
-impl std::fmt::Debug for SensitiveBytes {
+impl std::fmt::Debug for SensitiveBytes<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}", self.0)
     }
 }
 
 #[cfg(feature = "hazmat")]
-impl std::fmt::Display for SensitiveBytes {
+impl std::fmt::Display for SensitiveBytes<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", hex::encode(self.0.as_slice()))
     }
 }
 
-impl tls_codec::Size for SensitiveBytes {
-    fn tls_serialized_len(&self) -> usize {
-        crate::tlspl::bytes::tls_serialized_len(&self.0)
-    }
-}
-
-impl tls_codec::Serialize for SensitiveBytes {
-    fn tls_serialize<W: std::io::Write>(&self, writer: &mut W) -> Result<usize, tls_codec::Error> {
-        crate::tlspl::bytes::tls_serialize(&self.0, writer)
-    }
-}
-
-impl tls_codec::Deserialize for SensitiveBytes {
-    fn tls_deserialize<R: std::io::Read>(bytes: &mut R) -> Result<Self, tls_codec::Error>
-    where
-        Self: Sized,
-    {
-        Ok(Self(crate::tlspl::bytes::tls_deserialize(bytes)?))
-    }
-}
-
-ref_forward_tls_impl!(SensitiveBytes);
-
-impl From<Vec<u8>> for SensitiveBytes {
+impl From<Vec<u8>> for SensitiveBytes<'_> {
+    #[inline]
     fn from(value: Vec<u8>) -> Self {
-        Self(value)
+        Self(Cow::Owned(value))
     }
 }
 
-impl From<SensitiveBytes> for Vec<u8> {
-    fn from(val: SensitiveBytes) -> Self {
-        val.0.clone()
-    }
-}
-
-impl PartialEq for SensitiveBytes {
+impl PartialEq for SensitiveBytes<'_> {
+    #[inline]
     fn eq(&self, other: &Self) -> bool {
         use subtle::ConstantTimeEq as _;
         self.0.ct_eq(&other.0).into()
     }
 }
 
-impl Eq for SensitiveBytes {}
+impl Eq for SensitiveBytes<'_> {}
 
-impl std::ops::Deref for SensitiveBytes {
+impl<'a> std::ops::Deref for SensitiveBytes<'a> {
     type Target = [u8];
+    #[inline]
     fn deref(&self) -> &Self::Target {
-        self.0.as_slice()
+        &*self.0
     }
 }
 
-impl std::ops::DerefMut for SensitiveBytes {
+impl std::ops::DerefMut for SensitiveBytes<'_> {
+    #[inline]
     fn deref_mut(&mut self) -> &mut Self::Target {
-        self.0.as_mut_slice()
+        self.0.to_mut()
     }
 }

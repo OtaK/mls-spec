@@ -1,7 +1,8 @@
 use crate::{
     SensitiveBytes,
     defs::{LeafIndex, WireFormat},
-    group::{GroupId, GroupIdRef, LeafNodeRef},
+    group::GroupId,
+    tree::leaf_node::LeafNode,
 };
 
 pub const WIRE_FORMAT_MLS_LEAF_OPERATION_INTENT: u16 = 0xFE01;
@@ -10,16 +11,7 @@ static_assertions::const_assert!(
         && WIRE_FORMAT_MLS_LEAF_OPERATION_INTENT <= *WireFormat::RESERVED_PRIVATE_USE_RANGE.end()
 );
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSize,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(
     feature = "serde",
     derive(serde_repr::Serialize_repr, serde_repr::Deserialize_repr)
@@ -31,36 +23,26 @@ pub enum RemovalMode {
     RemoveAssociatedMember = 0x02,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, tls_codec::TlsSize, tls_codec::TlsSerialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, thalassa::TlsplSize, thalassa::TlsplSerialize)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct LeafOperationIntentTBS<'a> {
-    #[tls_codec(with = "crate::tlspl::bytes")]
-    pub group_id: GroupIdRef<'a>,
+    pub group_id: &'a GroupId<'a>,
     pub sender_index: &'a LeafIndex,
-    pub sender_leaf_ref: &'a LeafNodeRef,
+    pub sender_leaf_ref: &'a LeafNode<'a>,
     pub removal_mode: &'a RemovalMode,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSize,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct LeafOperationIntent {
-    #[tls_codec(with = "crate::tlspl::bytes")]
-    pub group_id: GroupId,
+pub struct LeafOperationIntent<'a> {
+    pub group_id: GroupId<'a>,
     pub sender_index: LeafIndex,
-    pub sender_leaf_ref: LeafNodeRef,
+    pub sender_leaf_ref: LeafNode<'a>,
     pub removal_mode: RemovalMode,
-    pub signature: SensitiveBytes,
+    pub signature: SensitiveBytes<'a>,
 }
 
-impl LeafOperationIntent {
+impl LeafOperationIntent<'_> {
     pub fn to_tbs(&self) -> LeafOperationIntentTBS<'_> {
         LeafOperationIntentTBS {
             group_id: &self.group_id,
@@ -71,16 +53,8 @@ impl LeafOperationIntent {
     }
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSize,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct LeafOperationProposal {
-    pub intent: LeafOperationIntent,
+pub struct LeafOperationProposal<'a> {
+    pub intent: LeafOperationIntent<'a>,
 }

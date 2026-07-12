@@ -1,4 +1,4 @@
-use tls_codec::Deserialize;
+use thalassa::{TlsplDeserialize, error::TlsplReadError, io::Read};
 
 use crate::{
     MlsSpecError, MlsSpecResult, SensitiveBytes,
@@ -10,25 +10,17 @@ use crate::{
     messages::{ContentType, ContentTypeInner, PrivateMessage, PublicMessage, Sender, SenderType},
 };
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct FramedContent {
-    pub group_id: GroupId,
+pub struct FramedContent<'a> {
+    pub group_id: GroupId<'a>,
     pub epoch: Epoch,
     pub sender: Sender,
-    pub authenticated_data: SensitiveBytes,
-    pub content: ContentTypeInner,
+    pub authenticated_data: SensitiveBytes<'a>,
+    pub content: ContentTypeInner<'a>,
 }
 
-impl FramedContent {
+impl FramedContent<'_> {
     pub fn to_tbs<'a>(
         &'a self,
         wire_format: &'a WireFormat,
@@ -47,17 +39,17 @@ impl FramedContent {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, tls_codec::TlsSerialize, tls_codec::TlsSize)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, thalassa::TlsplSerialize, thalassa::TlsplSize)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[repr(u8)]
 pub enum FramedContentTBSSenderType<'a> {
-    #[tls_codec(discriminant = "SenderType::Member")]
+    #[tlspl(discriminant = "SenderType::Member")]
     Member(FramedContentTBSSenderTypeContext<'a>),
-    #[tls_codec(discriminant = "SenderType::External")]
+    #[tlspl(discriminant = "SenderType::External")]
     External,
-    #[tls_codec(discriminant = "SenderType::NewMemberCommit")]
+    #[tlspl(discriminant = "SenderType::NewMemberCommit")]
     NewMemberCommit(FramedContentTBSSenderTypeContext<'a>),
-    #[tls_codec(discriminant = "SenderType::NewMemberProposal")]
+    #[tlspl(discriminant = "SenderType::NewMemberProposal")]
     NewMemberProposal,
 }
 
@@ -86,26 +78,26 @@ impl<'a> FramedContentTBSSenderType<'a> {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, tls_codec::TlsSerialize, tls_codec::TlsSize)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, thalassa::TlsplSerialize, thalassa::TlsplSize)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct FramedContentTBSSenderTypeContext<'a> {
-    pub context: &'a GroupContext,
+    pub context: &'a GroupContext<'a>,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct FramedContentTBS<'a> {
     pub version: &'a ProtocolVersion,
     pub wire_format: &'a WireFormat,
-    pub content: &'a FramedContent,
+    pub content: &'a FramedContent<'a>,
     pub sender_type: FramedContentTBSSenderType<'a>,
 }
 
 // Impl TLS serialization by hand to make this depend on `self.content.sender.sender_type`'s discriminant
-impl tls_codec::Size for FramedContentTBS<'_> {
-    fn tls_serialized_len(&self) -> usize {
-        let mut len = self.version.tls_serialized_len()
-            + self.wire_format.tls_serialized_len()
-            + self.content.tls_serialized_len();
+impl thalassa::TlsplSize for FramedContentTBS<'_> {
+    fn tlspl_serialized_len(&self) -> usize {
+        let mut len = self.version.tlspl_serialized_len()
+            + self.wire_format.tlspl_serialized_len()
+            + self.content.tlspl_serialized_len();
         if matches!(
             self.content.sender,
             Sender::Member(_) | Sender::NewMemberCommit
@@ -113,7 +105,7 @@ impl tls_codec::Size for FramedContentTBS<'_> {
             match &self.sender_type {
                 FramedContentTBSSenderType::NewMemberCommit(context)
                 | FramedContentTBSSenderType::Member(context) => {
-                    len += context.tls_serialized_len();
+                    len += context.tlspl_serialized_len();
                 }
                 _ => {}
             }
@@ -122,12 +114,15 @@ impl tls_codec::Size for FramedContentTBS<'_> {
     }
 }
 
-impl tls_codec::Serialize for FramedContentTBS<'_> {
-    fn tls_serialize<W: std::io::Write>(&self, writer: &mut W) -> Result<usize, tls_codec::Error> {
-        let mut ret = self.version.tls_serialize(writer)?;
+impl thalassa::TlsplSerialize for FramedContentTBS<'_> {
+    fn tlspl_serialize_to<W: thalassa::io::Write>(
+        &self,
+        writer: &mut W,
+    ) -> thalassa::error::TlsplWriteResult<usize> {
+        let mut ret = self.version.tlspl_serialize_to(writer)?;
 
-        ret += self.wire_format.tls_serialize(writer)?;
-        ret += self.content.tls_serialize(writer)?;
+        ret += self.wire_format.tlspl_serialize_to(writer)?;
+        ret += self.content.tlspl_serialize_to(writer)?;
         if matches!(
             self.content.sender,
             Sender::Member(_) | Sender::NewMemberCommit
@@ -135,7 +130,7 @@ impl tls_codec::Serialize for FramedContentTBS<'_> {
             match &self.sender_type {
                 FramedContentTBSSenderType::NewMemberCommit(context)
                 | FramedContentTBSSenderType::Member(context) => {
-                    ret += context.tls_serialize(writer)?;
+                    ret += context.tlspl_serialize_to(writer)?;
                 }
                 _ => {}
             }
@@ -145,26 +140,14 @@ impl tls_codec::Serialize for FramedContentTBS<'_> {
     }
 }
 
-impl<'a> tls_codec::Size for &'a FramedContentTBS<'a> {
-    fn tls_serialized_len(&self) -> usize {
-        (*self).tls_serialized_len()
-    }
-}
-
-impl<'a> tls_codec::Serialize for &'a FramedContentTBS<'a> {
-    fn tls_serialize<W: std::io::Write>(&self, writer: &mut W) -> Result<usize, tls_codec::Error> {
-        (*self).tls_serialize(writer)
-    }
-}
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct FramedContentAuthData {
-    pub signature: SensitiveBytes,
-    pub confirmation_tag: Option<Mac>,
+pub struct FramedContentAuthData<'a> {
+    pub signature: SensitiveBytes<'a>,
+    pub confirmation_tag: Option<Mac<'a>>,
 }
 
-impl FramedContentAuthData {
+impl FramedContentAuthData<'_> {
     pub fn without_confirmation_tag(&self) -> Self {
         Self {
             signature: self.signature.clone(),
@@ -173,46 +156,37 @@ impl FramedContentAuthData {
     }
 }
 
-impl tls_codec::Size for FramedContentAuthData {
-    fn tls_serialized_len(&self) -> usize {
-        self.signature.tls_serialized_len()
+impl thalassa::TlsplSize for FramedContentAuthData<'_> {
+    fn tlspl_serialized_len(&self) -> usize {
+        self.signature.tlspl_serialized_len()
             + self
                 .confirmation_tag
                 .as_ref()
-                .map_or(0, SensitiveBytes::tls_serialized_len)
+                .map_or(0, SensitiveBytes::tlspl_serialized_len)
     }
 }
 
-impl tls_codec::Size for &FramedContentAuthData {
-    fn tls_serialized_len(&self) -> usize {
-        (*self).tls_serialized_len()
-    }
-}
-
-impl tls_codec::Serialize for FramedContentAuthData {
-    fn tls_serialize<W: std::io::Write>(&self, writer: &mut W) -> Result<usize, tls_codec::Error> {
-        let mut written = self.signature.tls_serialize(writer)?;
+impl thalassa::TlsplSerialize for FramedContentAuthData<'_> {
+    fn tlspl_serialize_to<W: thalassa::io::Write>(
+        &self,
+        writer: &mut W,
+    ) -> thalassa::error::TlsplWriteResult<usize> {
+        let mut written = self.signature.tlspl_serialize_to(writer)?;
         if let Some(confirmation_tag) = &self.confirmation_tag {
-            written += confirmation_tag.tls_serialize(writer)?;
+            written += confirmation_tag.tlspl_serialize_to(writer)?;
         }
         Ok(written)
     }
 }
 
-impl tls_codec::Serialize for &FramedContentAuthData {
-    fn tls_serialize<W: std::io::Write>(&self, writer: &mut W) -> Result<usize, tls_codec::Error> {
-        (*self).tls_serialize(writer)
-    }
-}
-
-impl FramedContentAuthData {
-    pub fn tls_deserialize_with_content_type<R: std::io::Read>(
-        bytes: &mut R,
+impl<'a> FramedContentAuthData<'a> {
+    pub fn tlspl_deserialize_from_with_content_type<R: Read<'a>>(
+        reader: &mut R,
         content_type: ContentType,
-    ) -> Result<Self, tls_codec::Error> {
-        let signature = SensitiveBytes::tls_deserialize(bytes)?;
+    ) -> Result<Self, TlsplReadError> {
+        let signature = SensitiveBytes::tlspl_deserialize_from(reader)?;
         let confirmation_tag = (content_type == ContentType::Commit)
-            .then(|| Mac::tls_deserialize(bytes))
+            .then(|| Mac::tlspl_deserialize_from(reader))
             .transpose()?;
 
         Ok(Self {
@@ -222,49 +196,41 @@ impl FramedContentAuthData {
     }
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u16)]
-pub enum MlsMessageContent {
-    #[tls_codec(discriminant = "WireFormat::MLS_PUBLIC_MESSAGE")]
-    MlsPublicMessage(PublicMessage),
-    #[tls_codec(discriminant = "WireFormat::MLS_PRIVATE_MESSAGE")]
-    MlsPrivateMessage(PrivateMessage),
-    #[tls_codec(discriminant = "WireFormat::MLS_WELCOME")]
-    Welcome(Welcome),
-    #[tls_codec(discriminant = "WireFormat::MLS_GROUP_INFO")]
-    GroupInfo(GroupInfo),
-    #[tls_codec(discriminant = "WireFormat::MLS_KEY_PACKAGE")]
-    KeyPackage(KeyPackage),
+pub enum MlsMessageContent<'a> {
+    #[tlspl(discriminant = "WireFormat::MLS_PUBLIC_MESSAGE")]
+    MlsPublicMessage(PublicMessage<'a>),
+    #[tlspl(discriminant = "WireFormat::MLS_PRIVATE_MESSAGE")]
+    MlsPrivateMessage(PrivateMessage<'a>),
+    #[tlspl(discriminant = "WireFormat::MLS_WELCOME")]
+    Welcome(Welcome<'a>),
+    #[tlspl(discriminant = "WireFormat::MLS_GROUP_INFO")]
+    GroupInfo(GroupInfo<'a>),
+    #[tlspl(discriminant = "WireFormat::MLS_KEY_PACKAGE")]
+    KeyPackage(KeyPackage<'a>),
     #[cfg(feature = "draft-ietf-mls-targeted-messages")]
-    #[tls_codec(discriminant = "WireFormat::MLS_TARGETED_MESSAGE")]
-    MlsTargetedMessage(crate::drafts::targeted_messages::TargetedMessage),
+    #[tlspl(discriminant = "WireFormat::MLS_TARGETED_MESSAGE")]
+    MlsTargetedMessage(crate::drafts::targeted_messages::TargetedMessage<'a>),
     #[cfg(feature = "draft-mahy-mls-semiprivatemessage")]
-    #[tls_codec(discriminant = "WireFormat::MLS_SEMIPRIVATE_MESSAGE")]
-    MlsSemiPrivateMessage(crate::drafts::semiprivate_message::messages::SemiPrivateMessage),
+    #[tlspl(discriminant = "WireFormat::MLS_SEMIPRIVATE_MESSAGE")]
+    MlsSemiPrivateMessage(crate::drafts::semiprivate_message::messages::SemiPrivateMessage<'a>),
     #[cfg(feature = "draft-mularczyk-mls-splitcommit")]
-    #[tls_codec(discriminant = "WireFormat::MLS_SPLIT_COMMIT")]
-    MlsSplitCommitMessage(crate::drafts::split_commit::SplitCommitMessage),
+    #[tlspl(discriminant = "WireFormat::MLS_SPLIT_COMMIT")]
+    MlsSplitCommitMessage(crate::drafts::split_commit::SplitCommitMessage<'a>),
     #[cfg(feature = "draft-pham-mls-additional-wire-formats")]
-    #[tls_codec(discriminant = "WireFormat::MLS_MESSAGE_WITHOUT_AAD")]
-    MlsMessageWithoutAad(crate::drafts::additional_wire_formats::MessageWithoutAad),
+    #[tlspl(discriminant = "WireFormat::MLS_MESSAGE_WITHOUT_AAD")]
+    MlsMessageWithoutAad(crate::drafts::additional_wire_formats::MessageWithoutAad<'a>),
     #[cfg(feature = "draft-mahy-mls-private-external")]
-    #[tls_codec(discriminant = "WireFormat::MLS_PRIVATE_EXTERNAL_MESSAGE")]
-    MlsPrivateExternalMessage(crate::drafts::private_external::PrivateExternalMessage),
+    #[tlspl(discriminant = "WireFormat::MLS_PRIVATE_EXTERNAL_MESSAGE")]
+    MlsPrivateExternalMessage(crate::drafts::private_external::PrivateExternalMessage<'a>),
     #[cfg(feature = "draft-kohbrok-mls-leaf-operation-intents")]
-    #[tls_codec(discriminant = "WireFormat::MLS_LEAF_OPERATION_INTENT")]
-    MlsLeafOperationIntent(crate::drafts::leaf_operation_intents::LeafOperationIntent),
+    #[tlspl(discriminant = "WireFormat::MLS_LEAF_OPERATION_INTENT")]
+    MlsLeafOperationIntent(crate::drafts::leaf_operation_intents::LeafOperationIntent<'a>),
 }
 
-impl MlsMessageContent {
+impl MlsMessageContent<'_> {
     pub fn content_type(&self) -> Option<ContentType> {
         match self {
             MlsMessageContent::MlsPublicMessage(pub_msg) => Some((&pub_msg.content.content).into()),
@@ -326,7 +292,7 @@ impl MlsMessageContent {
 }
 
 #[allow(clippy::from_over_into)]
-impl Into<WireFormat> for &MlsMessageContent {
+impl Into<WireFormat> for &MlsMessageContent<'_> {
     fn into(self) -> WireFormat {
         match self {
             MlsMessageContent::MlsPublicMessage(_) => {
@@ -370,23 +336,23 @@ impl Into<WireFormat> for &MlsMessageContent {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, tls_codec::TlsSerialize, tls_codec::TlsSize)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplSerialize, thalassa::TlsplSize)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct AuthenticatedContent {
+pub struct AuthenticatedContent<'a> {
     pub wire_format: WireFormat,
-    pub content: FramedContent,
-    pub auth: FramedContentAuthData,
+    pub content: FramedContent<'a>,
+    pub auth: FramedContentAuthData<'a>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, tls_codec::TlsSerialize, tls_codec::TlsSize)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplSerialize, thalassa::TlsplSize)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct AuthenticatedContentRef<'a> {
     pub wire_format: &'a WireFormat,
-    pub content: &'a FramedContent,
-    pub auth: &'a FramedContentAuthData,
+    pub content: &'a FramedContent<'a>,
+    pub auth: &'a FramedContentAuthData<'a>,
 }
 
-impl AuthenticatedContent {
+impl AuthenticatedContent<'_> {
     pub fn confirmed_transcript_hash_input(&self) -> ConfirmedTranscriptHashInput<'_> {
         ConfirmedTranscriptHashInput {
             wire_format: &self.wire_format,
@@ -404,15 +370,15 @@ impl AuthenticatedContent {
     }
 }
 
-impl tls_codec::Deserialize for AuthenticatedContent {
-    fn tls_deserialize<R: std::io::Read>(bytes: &mut R) -> Result<Self, tls_codec::Error>
+impl<'a> thalassa::TlsplDeserialize<'a> for AuthenticatedContent<'a> {
+    fn tlspl_deserialize_from<R: Read<'a>>(reader: &mut R) -> thalassa::error::TlsplReadResult<Self>
     where
-        Self: Sized,
+        Self: Sized + 'a,
     {
-        let wire_format = WireFormat::tls_deserialize(bytes)?;
-        let content = FramedContent::tls_deserialize(bytes)?;
-        let auth = FramedContentAuthData::tls_deserialize_with_content_type(
-            bytes,
+        let wire_format = WireFormat::tlspl_deserialize_from(reader)?;
+        let content = FramedContent::tlspl_deserialize_from(reader)?;
+        let auth = FramedContentAuthData::tlspl_deserialize_from_with_content_type(
+            reader,
             (&content.content).into(),
         )?;
         Ok(Self {

@@ -8,69 +8,42 @@ use crate::{
     tree::{hashes::ParentNodeHash, leaf_node::LeafNode},
 };
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    Default,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Default, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct RatchetTree(Vec<Option<TreeNode>>);
+#[repr(transparent)]
+pub struct RatchetTree<'a>(Vec<Option<TreeNode<'a>>>);
 
-impl RatchetTree {
-    pub fn into_inner(self) -> Vec<Option<TreeNode>> {
+impl<'a> RatchetTree<'a> {
+    pub fn into_inner(self) -> Vec<Option<TreeNode<'a>>> {
         self.0
     }
 }
 
-impl From<Vec<Option<TreeNode>>> for RatchetTree {
-    fn from(value: Vec<Option<TreeNode>>) -> Self {
+impl<'a> From<Vec<Option<TreeNode<'a>>>> for RatchetTree<'a> {
+    fn from(value: Vec<Option<TreeNode<'a>>>) -> Self {
         Self(value)
     }
 }
 
-impl std::ops::Deref for RatchetTree {
-    type Target = [Option<TreeNode>];
+impl<'a> std::ops::Deref for RatchetTree<'a> {
+    type Target = [Option<TreeNode<'a>>];
 
     fn deref(&self) -> &Self::Target {
         self.0.as_slice()
     }
 }
 
-pub type TreeHash = SensitiveBytes;
+pub type TreeHash<'a> = SensitiveBytes<'a>;
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ParentNode {
-    pub encryption_key: HpkePublicKey,
-    pub parent_hash: ParentNodeHash,
+pub struct ParentNode<'a> {
+    pub encryption_key: HpkePublicKey<'a>,
+    pub parent_hash: ParentNodeHash<'a>,
     pub unmerged_leaves: Vec<LeafIndex>,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(
     feature = "serde",
     derive(serde_repr::Serialize_repr, serde_repr::Deserialize_repr)
@@ -82,40 +55,31 @@ pub enum NodeType {
     Parent = 0x02,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u8)]
 #[allow(clippy::large_enum_variant)]
-pub enum TreeNode {
-    #[tls_codec(discriminant = "NodeType::Leaf")]
-    LeafNode(LeafNode),
-    #[tls_codec(discriminant = "NodeType::Parent")]
-    ParentNode(ParentNode),
+pub enum TreeNode<'a> {
+    #[tlspl(discriminant = "NodeType::Leaf")]
+    LeafNode(LeafNode<'a>),
+    #[tlspl(discriminant = "NodeType::Parent")]
+    ParentNode(ParentNode<'a>),
 }
 
-impl From<LeafNode> for TreeNode {
-    fn from(value: LeafNode) -> Self {
+impl<'a> From<LeafNode<'a>> for TreeNode<'a> {
+    fn from(value: LeafNode<'a>) -> Self {
         Self::LeafNode(value)
     }
 }
 
-impl From<ParentNode> for TreeNode {
-    fn from(value: ParentNode) -> Self {
+impl<'a> From<ParentNode<'a>> for TreeNode<'a> {
+    fn from(value: ParentNode<'a>) -> Self {
         Self::ParentNode(value)
     }
 }
 
-impl TreeNode {
-    pub fn as_leaf_node(&self) -> Option<&LeafNode> {
+impl<'a> TreeNode<'a> {
+    pub fn as_leaf_node(&self) -> Option<&LeafNode<'a>> {
         if let Self::LeafNode(leaf_node) = &self {
             Some(leaf_node)
         } else {
@@ -123,7 +87,7 @@ impl TreeNode {
         }
     }
 
-    pub fn as_leaf_node_mut(&mut self) -> Option<&mut LeafNode> {
+    pub fn as_leaf_node_mut(&mut self) -> Option<&mut LeafNode<'a>> {
         if let Self::LeafNode(leaf_node) = self {
             Some(leaf_node)
         } else {
@@ -131,7 +95,7 @@ impl TreeNode {
         }
     }
 
-    pub fn as_parent_node(&self) -> Option<&ParentNode> {
+    pub fn as_parent_node(&self) -> Option<&ParentNode<'a>> {
         if let Self::ParentNode(parent_node) = &self {
             Some(parent_node)
         } else {
@@ -139,7 +103,7 @@ impl TreeNode {
         }
     }
 
-    pub fn as_parent_node_mut(&mut self) -> Option<&mut ParentNode> {
+    pub fn as_parent_node_mut(&mut self) -> Option<&mut ParentNode<'a>> {
         if let Self::ParentNode(parent_node) = self {
             Some(parent_node)
         } else {
@@ -148,41 +112,16 @@ impl TreeNode {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, tls_codec::TlsSerialize, tls_codec::TlsSize)]
-#[repr(u8)]
-pub enum TreeNodeRef<'a> {
-    #[tls_codec(discriminant = "NodeType::Leaf")]
-    LeafNode(&'a LeafNode),
-    #[tls_codec(discriminant = "NodeType::Parent")]
-    ParentNode(&'a ParentNode),
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct UpdatePathNode<'a> {
+    pub encryption_key: HpkePublicKey<'a>,
+    pub encrypted_path_secret: Vec<HpkeCiphertext<'a>>,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct UpdatePathNode {
-    pub encryption_key: HpkePublicKey,
-    pub encrypted_path_secret: Vec<HpkeCiphertext>,
-}
-
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct UpdatePath {
-    pub leaf_node: LeafNode,
-    pub nodes: Vec<UpdatePathNode>,
+pub struct UpdatePath<'a> {
+    pub leaf_node: LeafNode<'a>,
+    pub nodes: Vec<UpdatePathNode<'a>>,
 }

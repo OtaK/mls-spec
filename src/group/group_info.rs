@@ -8,35 +8,27 @@ use crate::{
     tree::RatchetTree,
 };
 
-#[derive(Debug, Clone, PartialEq, Eq, tls_codec::TlsSerialize, tls_codec::TlsSize)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplSerialize, thalassa::TlsplSize)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct GroupInfoTBS<'a> {
-    pub group_context: &'a GroupContext,
-    pub extensions: &'a [Extension],
-    pub confirmation_tag: &'a Mac,
+    pub group_context: &'a GroupContext<'a>,
+    pub extensions: &'a [Extension<'a>],
+    pub confirmation_tag: &'a Mac<'a>,
     pub signer: &'a LeafIndex,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct GroupInfo {
-    pub group_context: GroupContext,
-    pub extensions: Vec<Extension>,
-    pub confirmation_tag: Mac,
+pub struct GroupInfo<'a> {
+    pub group_context: GroupContext<'a>,
+    pub extensions: Vec<Extension<'a>>,
+    pub confirmation_tag: Mac<'a>,
     pub signer: LeafIndex,
-    pub signature: SensitiveBytes,
+    pub signature: SensitiveBytes<'a>,
 }
 
-impl GroupInfo {
-    pub fn to_tbs(&self) -> GroupInfoTBS<'_> {
+impl<'a> GroupInfo<'a> {
+    pub fn to_tbs(&'a self) -> GroupInfoTBS<'a> {
         GroupInfoTBS {
             group_context: &self.group_context,
             extensions: &self.extensions,
@@ -46,7 +38,7 @@ impl GroupInfo {
     }
 
     /// Returns the RatchetTree extension if present
-    pub fn ratchet_tree(&self) -> Option<&RatchetTree> {
+    pub fn ratchet_tree(&self) -> Option<&RatchetTree<'a>> {
         self.extensions.iter().find_map(|ext| {
             if let Extension::RatchetTree(RatchetTreeExtension { ratchet_tree }) = ext {
                 Some(ratchet_tree)
@@ -67,7 +59,7 @@ impl GroupInfo {
         })
     }
 
-    pub fn into_mls_message(self, protocol_version: ProtocolVersion) -> MlsMessage {
+    pub fn into_mls_message(self, protocol_version: ProtocolVersion) -> MlsMessage<'a> {
         MlsMessage {
             version: protocol_version,
             content: crate::messages::MlsMessageContent::GroupInfo(self),
@@ -83,7 +75,7 @@ mod tests {
 
     generate_roundtrip_test!(can_roundtrip_groupinfo, {
         GroupInfo {
-            group_context: GroupContext::with_group_id(vec![]),
+            group_context: GroupContext::with_group_id(vec![].into()),
             extensions: vec![],
             confirmation_tag: vec![].into(),
             signer: 0,

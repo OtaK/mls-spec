@@ -18,6 +18,9 @@ pub enum MlsSpecError {
     #[error("This content type identifier is outside the specification")]
     #[diagnostic(code(mls_spec::invalid_content_type))]
     InvalidContentType,
+    #[error("The padding in the message isn't all zeroes")]
+    #[diagnostic(code(mls_spec::non_zero_padding))]
+    NonZeroPadding,
     #[error("Trying to build a FramedContentTBS but the GroupContext hasn't been provided")]
     #[diagnostic(code(mls_spec::missing_ctx))]
     FramedContentTBSMissingGroupContext,
@@ -30,9 +33,9 @@ pub enum MlsSpecError {
     #[diagnostic(code(mls_spec::invalid_spec_value))]
     InvalidSpecValue,
     #[error(transparent)]
-    #[diagnostic(code(mls_spec::tls_codec_error))]
+    #[diagnostic(code(mls_spec::thalassa_error))]
     #[diagnostic_source]
-    TlsCodecError(#[from] tls_codec::Error),
+    ThalassaError(#[from] thalassa::error::TlsplError),
     #[cfg(feature = "mls-rs-compat")]
     #[error(transparent)]
     #[diagnostic(code(mls_spec::mls_rs_codec_error))]
@@ -57,6 +60,18 @@ pub enum MlsSpecError {
         expected: crate::drafts::mls_extensions::safe_application::ComponentId,
         actual: crate::drafts::mls_extensions::safe_application::ComponentId,
     },
+}
+
+impl From<thalassa::error::TlsplReadError> for MlsSpecError {
+    fn from(value: thalassa::error::TlsplReadError) -> Self {
+        Self::ThalassaError(value.into())
+    }
+}
+
+impl From<thalassa::error::TlsplWriteError> for MlsSpecError {
+    fn from(value: thalassa::error::TlsplWriteError) -> Self {
+        Self::ThalassaError(value.into())
+    }
 }
 
 pub type MlsSpecResult<T> = Result<T, MlsSpecError>;

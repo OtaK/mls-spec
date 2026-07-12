@@ -27,9 +27,7 @@ pub const GREASE_VALUES: [u16; 15] = [
     Ord,
     Hash,
     Default,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
+    thalassa::TlsplAll,
     strum::IntoStaticStr,
     strum::Display,
     strum::EnumString,
@@ -210,16 +208,7 @@ impl_spec_enum! {
     MLS_LEAF_OPERATION_INTENT = crate::drafts::leaf_operation_intents::WIRE_FORMAT_MLS_LEAF_OPERATION_INTENT
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Capabilities {
     pub versions: Vec<ProtocolVersion>,

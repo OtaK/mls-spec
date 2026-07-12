@@ -36,19 +36,11 @@ use crate::defs::ProtocolVersion;
 ///     };
 /// } MLSMessage;
 /// ```
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct MlsMessage {
+pub struct MlsMessage<'a> {
     pub version: ProtocolVersion,
-    pub content: MlsMessageContent,
+    pub content: MlsMessageContent<'a>,
 }
 
 impl MlsMessage {

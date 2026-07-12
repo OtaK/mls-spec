@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use crate::{
     SensitiveBytes,
     defs::{CiphersuiteId, Epoch, ProtocolVersion, WireFormat, labels::KdfLabelKind},
@@ -6,31 +8,21 @@ use crate::{
     tree::TreeHash,
 };
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    Default,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, Default, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct GroupContext {
+pub struct GroupContext<'a> {
     pub version: ProtocolVersion,
     pub cipher_suite: CiphersuiteId,
-    #[tls_codec(with = "crate::tlspl::bytes")]
-    group_id: GroupId,
+    group_id: GroupId<'a>,
     pub epoch: u64,
-    pub tree_hash: TreeHash,
-    pub confirmed_transcript_hash: TranscriptHash,
-    pub extensions: Vec<Extension>,
+    pub tree_hash: TreeHash<'a>,
+    pub confirmed_transcript_hash: TranscriptHash<'a>,
+    pub extensions: Vec<Extension<'a>>,
 }
 
-impl GroupContext {
+impl<'a> GroupContext<'a> {
     /// Allows for initialization with an arbitrary group id
-    pub fn with_group_id(group_id: GroupId) -> Self {
+    pub fn with_group_id(group_id: GroupId<'a>) -> Self {
         Self {
             group_id,
             ..Default::default()
@@ -42,7 +34,7 @@ impl GroupContext {
         &self.group_id
     }
 
-    pub fn external_senders(&self) -> &[ExternalSender] {
+    pub fn external_senders(&self) -> &[ExternalSender<'a>] {
         self.extensions
             .iter()
             .find_map(|ext| {
@@ -99,17 +91,17 @@ impl From<EpochSecretExport> for KdfLabelKind {
     }
 }
 
-pub type TranscriptHash = SensitiveBytes;
+pub type TranscriptHash<'a> = SensitiveBytes<'a>;
 
-#[derive(Debug, Clone, PartialEq, Eq, tls_codec::TlsSerialize, tls_codec::TlsSize)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplSize, thalassa::TlsplSerialize)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct ConfirmedTranscriptHashInput<'a> {
     pub wire_format: &'a WireFormat,
-    pub content: &'a FramedContent,
+    pub content: &'a FramedContent<'a>,
     pub signature: &'a [u8],
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, tls_codec::TlsSerialize, tls_codec::TlsSize)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplSize, thalassa::TlsplSerialize)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct InterimTranscriptHashInput<'a> {
     pub confirmation_tag: &'a [u8],
@@ -121,16 +113,7 @@ impl<'a> From<&'a [u8]> for InterimTranscriptHashInput<'a> {
     }
 }
 
-#[derive(
-    Debug,
-    Copy,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(
     feature = "serde",
     derive(serde_repr::Serialize_repr, serde_repr::Deserialize_repr)
@@ -144,17 +127,7 @@ pub enum PskType {
     Application = 0x03,
 }
 
-#[derive(
-    Debug,
-    Copy,
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(
     feature = "serde",
     derive(serde_repr::Serialize_repr, serde_repr::Deserialize_repr)
@@ -167,109 +140,52 @@ pub enum ResumptionPskUsage {
     Branch = 0x03,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-    zeroize::Zeroize,
-    zeroize::ZeroizeOnDrop,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u8)]
-pub enum PreSharedKeyIdPskType {
-    #[tls_codec(discriminant = "PskType::External")]
-    External(ExternalPsk),
-    #[tls_codec(discriminant = "PskType::Resumption")]
-    Resumption(ResumptionPsk),
+pub enum PreSharedKeyIdPskType<'a> {
+    #[tlspl(discriminant = "PskType::External")]
+    External(ExternalPsk<'a>),
+    #[tlspl(discriminant = "PskType::Resumption")]
+    Resumption(ResumptionPsk<'a>),
     #[cfg(feature = "draft-ietf-mls-extensions")]
-    #[tls_codec(discriminant = "PskType::Application")]
-    Application(ApplicationPsk),
+    #[tlspl(discriminant = "PskType::Application")]
+    Application(ApplicationPsk<'a>),
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-    zeroize::Zeroize,
-    zeroize::ZeroizeOnDrop,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ExternalPsk {
-    #[tls_codec(with = "crate::tlspl::bytes")]
-    pub psk_id: Vec<u8>,
+pub struct ExternalPsk<'a> {
+    pub psk_id: Cow<'a, [u8]>,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-    zeroize::Zeroize,
-    zeroize::ZeroizeOnDrop,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ResumptionPsk {
-    #[zeroize(skip)]
+pub struct ResumptionPsk<'a> {
     pub usage: ResumptionPskUsage,
-    #[tls_codec(with = "crate::tlspl::bytes")]
-    pub psk_group_id: GroupId,
+    pub psk_group_id: GroupId<'a>,
     pub psk_epoch: Epoch,
 }
 
 #[cfg(feature = "draft-ietf-mls-extensions")]
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-    zeroize::Zeroize,
-    zeroize::ZeroizeOnDrop,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ApplicationPsk {
-    #[zeroize(skip)]
+pub struct ApplicationPsk<'a> {
     pub component_id: crate::drafts::mls_extensions::safe_application::ComponentId,
-    #[tls_codec(with = "crate::tlspl::bytes")]
-    pub psk_id: Vec<u8>,
+    pub psk_id: Cow<'a, [u8]>,
 }
 
 #[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-    zeroize::Zeroize,
-    zeroize::ZeroizeOnDrop,
+    Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll, zeroize::Zeroize, zeroize::ZeroizeOnDrop,
 )]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct PreSharedKeyId {
-    pub psktype: PreSharedKeyIdPskType,
-    pub psk_nonce: SensitiveBytes,
+pub struct PreSharedKeyId<'a> {
+    #[zeroize(skip)]
+    pub psktype: PreSharedKeyIdPskType<'a>,
+    pub psk_nonce: SensitiveBytes<'a>,
 }
 
-impl PreSharedKeyId {
+impl PreSharedKeyId<'_> {
     pub fn with_default_nonce(&self) -> Self {
         Self {
             psktype: self.psktype.clone(),
@@ -278,10 +194,10 @@ impl PreSharedKeyId {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, tls_codec::TlsSerialize, tls_codec::TlsSize)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplSize, thalassa::TlsplSerialize)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct PskLabel<'a> {
-    pub id: &'a PreSharedKeyId,
+    pub id: PreSharedKeyId<'a>,
     pub index: u16,
     pub count: u16,
 }

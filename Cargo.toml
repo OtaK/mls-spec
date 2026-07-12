@@ -1,6 +1,6 @@
 [package]
 name = "mls-spec"
-version = "2.1.0"
+version = "3.0.0-pre.0"
 description = "This crate is a repository of MLS / RFC9420-related data structures."
 readme = "README.md"
 documentation = "https://docs.rs/mls-spec"
@@ -23,7 +23,7 @@ features = [
 rustdoc-args = ["--cfg", "docsrs", "--generate-link-to-definition"]
 
 [features]
-default = []
+default = ["std", "all-drafts"]
 # Used when developing locally
 all-drafts = [
     "mls-extensions",
@@ -40,33 +40,34 @@ all-drafts = [
     "draft-pham-mls-additional-wire-formats",
     "draft-kohbrok-mls-leaf-operation-intents"
 ]
+alloc = []
+std = ["alloc"]
 hazmat = []
 test-vectors = []
 test-utils = ["dep:pretty_assertions", "dep:color-eyre", "dep:postcard", "dep:serde_json"]
-serde = ["dep:serde", "dep:serde_repr", "tls_codec/serde", "zeroize/serde"]
-tlspl-utils = []
+serde = ["dep:serde", "dep:serde_repr", "zeroize/serde"]
 mls-rs-compat = ["dep:mls-rs-codec"]
 mls-extensions = [
     "draft-ietf-mls-extensions",
 ] # Prep transition from draft to RFC
 # MLS-related drafts implemented in-tree
-draft-ietf-mls-extensions = [] # draft-09
+draft-ietf-mls-extensions = [] # draft-10
 draft-ietf-mls-extensions-content-advertisement-parse = [
     "draft-ietf-mls-extensions",
     "dep:mediatype",
 ]
 draft-ietf-mls-combiner = ["draft-ietf-mls-extensions"] # draft-02++ @ git:c511d87
-draft-ietf-mls-targeted-messages = [] # draft-00
+draft-ietf-mls-targeted-messages = [] # draft-01
 draft-ietf-mls-partial = [] # draft-02
-draft-ietf-mls-ratchet-tree-options = [] # draft-00
+draft-ietf-mls-ratchet-tree-options = [] # draft-01
 draft-kohbrok-mls-associated-parties = [
     "draft-ietf-mls-extensions",
 ] # draft-00++
 draft-kohbrok-mls-leaf-operation-intents = [] # draft-01
-draft-mahy-mls-new-content-types = [] # draft-00
+draft-mahy-mls-new-content-types = [] # draft-01
 draft-mahy-mls-private-external = [] # draft-00
 draft-mahy-mls-ratchet-tree-options = ["draft-ietf-mls-ratchet-tree-options"] # draft-04 == ietf-draft-00 alias
-draft-mahy-mls-semiprivatemessage = ["draft-ietf-mls-extensions"] # draft-06
+draft-mahy-mls-semiprivatemessage = ["draft-ietf-mls-extensions"] # draft-07
 draft-mahy-mls-sd-cwt-credential = [] # draft-02
 draft-mularczyk-mls-splitcommit = [] # draft-00
 draft-pham-mls-additional-wire-formats = [
@@ -78,10 +79,10 @@ thiserror = "2"
 miette = "7"
 async-trait = "0.1"
 strum = { version = "0.28", features = ["derive"] }
-tls_codec = { version = "0.4", features = ["derive", "mls"] }
+thalassa = { version = "0.0.1-pre.3", features = ["derive"] }
 static_assertions = "1.1"
 subtle = "2.6"
-zeroize = { version = "1.8", features = ["derive"] }
+zeroize = { version = "1", features = ["derive"] }
 hex = "0.4"
 mediatype = { version = "0.21", default-features = false, optional = true }
 serde = { version = "1", features = ["derive"], optional = true }

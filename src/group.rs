@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use crate::{
     SensitiveBytes,
     credential::Credential,
@@ -11,26 +13,15 @@ pub mod group_info;
 pub mod proposals;
 pub mod welcome;
 
-pub type HashReference = SensitiveBytes;
-pub type ProposalRef = HashReference;
-pub type KeyPackageRef = HashReference;
+pub type HashReference<'a> = SensitiveBytes<'a>;
+pub type ProposalRef<'a> = HashReference<'a>;
+pub type KeyPackageRef<'a> = HashReference<'a>;
 #[cfg(feature = "draft-kohbrok-mls-leaf-operation-intents")]
-pub type LeafNodeRef = HashReference;
+pub type LeafNodeRef<'a> = HashReference<'a>;
 
-pub type GroupId = Vec<u8>;
-pub type GroupIdRef<'a> = &'a [u8];
+pub type GroupId<'a> = Cow<'a, [u8]>;
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KeyPackageLifetime {
     pub not_before: u64,
@@ -93,33 +84,14 @@ impl Default for KeyPackageLifetime {
     }
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ExternalSender {
-    pub signature_key: SignaturePublicKey,
-    pub credential: Credential,
+pub struct ExternalSender<'a> {
+    pub signature_key: SignaturePublicKey<'a>,
+    pub credential: Credential<'a>,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Default,
-    PartialEq,
-    Eq,
-    Hash,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RequiredCapabilities {
     pub extension_types: Vec<ExtensionType>,

@@ -20,18 +20,18 @@ and has constant-time equality checks using `subtle` to make a best-effort attem
 
 There's also some definitions for the follwing drafted extensions, enabled by the matching `feature`:
 
-- [`draft-ietf-mls-extensions`](https://www.ietf.org/archive/id/draft-ietf-mls-extensions-09.html) @ draft-09
+- [`draft-ietf-mls-extensions`](https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html) @ draft-10
   - `mls-extensions` has content-advertisement parsing, this pulls an additional dependency (`mediatype`) with this feature flag: `draft-ietf-mls-extensions-content-advertisement-parse`. If you do the MIME parsing yourself, you can ignore this flag.
 - [`draft-ietf-mls-partial`](https://www.ietf.org/archive/id/draft-ietf-mls-partial-02.html) @ draft-02
 - [`draft-ietf-mls-combiner`](https://www.ietf.org/archive/id/draft-ietf-mls-combiner-02.html) @ draft-02++ (git:c511d87)
-- [`draft-ietf-mls-targeted-messages`](https://www.ietf.org/archive/id/draft-ietf-mls-targeted-messages-00.html) @ draft-00
+- [`draft-ietf-mls-targeted-messages`](https://www.ietf.org/archive/id/draft-ietf-mls-targeted-messages-01.html) @ draft-01
 - [`draft-kohbrok-mls-leaf-operation-intents`](https://www.ietf.org/archive/id/draft-kohbrok-mls-leaf-operation-intents-01.html) @ draft-01
-- [`draft-mahy-mls-new-content-types`](https://www.ietf.org/archive/id/draft-mahy-mls-new-content-types-00.html) @ draft-00
+- [`draft-mahy-mls-new-content-types`](https://www.ietf.org/archive/id/draft-mahy-mls-new-content-types-01.html) @ draft-01
 - [`draft-mahy-mls-private-external`](https://www.ietf.org/archive/id/draft-mahy-mls-private-external-01.html) @ draft-01
-- [`draft-ietf-mls-ratchet-tree-options`](https://www.ietf.org/archive/id/draft-ietf-mls-ratchet-tree-options-00.html) @ draft-00
+- [`draft-ietf-mls-ratchet-tree-options`](https://www.ietf.org/archive/id/draft-ietf-mls-ratchet-tree-options-01.html) @ draft-01
   - aliased by feature `draft-mahy-mls-ratchet-tree-options` pointing to draft-04 since its ietf mls wg adoption
 - [`draft-mahy-mls-sd-cwt-credential`](https://www.ietf.org/archive/id/draft-mahy-mls-sd-cwt-credential-02.html) @ draft-02
-- [`draft-mahy-mls-semiprivatemessage`](https://www.ietf.org/archive/id/draft-mahy-mls-semiprivatemessage-06.html) @ draft-06
+- [`draft-mahy-mls-semiprivatemessage`](https://www.ietf.org/archive/id/draft-mahy-mls-semiprivatemessage-07.html) @ draft-07
 - [`draft-mularczyk-mls-splitcommit`](https://www.ietf.org/archive/id/draft-mularczyk-mls-splitcommit-00.html) @ draft-00
 
 The following draft features were modified by extrapolating the current status of `mls-extensions` and the current status of the respective drafts:

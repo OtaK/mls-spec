@@ -1,5 +1,5 @@
 use crate::{
-    SensitiveBytes,
+    CRATE_NAME, SensitiveBytes,
     crypto::Mac,
     defs::{Epoch, WireFormat},
     group::GroupId,
@@ -12,16 +12,7 @@ static_assertions::const_assert!(
         && WIRE_FORMAT_MLS_MESSAGE_WITHOUT_AAD <= *WireFormat::RESERVED_PRIVATE_USE_RANGE.end()
 );
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSize,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(
     feature = "serde",
     derive(serde_repr::Serialize_repr, serde_repr::Deserialize_repr)
@@ -42,23 +33,15 @@ pub enum MessageWithoutAadType {
 /// } MessageWithoutAAD;
 /// ```
 ///
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSize,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u8)]
 #[allow(clippy::large_enum_variant)]
-pub enum MessageWithoutAad {
-    #[tls_codec(discriminant = "MessageWithoutAadType::PublicMessage")]
-    PublicMessageWithoutAad(PublicMessageWithoutAad),
-    #[tls_codec(discriminant = "MessageWithoutAadType::PrivateMessage")]
-    PrivateMessageWithoutAad(PrivateMessageWithoutAad),
+pub enum MessageWithoutAad<'a> {
+    #[tlspl(discriminant = "MessageWithoutAadType::PublicMessage")]
+    PublicMessageWithoutAad(PublicMessageWithoutAad<'a>),
+    #[tlspl(discriminant = "MessageWithoutAadType::PrivateMessage")]
+    PrivateMessageWithoutAad(PrivateMessageWithoutAad<'a>),
 }
 
 ///
@@ -80,62 +63,82 @@ pub enum MessageWithoutAad {
 /// } FramedContentWithoutAAD;
 /// ```
 ///
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSize,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct FramedContentWithoutAad {
-    #[tls_codec(with = "crate::tlspl::bytes")]
-    pub group_id: GroupId,
+pub struct FramedContentWithoutAad<'a> {
+    pub group_id: GroupId<'a>,
     pub epoch: Epoch,
     pub sender: Sender,
-    pub content: ContentTypeInner,
+    pub content: ContentTypeInner<'a>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct PublicMessageWithoutAad {
-    pub content: FramedContentWithoutAad,
-    pub auth: FramedContentAuthData,
-    pub membership_tag: Option<Mac>,
+pub struct PublicMessageWithoutAad<'a> {
+    pub content: FramedContentWithoutAad<'a>,
+    pub auth: FramedContentAuthData<'a>,
+    pub membership_tag: Option<Mac<'a>>,
 }
 
-impl tls_codec::Serialize for PublicMessageWithoutAad {
-    fn tls_serialize<W: std::io::Write>(&self, writer: &mut W) -> Result<usize, tls_codec::Error> {
-        let mut written = self.content.tls_serialize(writer)?;
-        written += self.auth.tls_serialize(writer)?;
+impl thalassa::TlsplSize for PublicMessageWithoutAad<'_> {
+    #[inline]
+    fn tlspl_serialized_len(&self) -> usize {
+        let membership_tag_len = if matches!(self.content.sender, Sender::Member(_)) {
+            self.membership_tag
+                .as_ref()
+                .map(thalassa::TlsplSize::tlspl_serialized_len)
+                .unwrap_or_default()
+        } else {
+            debug_assert!(
+                self.membership_tag.is_none(),
+                "PublicMessageWithoutAad contains a membership_tag while it shouldn't. There's a bug somewhere"
+            );
+
+            0
+        };
+
+        self.content.tlspl_serialized_len() + self.auth.tlspl_serialized_len() + membership_tag_len
+    }
+}
+
+impl thalassa::TlsplSerialize for PublicMessageWithoutAad<'_> {
+    #[inline]
+    fn tlspl_serialize_to<W: thalassa::io::Write>(
+        &self,
+        writer: &mut W,
+    ) -> thalassa::error::TlsplWriteResult<usize> {
+        let mut written = self.content.tlspl_serialize_to(writer)?;
+        written += self.auth.tlspl_serialize_to(writer)?;
         if matches!(self.content.sender, Sender::Member(_)) {
             let Some(mac) = &self.membership_tag else {
-                return Err(tls_codec::Error::EncodingError(
-                    "PublicMessageWithoutAad.content.sender is Member but `membership_tag` is missing".into(),
+                return Err(thalassa::error::TlsplWriteError::custom(
+                    CRATE_NAME,
+                    "PublicMessageWithoutAad.content.sender is Member but `membership_tag` is missing",
                 ));
             };
-            written += mac.tls_serialize(writer)?;
+            written += mac.tlspl_serialize_to(writer)?;
         }
 
         Ok(written)
     }
 }
 
-impl tls_codec::Deserialize for PublicMessageWithoutAad {
-    fn tls_deserialize<R: std::io::Read>(bytes: &mut R) -> Result<Self, tls_codec::Error>
+impl<'a> thalassa::TlsplDeserialize<'a> for PublicMessageWithoutAad<'a> {
+    #[inline]
+    fn tlspl_deserialize_from<R: thalassa::io::Read<'a>>(
+        reader: &mut R,
+    ) -> thalassa::error::TlsplReadResult<Self>
     where
-        Self: Sized,
+        Self: Sized + 'a,
     {
-        let content = FramedContentWithoutAad::tls_deserialize(bytes)?;
-        let auth = FramedContentAuthData::tls_deserialize_with_content_type(
-            bytes,
+        let content = FramedContentWithoutAad::tlspl_deserialize_from(reader)?;
+        let auth = FramedContentAuthData::tlspl_deserialize_from_with_content_type(
+            reader,
             (&content.content).into(),
         )?;
 
         let membership_tag = if matches!(content.sender, Sender::Member(_)) {
-            Some(Mac::tls_deserialize(bytes)?)
+            Some(Mac::tlspl_deserialize_from(reader)?)
         } else {
             None
         };
@@ -148,41 +151,12 @@ impl tls_codec::Deserialize for PublicMessageWithoutAad {
     }
 }
 
-impl tls_codec::Size for PublicMessageWithoutAad {
-    fn tls_serialized_len(&self) -> usize {
-        let membership_tag_len = if matches!(self.content.sender, Sender::Member(_)) {
-            self.membership_tag
-                .as_ref()
-                .map(tls_codec::Size::tls_serialized_len)
-                .unwrap_or_default()
-        } else {
-            debug_assert!(
-                self.membership_tag.is_none(),
-                "PublicMessageWithoutAad contains a membership_tag while it shouldn't. There's a bug somewhere"
-            );
-
-            0
-        };
-
-        self.content.tls_serialized_len() + self.auth.tls_serialized_len() + membership_tag_len
-    }
-}
-
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSize,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct PrivateMessageWithoutAad {
-    #[tls_codec(with = "crate::tlspl::bytes")]
-    pub group_id: GroupId,
+pub struct PrivateMessageWithoutAad<'a> {
+    pub group_id: GroupId<'a>,
     pub epoch: Epoch,
     pub content_type: ContentType,
-    pub encrypted_sender_data: SensitiveBytes,
-    pub ciphertext: SensitiveBytes,
+    pub encrypted_sender_data: SensitiveBytes<'a>,
+    pub ciphertext: SensitiveBytes<'a>,
 }

@@ -7,51 +7,43 @@ use crate::{
     tree::leaf_node::LeafNode,
 };
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u16)]
-pub enum Proposal {
-    #[tls_codec(discriminant = "ProposalType::ADD")]
-    Add(AddProposal),
-    #[tls_codec(discriminant = "ProposalType::UPDATE")]
-    Update(UpdateProposal),
-    #[tls_codec(discriminant = "ProposalType::REMOVE")]
+pub enum Proposal<'a> {
+    #[tlspl(discriminant = "ProposalType::ADD")]
+    Add(AddProposal<'a>),
+    #[tlspl(discriminant = "ProposalType::UPDATE")]
+    Update(UpdateProposal<'a>),
+    #[tlspl(discriminant = "ProposalType::REMOVE")]
     Remove(RemoveProposal),
-    #[tls_codec(discriminant = "ProposalType::PSK")]
-    PreSharedKey(PreSharedKeyProposal),
-    #[tls_codec(discriminant = "ProposalType::REINIT")]
-    ReInit(ReInitProposal),
-    #[tls_codec(discriminant = "ProposalType::EXTERNAL_INIT")]
-    ExternalInit(ExternalInitProposal),
-    #[tls_codec(discriminant = "ProposalType::GROUP_CONTEXT_EXTENSIONS")]
-    GroupContextExtensions(GroupContextExtensionsProposal),
+    #[tlspl(discriminant = "ProposalType::PSK")]
+    PreSharedKey(PreSharedKeyProposal<'a>),
+    #[tlspl(discriminant = "ProposalType::REINIT")]
+    ReInit(ReInitProposal<'a>),
+    #[tlspl(discriminant = "ProposalType::EXTERNAL_INIT")]
+    ExternalInit(ExternalInitProposal<'a>),
+    #[tlspl(discriminant = "ProposalType::GROUP_CONTEXT_EXTENSIONS")]
+    GroupContextExtensions(GroupContextExtensionsProposal<'a>),
     #[cfg(feature = "draft-ietf-mls-extensions")]
-    #[tls_codec(discriminant = "ProposalType::APP_DATA_UPDATE")]
-    AppDataUpdate(crate::drafts::mls_extensions::safe_application::AppDataUpdate),
+    #[tlspl(discriminant = "ProposalType::APP_DATA_UPDATE")]
+    AppDataUpdate(crate::drafts::mls_extensions::safe_application::AppDataUpdate<'a>),
     #[cfg(feature = "draft-ietf-mls-extensions")]
-    #[tls_codec(discriminant = "ProposalType::APP_EPHEMERAL")]
-    AppEphemeral(crate::drafts::mls_extensions::safe_application::AppEphemeral),
+    #[tlspl(discriminant = "ProposalType::APP_EPHEMERAL")]
+    AppEphemeral(crate::drafts::mls_extensions::safe_application::AppEphemeral<'a>),
     #[cfg(feature = "draft-ietf-mls-extensions")]
-    #[tls_codec(discriminant = "ProposalType::SELF_REMOVE")]
+    #[tlspl(discriminant = "ProposalType::SELF_REMOVE")]
     SelfRemove(crate::drafts::mls_extensions::self_remove::SelfRemoveProposal),
 }
 
-impl Proposal {
+impl Proposal<'_> {
     #[inline(always)]
     pub fn proposal_type(&self) -> ProposalType {
         self.into()
     }
 }
 
-impl From<&Proposal> for ProposalType {
+impl From<&Proposal<'_>> for ProposalType {
     fn from(val: &Proposal) -> Self {
         match val {
             Proposal::Add(_) => ProposalType::new_unchecked(ProposalType::ADD),
@@ -75,87 +67,47 @@ impl From<&Proposal> for ProposalType {
     }
 }
 
-impl Proposal {
+impl Proposal<'_> {
     #[inline]
     pub fn needs_update_path(&self) -> bool {
         self.proposal_type().needs_update_path()
     }
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct AddProposal {
-    pub key_package: KeyPackage,
+pub struct AddProposal<'a> {
+    pub key_package: KeyPackage<'a>,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct UpdateProposal {
-    pub leaf_node: LeafNode,
+pub struct UpdateProposal<'a> {
+    pub leaf_node: LeafNode<'a>,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RemoveProposal {
     pub removed: LeafIndex,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct PreSharedKeyProposal {
-    pub psk: PreSharedKeyId,
+pub struct PreSharedKeyProposal<'a> {
+    pub psk: PreSharedKeyId<'a>,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ReInitProposal {
-    pub group_id: GroupId,
+pub struct ReInitProposal<'a> {
+    pub group_id: GroupId<'a>,
     pub version: ProtocolVersion,
     pub cipher_suite: CiphersuiteId,
-    pub extensions: Vec<Extension>,
+    pub extensions: Vec<Extension<'a>>,
 }
 
-impl ReInitProposal {
+impl ReInitProposal<'_> {
     pub fn matches_group_context(&self, ctx: &GroupContext) -> bool {
         self.group_id == ctx.group_id()
             && self.version == ctx.version
@@ -164,30 +116,14 @@ impl ReInitProposal {
     }
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ExternalInitProposal {
-    pub kem_output: SensitiveBytes,
+pub struct ExternalInitProposal<'a> {
+    pub kem_output: SensitiveBytes<'a>,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct GroupContextExtensionsProposal {
-    pub extensions: Vec<Extension>,
+pub struct GroupContextExtensionsProposal<'a> {
+    pub extensions: Vec<Extension<'a>>,
 }

@@ -17,9 +17,7 @@ macro_rules! impl_spec_enum {
             Hash,
             PartialOrd,
             Ord,
-            tls_codec::TlsSerialize,
-            tls_codec::TlsDeserialize,
-            tls_codec::TlsSize
+            thalassa::TlsplAll,
         )]
         #[cfg_attr(
             feature = "serde",
@@ -141,24 +139,3 @@ macro_rules! impl_spec_enum {
 }
 
 pub(crate) use impl_spec_enum;
-
-macro_rules! ref_forward_tls_impl {
-    ($target:ident) => {
-        impl tls_codec::Size for &$target {
-            fn tls_serialized_len(&self) -> usize {
-                (*self).tls_serialized_len()
-            }
-        }
-
-        impl tls_codec::Serialize for &$target {
-            fn tls_serialize<W: std::io::Write>(
-                &self,
-                writer: &mut W,
-            ) -> Result<usize, tls_codec::Error> {
-                (*self).tls_serialize(writer)
-            }
-        }
-    };
-}
-
-pub(crate) use ref_forward_tls_impl;

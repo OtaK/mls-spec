@@ -1,11 +1,11 @@
+use std::borrow::Cow;
+
 use crate::{
     SensitiveBytes,
-    crypto::{
-        HpkeCiphertext, HpkePublicKey, HpkePublicKeyRef, SignaturePublicKey, SignaturePublicKeyRef,
-    },
+    crypto::{HpkeCiphertext, HpkePublicKey, SignaturePublicKey},
     defs::{CiphersuiteId, Epoch, ProtocolVersion, WireFormat},
     drafts::mls_extensions::safe_application::{self, ComponentId},
-    group::{GroupId, GroupIdRef},
+    group::GroupId,
     messages::ContentType,
 };
 
@@ -29,66 +29,49 @@ static_assertions::const_assert!(
             <= *super::mls_extensions::COMPONENT_RESERVED_PRIVATE_RANGE.end()
 );
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSerialize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct RootPrivateSignature {
-    pub root_private_signature_key: SensitiveBytes,
+pub struct RootPrivateSignature<'a> {
+    pub root_private_signature_key: SensitiveBytes<'a>,
 }
 
-impl safe_application::Component for RootPrivateSignature {
+impl<'a> safe_application::Component<'a> for RootPrivateSignature<'a> {
     fn component_id() -> ComponentId {
         ROOT_PRIVATE_SIGNATURE_ID
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, tls_codec::TlsSize, tls_codec::TlsSerialize)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplSize, thalassa::TlsplSerialize)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct ExternalEncryptionInfoTBS<'a> {
     pub version: &'a ProtocolVersion,
-    #[tls_codec(with = "crate::tlspl::bytes")]
-    pub group_id: GroupIdRef<'a>,
+    pub group_id: &'a GroupId<'a>,
     pub epoch: &'a Epoch,
     pub ciphersuite: &'a CiphersuiteId,
-    pub external_encryption_public_key: HpkePublicKeyRef<'a>,
-    pub root_public_signature_key: SignaturePublicKeyRef<'a>,
+    pub external_encryption_public_key: &'a HpkePublicKey<'a>,
+    pub root_public_signature_key: &'a SignaturePublicKey<'a>,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSerialize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ExternalEncryptionInfo {
+pub struct ExternalEncryptionInfo<'a> {
     pub ciphersuite: CiphersuiteId,
-    pub external_encryption_public_key: HpkePublicKey,
-    pub root_public_signature_key: SignaturePublicKey,
-    pub external_encryption_signature: SensitiveBytes,
+    pub external_encryption_public_key: HpkePublicKey<'a>,
+    pub root_public_signature_key: SignaturePublicKey<'a>,
+    pub external_encryption_signature: SensitiveBytes<'a>,
 }
 
-impl safe_application::Component for ExternalEncryptionInfo {
+impl<'a> safe_application::Component<'a> for ExternalEncryptionInfo<'a> {
     fn component_id() -> ComponentId {
         EXT_ENCRYPTION_INFO_ID
     }
 }
 
-impl ExternalEncryptionInfo {
-    pub fn to_tbs<'a>(
+impl<'a> ExternalEncryptionInfo<'a> {
+    pub fn to_tbs(
         &'a self,
         version: &'a ProtocolVersion,
-        group_id: GroupIdRef<'a>,
+        group_id: &'a GroupId<'a>,
         epoch: &'a Epoch,
     ) -> ExternalEncryptionInfoTBS<'a> {
         ExternalEncryptionInfoTBS {
@@ -102,34 +85,16 @@ impl ExternalEncryptionInfo {
     }
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSerialize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrivateExternalMessageContext;
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSerialize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct PrivateExternalMessage {
-    #[tls_codec(with = "crate::tlspl::bytes")]
-    pub group_id: GroupId,
+pub struct PrivateExternalMessage<'a> {
+    pub group_id: GroupId<'a>,
     pub epoch: Epoch,
     pub content_type: ContentType,
-    #[tls_codec(with = "crate::tlspl::bytes")]
-    pub authenticated_data: Vec<u8>,
-    pub encrypted_public_message: HpkeCiphertext,
+    pub authenticated_data: Cow<'a, [u8]>,
+    pub encrypted_public_message: HpkeCiphertext<'a>,
 }

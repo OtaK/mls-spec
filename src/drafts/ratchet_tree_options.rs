@@ -1,62 +1,27 @@
+use std::borrow::Cow;
+
 use crate::{group::extensions::Extension, tree::RatchetTree};
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Domain {
-    #[tls_codec(with = "crate::tlspl::string")]
-    pub domain: String,
+pub struct Domain<'a> {
+    pub domain: Cow<'a, str>,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct DomainList {
-    pub domains: Vec<Domain>,
+pub struct DomainList<'a> {
+    pub domains: Vec<Domain<'a>>,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(transparent)]
-pub struct RatchetTreeSourceDomainsExtension(pub DomainList);
+pub struct RatchetTreeSourceDomainsExtension<'a>(pub DomainList<'a>);
 
 pub const EXTENSION_RATCHET_TREE_SOURCE_DOMAINS: u16 = 0xF4C0;
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, thalassa::TlsplAll)]
 #[repr(u8)]
 #[cfg_attr(
     feature = "serde",
@@ -70,41 +35,21 @@ pub enum RatchetTreeRepresentation {
     DistributionService = 0x04,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[repr(u8)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum RatchetTreeOption {
-    #[tls_codec(discriminant = "RatchetTreeRepresentation::Full")]
-    Full { ratchet_tree: RatchetTree },
-    #[tls_codec(discriminant = "RatchetTreeRepresentation::HttpsUri")]
-    HttpsUri {
-        #[tls_codec(with = "crate::tlspl::string")]
-        ratchet_tree_url: String,
-    },
-    #[tls_codec(discriminant = "RatchetTreeRepresentation::OutOfBand")]
+pub enum RatchetTreeOption<'a> {
+    #[tlspl(discriminant = "RatchetTreeRepresentation::Full")]
+    Full { ratchet_tree: RatchetTree<'a> },
+    #[tlspl(discriminant = "RatchetTreeRepresentation::HttpsUri")]
+    HttpsUri { ratchet_tree_url: Cow<'a, str> },
+    #[tlspl(discriminant = "RatchetTreeRepresentation::OutOfBand")]
     OutOfBand,
-    #[tls_codec(discriminant = "RatchetTreeRepresentation::DistributionService")]
+    #[tlspl(discriminant = "RatchetTreeRepresentation::DistributionService")]
     DistributionService,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, thalassa::TlsplAll)]
 #[repr(u8)]
 #[cfg_attr(
     feature = "serde",
@@ -117,19 +62,10 @@ pub enum RatchetTreePresence {
     Added = 0x03,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct PartialGroupInfo {
+pub struct PartialGroupInfo<'a> {
     pub ratchet_tree_presence: RatchetTreePresence,
-    pub group_info_extensions: Vec<Extension>,
-    #[tls_codec(with = "crate::tlspl::bytes")]
-    pub signature: Vec<u8>,
+    pub group_info_extensions: Vec<Extension<'a>>,
+    pub signature: Cow<'a, [u8]>,
 }

@@ -51,7 +51,9 @@ pub struct MessagesVector {
     pub private_message: Vec<u8>,
 }
 
-fn roundtrip<S: mls_spec::Serializable + mls_spec::Parsable>(buf: &[u8]) -> Result<S> {
+fn roundtrip<'a, S: mls_spec::Serializable + mls_spec::Parsable<'a> + 'a>(
+    buf: &'a [u8],
+) -> Result<S> {
     let type_name = std::any::type_name::<S>();
     let value = S::from_tls_bytes(buf).context(format!("{type_name} {buf:?}"))?;
     assert_eq_err!(buf, &value.to_tls_bytes()?, type_name);
