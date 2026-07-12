@@ -59,34 +59,47 @@ pub mod assertions {
 // TODO: Use this macro to roundtrip all the structs in the drafts
 pub(crate) mod testing {
     #[cfg(not(feature = "serde"))]
-    pub trait Target: crate::Parsable + crate::Serializable + std::fmt::Debug + PartialEq {}
+    pub trait Target<'a>:
+        crate::Parsable<'a> + crate::Serializable + std::fmt::Debug + PartialEq + 'a
+    {
+    }
+
     #[cfg(not(feature = "serde"))]
-    impl<T> Target for T where T: crate::Parsable + crate::Serializable + std::fmt::Debug + PartialEq {}
+    impl<'a, T> Target<'a> for T where
+        T: crate::Parsable<'a> + crate::Serializable + std::fmt::Debug + PartialEq + 'a
+    {
+    }
 
     #[cfg(feature = "serde")]
-    pub trait Target:
-        crate::Parsable
+    pub trait Target<'a>:
+        crate::Parsable<'a>
         + crate::Serializable
         + serde::Serialize
-        + for<'a> serde::Deserialize<'a>
+        + serde::de::DeserializeOwned
         + std::fmt::Debug
         + PartialEq
-    {
-    }
-    #[cfg(feature = "serde")]
-    impl<T> Target for T where
-        T: crate::Parsable
-            + crate::Serializable
-            + serde::Serialize
-            + for<'a> serde::Deserialize<'a>
-            + std::fmt::Debug
-            + PartialEq
+        + 'a
     {
     }
 
-    pub(crate) fn roundtrip<T: Target>(value: &T, ctx: &str) -> color_eyre::eyre::Result<()> {
+    #[cfg(feature = "serde")]
+    impl<'a, T> Target<'a> for T where
+        T: crate::Parsable<'a>
+            + crate::Serializable
+            + serde::Serialize
+            + serde::de::DeserializeOwned
+            + std::fmt::Debug
+            + PartialEq
+            + 'a
+    {
+    }
+
+    pub(crate) fn roundtrip<'a, T: Target<'a>>(
+        value: &T,
+        value_bytes: &'a [u8],
+        ctx: &str,
+    ) -> color_eyre::eyre::Result<()> {
         let _ = color_eyre::install();
-        let value_bytes = value.to_tls_bytes()?;
         let value2 = T::from_tls_bytes(&value_bytes)?;
         super::assertions::assert_eq_err!(value, &value2);
         println!("==== --> [{ctx}] TLSPL OK");
@@ -111,7 +124,9 @@ pub(crate) mod testing {
         ($testname:ident, $iv:expr) => {
             #[test]
             fn $testname() -> color_eyre::eyre::Result<()> {
-                $crate::test_utils::testing::roundtrip(&$iv, stringify!($testname))?;
+                use crate::Serializable as _;
+                let bytes = $iv.to_tls_bytes()?;
+                $crate::test_utils::testing::roundtrip(&$iv, &bytes, stringify!($testname))?;
                 Ok(())
             }
         };

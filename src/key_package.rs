@@ -6,44 +6,35 @@ use crate::{
     tree::leaf_node::LeafNode,
 };
 
-#[derive(Debug, Clone, PartialEq, Eq, tls_codec::TlsSerialize, tls_codec::TlsSize)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplSerialize, thalassa::TlsplSize)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct KeyPackageTBS<'a> {
     pub version: &'a ProtocolVersion,
     pub cipher_suite: &'a CiphersuiteId,
     pub init_key: &'a [u8],
-    pub leaf_node: &'a LeafNode,
-    pub extensions: &'a [Extension],
+    pub leaf_node: &'a LeafNode<'a>,
+    pub extensions: &'a [Extension<'a>],
 }
 
 #[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    zeroize::Zeroize,
-    zeroize::ZeroizeOnDrop,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
+    Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll, zeroize::Zeroize, zeroize::ZeroizeOnDrop,
 )]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct KeyPackage {
+pub struct KeyPackage<'a> {
     #[zeroize(skip)]
     pub version: ProtocolVersion,
     #[zeroize(skip)]
     pub cipher_suite: CiphersuiteId,
-    pub init_key: SensitiveBytes,
+    pub init_key: SensitiveBytes<'a>,
     #[zeroize(skip)]
-    pub leaf_node: LeafNode,
+    pub leaf_node: LeafNode<'a>,
     #[zeroize(skip)]
-    pub extensions: Vec<Extension>,
-    pub signature: SensitiveBytes,
+    pub extensions: Vec<Extension<'a>>,
+    pub signature: SensitiveBytes<'a>,
 }
 
-impl KeyPackage {
-    pub fn to_tbs(&self) -> KeyPackageTBS<'_> {
+impl<'a> KeyPackage<'a> {
+    pub fn to_tbs(&'a self) -> KeyPackageTBS<'a> {
         KeyPackageTBS {
             version: &self.version,
             cipher_suite: &self.cipher_suite,
@@ -53,7 +44,7 @@ impl KeyPackage {
         }
     }
 
-    pub fn into_message(self) -> MlsMessage {
+    pub fn into_message(self) -> MlsMessage<'a> {
         MlsMessage {
             version: ProtocolVersion::default(),
             content: crate::messages::MlsMessageContent::KeyPackage(self),
@@ -63,7 +54,7 @@ impl KeyPackage {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, zeroize::Zeroize, zeroize::ZeroizeOnDrop)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct KeyPackageWithRef {
-    pub keypackage_ref: KeyPackageRef,
-    pub keypackage: KeyPackage,
+pub struct KeyPackageWithRef<'a> {
+    pub keypackage_ref: KeyPackageRef<'a>,
+    pub keypackage: KeyPackage<'a>,
 }

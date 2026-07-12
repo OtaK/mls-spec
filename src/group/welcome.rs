@@ -7,76 +7,44 @@ use crate::{
     messages::{MlsMessage, MlsMessageContent},
 };
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct PathSecret {
-    pub path_secret: SensitiveBytes,
+pub struct PathSecret<'a> {
+    pub path_secret: SensitiveBytes<'a>,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct GroupSecrets {
-    pub joiner_secret: SensitiveBytes,
-    pub path_secret: Option<PathSecret>,
-    pub psks: Vec<PreSharedKeyId>,
+pub struct GroupSecrets<'a> {
+    pub joiner_secret: SensitiveBytes<'a>,
+    pub path_secret: Option<PathSecret<'a>>,
+    pub psks: Vec<PreSharedKeyId<'a>>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, tls_codec::TlsSerialize, tls_codec::TlsSize)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplSerialize, thalassa::TlsplSize)]
 pub struct GroupSecretsRef<'a> {
     pub joiner_secret: &'a [u8],
     pub path_secret: Option<&'a [u8]>,
-    pub psks: &'a [PreSharedKeyId],
+    pub psks: &'a [PreSharedKeyId<'a>],
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct EncryptedGroupSecrets {
-    pub new_member: KeyPackageRef,
-    pub encrypted_group_secrets: HpkeCiphertext,
+pub struct EncryptedGroupSecrets<'a> {
+    pub new_member: KeyPackageRef<'a>,
+    pub encrypted_group_secrets: HpkeCiphertext<'a>,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Welcome {
+pub struct Welcome<'a> {
     pub cipher_suite: CiphersuiteId,
-    pub secrets: Vec<EncryptedGroupSecrets>,
-    pub encrypted_group_info: SensitiveBytes,
+    pub secrets: Vec<EncryptedGroupSecrets<'a>>,
+    pub encrypted_group_info: SensitiveBytes<'a>,
 }
 
-impl Welcome {
-    pub fn into_mls_message(self, protocol_version: ProtocolVersion) -> MlsMessage {
+impl<'a> Welcome<'a> {
+    pub fn into_mls_message(self, protocol_version: ProtocolVersion) -> MlsMessage<'a> {
         MlsMessage {
             version: protocol_version,
             content: MlsMessageContent::Welcome(self),

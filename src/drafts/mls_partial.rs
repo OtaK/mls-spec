@@ -9,19 +9,10 @@ use crate::{
 /// } CopathHash;
 /// ```
 ///
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    Default,
-    tls_codec::TlsSize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSerialize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, Default, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct CopathHash {
-    pub hash_value: SensitiveBytes,
+pub struct CopathHash<'a> {
+    pub hash_value: SensitiveBytes<'a>,
 }
 
 ///
@@ -34,22 +25,13 @@ pub struct CopathHash {
 /// } MembershipProof;
 /// ```
 ///
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    Default,
-    tls_codec::TlsSize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSerialize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, Default, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct MembershipProof {
+pub struct MembershipProof<'a> {
     pub leaf_index: LeafIndex,
     pub n_leaves: u32,
-    pub direct_path_nodes: Vec<Option<TreeNode>>,
-    pub copath_hashes: Vec<CopathHash>,
+    pub direct_path_nodes: Vec<Option<TreeNode<'a>>>,
+    pub copath_hashes: Vec<CopathHash<'a>>,
 }
 
 ///
@@ -60,19 +42,11 @@ pub struct MembershipProof {
 /// } SenderAuthenticatedMessage<T>;
 /// ```
 ///
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSerialize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct SenderAuthenticatedMessage<T: tls_codec::Serialize + tls_codec::Deserialize> {
+pub struct SenderAuthenticatedMessage<'a, T> {
     pub message: T,
-    pub sender_membership_proof: MembershipProof,
+    pub sender_membership_proof: MembershipProof<'a>,
 }
 
 ///
@@ -83,19 +57,11 @@ pub struct SenderAuthenticatedMessage<T: tls_codec::Serialize + tls_codec::Deser
 /// } AnnotatedWelcome;
 /// ```
 ///
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSerialize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct AnnotatedWelcome {
-    pub welcome: SenderAuthenticatedMessage<Welcome>,
-    pub joiner_membership_proof: MembershipProof,
+pub struct AnnotatedWelcome<'a> {
+    pub welcome: SenderAuthenticatedMessage<'a, Welcome<'a>>,
+    pub joiner_membership_proof: MembershipProof<'a>,
 }
 
 ///
@@ -112,21 +78,13 @@ pub struct AnnotatedWelcome {
 /// } AnnotatedCommit;
 /// ```
 ///
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSerialize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct AnnotatedCommit {
-    pub commit: MlsMessage,
-    pub sender_membership_proof: Option<MembershipProof>,
-    pub tree_hash_after: SensitiveBytes,
+pub struct AnnotatedCommit<'a> {
+    pub commit: MlsMessage<'a>,
+    pub sender_membership_proof: Option<MembershipProof<'a>>,
+    pub tree_hash_after: SensitiveBytes<'a>,
     pub resolution_index: Option<u32>,
-    pub sender_membership_proof_after: MembershipProof,
-    pub receiver_membership_proof_after: MembershipProof,
+    pub sender_membership_proof_after: MembershipProof<'a>,
+    pub receiver_membership_proof_after: MembershipProof<'a>,
 }

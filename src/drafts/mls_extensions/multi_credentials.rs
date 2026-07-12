@@ -1,66 +1,36 @@
 use crate::{
-    SensitiveBytes,
-    credential::Credential,
-    crypto::{SignaturePublicKey, SignaturePublicKeyRef},
-    defs::CiphersuiteId,
+    SensitiveBytes, credential::Credential, crypto::SignaturePublicKey, defs::CiphersuiteId,
 };
 
 pub const MULTI_CREDENTIAL: u16 = 0x0003;
 pub const WEAK_MULTI_CREDENTIAL: u16 = 0x0004;
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct CredentialBinding {
+pub struct CredentialBinding<'a> {
     pub cipher_suite: CiphersuiteId,
-    pub credential: Credential,
-    pub credential_key: SignaturePublicKey,
-    pub signature: SensitiveBytes,
+    pub credential: Credential<'a>,
+    pub credential_key: SignaturePublicKey<'a>,
+    pub signature: SensitiveBytes<'a>,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct MultiCredential {
-    pub bindings: Vec<CredentialBinding>,
+pub struct MultiCredential<'a> {
+    pub bindings: Vec<CredentialBinding<'a>>,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct WeakMultiCredential {
-    pub bindings: Vec<CredentialBinding>,
+pub struct WeakMultiCredential<'a> {
+    pub bindings: Vec<CredentialBinding<'a>>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, tls_codec::TlsSerialize, tls_codec::TlsSize)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplSerialize, thalassa::TlsplSize)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct CredentialBindingTBS<'a> {
     pub cipher_suite: &'a CiphersuiteId,
-    pub credential: &'a Credential,
-    pub credential_key: SignaturePublicKeyRef<'a>,
-    pub signature_key: SignaturePublicKeyRef<'a>,
+    pub credential: &'a Credential<'a>,
+    pub credential_key: &'a SignaturePublicKey<'a>,
+    pub signature_key: &'a SignaturePublicKey<'a>,
 }

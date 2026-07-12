@@ -9,11 +9,13 @@
 mod error;
 pub use self::error::*;
 
+pub(crate) const CRATE_NAME: &'static str = std::env!("CARGO_PKG_NAME");
+
 pub mod reexports {
     #[cfg(feature = "draft-ietf-mls-extensions-content-advertisement-parse")]
     pub use mediatype;
 
-    pub use tls_codec;
+    pub use thalassa;
 }
 
 pub mod credential;
@@ -31,11 +33,6 @@ pub(crate) mod macros;
 #[cfg(feature = "test-utils")]
 pub mod test_utils;
 
-#[cfg(feature = "tlspl-utils")]
-pub mod tlspl;
-#[cfg(not(feature = "tlspl-utils"))]
-pub(crate) mod tlspl;
-
 mod sensitive_bytes;
 pub use sensitive_bytes::*;
 
@@ -49,11 +46,27 @@ pub trait ToPrefixedLabel: std::fmt::Display {
     }
 }
 
-#[async_trait::async_trait]
 /// Delegate trait for implementors to implement spec-compliant validation of credentials
 /// with their Authentication Service (MLS AS)
 pub trait AuthenticationServiceDelegate: Send + Sync {
-    async fn validate_credential(&self, credential: &crate::credential::Credential) -> bool;
+    fn validate_credential(
+        &self,
+        credential: &crate::credential::Credential,
+    ) -> impl std::future::Future<Output = bool> + Send;
+}
+
+pub(crate) fn consume_padding<'a, R: thalassa::io::Read<'a>>(
+    reader: &mut R,
+) -> Result<usize, thalassa::error::TlsplReadError> {
+    let bytes = reader.read_till_eof()?;
+    let len = bytes.len();
+    if bytes.into_iter().any(|&b| b != 0x00) {
+        return Err(thalassa::error::TlsplReadError::Parsio(
+            thalassa::io::ReadError::IoError(std::io::ErrorKind::InvalidData),
+        ));
+    }
+
+    Ok(len)
 }
 
 /// Trait that exposes TLS serialization
@@ -63,31 +76,56 @@ pub trait Serializable {
 
 impl<T> Serializable for T
 where
-    T: tls_codec::Serialize,
+    T: thalassa::TlsplSerialize,
 {
+    #[inline]
     fn to_tls_bytes(&self) -> MlsSpecResult<Vec<u8>> {
-        Ok(self.tls_serialize_detached()?)
+        Ok(self.tlspl_serialize()?)
     }
 }
+
+// #[cfg(feature = "tls-codec-compat")]
+// impl<T> Serializable for T
+// where
+//     T: tls_codec::Serialize,
+// {
+//     fn to_tls_bytes(&self) -> MlsSpecResult<Vec<u8>> {
+//         Ok(self.tls_serialize_detached()?)
+//     }
+// }
 
 /// Trait that exposes TLS deserialization
-pub trait Parsable {
-    fn from_tls_bytes(bytes: &[u8]) -> MlsSpecResult<Self>
+pub trait Parsable<'a> {
+    fn from_tls_bytes(bytes: &'a [u8]) -> MlsSpecResult<Self>
     where
-        Self: Sized;
+        Self: Sized + 'a;
 }
 
-impl<T> Parsable for T
+impl<'tlspl, T> Parsable<'tlspl> for T
 where
-    T: tls_codec::Deserialize,
+    T: thalassa::TlsplDeserialize<'tlspl>,
 {
-    fn from_tls_bytes(mut bytes: &[u8]) -> MlsSpecResult<Self>
+    #[inline]
+    fn from_tls_bytes(mut bytes: &'tlspl [u8]) -> MlsSpecResult<Self>
     where
-        Self: Sized,
+        Self: 'tlspl,
     {
-        Ok(T::tls_deserialize(&mut bytes)?)
+        Ok(T::tlspl_deserialize_from(&mut bytes)?)
     }
 }
+
+// #[cfg(feature = "tls-codec-compat")]
+// impl<T> Parsable for T
+// where
+//     T: tls_codec::Deserialize,
+// {
+//     fn from_tls_bytes(mut bytes: &[u8]) -> MlsSpecResult<Self>
+//     where
+//         Self: Sized,
+//     {
+//         Ok(T::tls_deserialize(&mut bytes)?)
+//     }
+// }
 
 #[cfg(feature = "mls-rs-compat")]
 pub mod mls_rs_compat {

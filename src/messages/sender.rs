@@ -14,26 +14,17 @@ pub enum SenderType {
     NewMemberCommit = 0x04,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u8)]
 pub enum Sender {
-    #[tls_codec(discriminant = "SenderType::Member")]
+    #[tlspl(discriminant = "SenderType::Member")]
     Member(LeafIndex),
-    #[tls_codec(discriminant = "SenderType::External")]
+    #[tlspl(discriminant = "SenderType::External")]
     External(SenderIndex),
-    #[tls_codec(discriminant = "SenderType::NewMemberCommit")]
+    #[tlspl(discriminant = "SenderType::NewMemberCommit")]
     NewMemberCommit,
-    #[tls_codec(discriminant = "SenderType::NewMemberProposal")]
+    #[tlspl(discriminant = "SenderType::NewMemberProposal")]
     NewMemberProposal,
 }
 

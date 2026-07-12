@@ -4,39 +4,34 @@ use crate::{
     tree::{NodeType, ParentNode, leaf_node::LeafNode},
 };
 
-pub type ParentNodeHash = SensitiveBytes;
-pub type NodeHash = SensitiveBytes;
+pub type ParentNodeHash<'a> = SensitiveBytes<'a>;
+pub type NodeHash<'a> = SensitiveBytes<'a>;
 
-#[derive(Debug, Clone, PartialEq, Eq, tls_codec::TlsSerialize, tls_codec::TlsSize)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplSerialize, thalassa::TlsplSize)]
 pub struct ParentNodeHashInput<'a> {
-    pub parent_node: Option<&'a ParentNode>,
-    #[tls_codec(with = "crate::tlspl::bytes")]
+    pub parent_node: Option<&'a ParentNode<'a>>,
     pub left_hash: &'a [u8],
-    #[tls_codec(with = "crate::tlspl::bytes")]
     pub right_hash: &'a [u8],
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, tls_codec::TlsSerialize, tls_codec::TlsSize)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplSerialize, thalassa::TlsplSize)]
 pub struct LeafNodeHashInput<'a> {
     pub leaf_index: &'a LeafIndex,
-    pub leaf_node: Option<&'a LeafNode>,
+    pub leaf_node: Option<&'a LeafNode<'a>>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, tls_codec::TlsSerialize, tls_codec::TlsSize)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplSerialize, thalassa::TlsplSize)]
 #[repr(u8)]
 pub enum TreeHashInput<'a> {
-    #[tls_codec(discriminant = "NodeType::Leaf")]
+    #[tlspl(discriminant = "NodeType::Leaf")]
     Leaf(LeafNodeHashInput<'a>),
-    #[tls_codec(discriminant = "NodeType::Parent")]
+    #[tlspl(discriminant = "NodeType::Parent")]
     Parent(ParentNodeHashInput<'a>),
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, tls_codec::TlsSerialize, tls_codec::TlsSize)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplSerialize, thalassa::TlsplSize)]
 pub struct ParentHashInput<'a> {
-    #[tls_codec(with = "crate::tlspl::bytes")]
     pub encryption_key: &'a [u8],
-    #[tls_codec(with = "crate::tlspl::bytes")]
     pub parent_hash: &'a [u8],
-    #[tls_codec(with = "crate::tlspl::bytes")]
     pub original_sibling_tree_hash: &'a [u8],
 }

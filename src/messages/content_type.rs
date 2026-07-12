@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use crate::{
     MlsSpecError,
     group::{commits::Commit, proposals::Proposal},
@@ -10,9 +12,7 @@ use crate::{
     PartialEq,
     Eq,
     Hash,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
+    thalassa::TlsplAll,
     strum::Display,
 )]
 #[strum(prefix = "ContentType")]
@@ -57,47 +57,30 @@ impl TryFrom<u8> for ContentType {
     }
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u8)]
-pub enum ContentTypeInner {
-    #[tls_codec(discriminant = "ContentType::Application")]
-    Application {
-        #[tls_codec(with = "crate::tlspl::bytes")]
-        application_data: Vec<u8>,
-    },
-    #[tls_codec(discriminant = "ContentType::Proposal")]
-    Proposal { proposal: Proposal },
-    #[tls_codec(discriminant = "ContentType::Commit")]
-    Commit { commit: Commit },
+pub enum ContentTypeInner<'a> {
+    #[tlspl(discriminant = "ContentType::Application")]
+    Application { application_data: Cow<'a, [u8]> },
+    #[tlspl(discriminant = "ContentType::Proposal")]
+    Proposal { proposal: Proposal<'a> },
+    #[tlspl(discriminant = "ContentType::Commit")]
+    Commit { commit: Commit<'a> },
     #[cfg(feature = "draft-mularczyk-mls-splitcommit")]
-    #[tls_codec(discriminant = "ContentType::SplitCommit")]
+    #[tlspl(discriminant = "ContentType::SplitCommit")]
     SplitCommit {
-        split_commit: crate::drafts::split_commit::SplitCommit,
+        split_commit: crate::drafts::split_commit::SplitCommit<'a>,
     },
     #[cfg(feature = "draft-mahy-mls-new-content-types")]
-    #[tls_codec(discriminant = "ContentType::Status")]
-    Status {
-        #[tls_codec(with = "crate::tlspl::bytes")]
-        application_data: Vec<u8>,
-    },
+    #[tlspl(discriminant = "ContentType::Status")]
+    Status { application_data: Cow<'a, [u8]> },
     #[cfg(feature = "draft-mahy-mls-new-content-types")]
-    #[tls_codec(discriminant = "ContentType::Ephemeral")]
-    Ephemeral {
-        #[tls_codec(with = "crate::tlspl::bytes")]
-        application_data: Vec<u8>,
-    },
+    #[tlspl(discriminant = "ContentType::Ephemeral")]
+    Ephemeral { application_data: Cow<'a, [u8]> },
 }
 
-impl From<&ContentTypeInner> for ContentType {
+impl From<&ContentTypeInner<'_>> for ContentType {
     fn from(value: &ContentTypeInner) -> Self {
         match value {
             ContentTypeInner::Application { .. } => ContentType::Application,

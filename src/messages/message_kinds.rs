@@ -1,5 +1,5 @@
 use crate::{
-    SensitiveBytes,
+    CRATE_NAME, SensitiveBytes,
     crypto::Mac,
     defs::WireFormat,
     group::GroupId,
@@ -31,17 +31,17 @@ use super::{AuthenticatedContent, AuthenticatedContentRef};
 ///
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct PublicMessage {
-    pub content: FramedContent,
-    pub auth: FramedContentAuthData,
-    pub membership_tag: Option<Mac>,
+pub struct PublicMessage<'a> {
+    pub content: FramedContent<'a>,
+    pub auth: FramedContentAuthData<'a>,
+    pub membership_tag: Option<Mac<'a>>,
 }
 
-impl PublicMessage {
+impl<'a> PublicMessage<'a> {
     const AUTH_CONTENT_REF_WF: WireFormat =
         WireFormat::new_unchecked(WireFormat::MLS_PUBLIC_MESSAGE);
 
-    pub fn into_authenticated_content(self) -> AuthenticatedContent {
+    pub fn into_authenticated_content(self) -> AuthenticatedContent<'a> {
         AuthenticatedContent {
             wire_format: Self::AUTH_CONTENT_REF_WF,
             content: self.content,
@@ -49,7 +49,7 @@ impl PublicMessage {
         }
     }
 
-    pub fn as_authenticated_content(&self) -> AuthenticatedContentRef<'_> {
+    pub fn as_authenticated_content(&'a self) -> AuthenticatedContentRef<'a> {
         AuthenticatedContentRef {
             wire_format: &Self::AUTH_CONTENT_REF_WF,
             content: &self.content,
@@ -58,54 +58,12 @@ impl PublicMessage {
     }
 }
 
-impl tls_codec::Serialize for PublicMessage {
-    fn tls_serialize<W: std::io::Write>(&self, writer: &mut W) -> Result<usize, tls_codec::Error> {
-        let mut written = self.content.tls_serialize(writer)?;
-        written += self.auth.tls_serialize(writer)?;
-        if matches!(self.content.sender, Sender::Member(_)) {
-            let Some(mac) = &self.membership_tag else {
-                return Err(tls_codec::Error::EncodingError(
-                    "PublicMessage.content.sender is Member but `membership_tag` is missing".into(),
-                ));
-            };
-            written += mac.tls_serialize(writer)?;
-        }
-
-        Ok(written)
-    }
-}
-
-impl tls_codec::Deserialize for PublicMessage {
-    fn tls_deserialize<R: std::io::Read>(bytes: &mut R) -> Result<Self, tls_codec::Error>
-    where
-        Self: Sized,
-    {
-        let content = FramedContent::tls_deserialize(bytes)?;
-        let auth = FramedContentAuthData::tls_deserialize_with_content_type(
-            bytes,
-            (&content.content).into(),
-        )?;
-
-        let membership_tag = if matches!(content.sender, Sender::Member(_)) {
-            Some(Mac::tls_deserialize(bytes)?)
-        } else {
-            None
-        };
-
-        Ok(Self {
-            content,
-            auth,
-            membership_tag,
-        })
-    }
-}
-
-impl tls_codec::Size for PublicMessage {
-    fn tls_serialized_len(&self) -> usize {
+impl thalassa::TlsplSize for PublicMessage<'_> {
+    fn tlspl_serialized_len(&self) -> usize {
         let membership_tag_len = if matches!(self.content.sender, Sender::Member(_)) {
             self.membership_tag
                 .as_ref()
-                .map(tls_codec::Size::tls_serialized_len)
+                .map(thalassa::TlsplSize::tlspl_serialized_len)
                 .unwrap_or_default()
         } else {
             debug_assert!(
@@ -116,7 +74,56 @@ impl tls_codec::Size for PublicMessage {
             0
         };
 
-        self.content.tls_serialized_len() + self.auth.tls_serialized_len() + membership_tag_len
+        self.content.tlspl_serialized_len() + self.auth.tlspl_serialized_len() + membership_tag_len
+    }
+}
+
+impl thalassa::TlsplSerialize for PublicMessage<'_> {
+    fn tlspl_serialize_to<W: thalassa::io::Write>(
+        &self,
+        writer: &mut W,
+    ) -> thalassa::error::TlsplWriteResult<usize> {
+        let mut written =
+            self.content.tlspl_serialize_to(writer)? + self.auth.tlspl_serialize_to(writer)?;
+
+        if matches!(self.content.sender, Sender::Member(_)) {
+            let Some(mac) = &self.membership_tag else {
+                return Err(thalassa::error::TlsplWriteError::custom(
+                    CRATE_NAME,
+                    "PublicMessage.content.sender is Member but `membership_tag` is missing",
+                ));
+            };
+            written += mac.tlspl_serialize_to(writer)?;
+        }
+
+        Ok(written)
+    }
+}
+
+impl<'a> thalassa::TlsplDeserialize<'a> for PublicMessage<'a> {
+    fn tlspl_deserialize_from<R: thalassa::io::Read<'a>>(
+        reader: &mut R,
+    ) -> thalassa::error::TlsplReadResult<Self>
+    where
+        Self: Sized + 'a,
+    {
+        let content = FramedContent::tlspl_deserialize_from(reader)?;
+        let auth = FramedContentAuthData::tlspl_deserialize_from_with_content_type(
+            reader,
+            (&content.content).into(),
+        )?;
+
+        let membership_tag = if matches!(content.sender, Sender::Member(_)) {
+            Some(Mac::tlspl_deserialize_from(reader)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            content,
+            auth,
+            membership_tag,
+        })
     }
 }
 
@@ -132,10 +139,10 @@ impl tls_codec::Size for PublicMessage {
 ///   FramedContentAuthData auth;
 /// } AuthenticatedContentTBM;
 /// ```
-#[derive(Debug, Clone, PartialEq, Eq, tls_codec::TlsSerialize, tls_codec::TlsSize)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplSerialize, thalassa::TlsplSize)]
 pub struct AuthenticatedContentTBM<'a> {
     pub content_tbs: FramedContentTBS<'a>,
-    pub auth: &'a FramedContentAuthData,
+    pub auth: &'a FramedContentAuthData<'a>,
 }
 
 /// MLS Private Message (authenticated & encrypted)
@@ -154,21 +161,13 @@ pub struct AuthenticatedContentTBM<'a> {
 ///     opaque ciphertext<V>;
 /// } PrivateMessage;
 /// ```
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct PrivateMessage {
-    pub group_id: GroupId,
+pub struct PrivateMessage<'a> {
+    pub group_id: GroupId<'a>,
     pub epoch: u64,
     pub content_type: ContentType,
-    pub authenticated_data: SensitiveBytes,
-    pub encrypted_sender_data: SensitiveBytes,
-    pub ciphertext: SensitiveBytes,
+    pub authenticated_data: SensitiveBytes<'a>,
+    pub encrypted_sender_data: SensitiveBytes<'a>,
+    pub ciphertext: SensitiveBytes<'a>,
 }

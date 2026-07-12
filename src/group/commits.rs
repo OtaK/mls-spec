@@ -15,16 +15,7 @@ use crate::{
 ///   (255)
 /// } ProposalOrRefType;
 /// ```
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(
     feature = "serde",
     derive(serde_repr::Serialize_repr, serde_repr::Deserialize_repr)
@@ -49,23 +40,15 @@ pub enum ProposalOrRefType {
 ///   };
 /// } ProposalOrRef;
 /// ```
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u8)]
 #[allow(clippy::large_enum_variant)]
-pub enum ProposalOrRef {
-    #[tls_codec(discriminant = "ProposalOrRefType::Proposal")]
-    Proposal(Proposal),
-    #[tls_codec(discriminant = "ProposalOrRefType::Reference")]
-    Reference(ProposalRef),
+pub enum ProposalOrRef<'a> {
+    #[tlspl(discriminant = "ProposalOrRefType::Proposal")]
+    Proposal(Proposal<'a>),
+    #[tlspl(discriminant = "ProposalOrRefType::Reference")]
+    Reference(ProposalRef<'a>),
 }
 
 /// A MLS Commit contains the modifications applied to a group
@@ -81,17 +64,9 @@ pub enum ProposalOrRef {
 ///     optional<UpdatePath> path;
 /// } Commit;
 /// ```
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct Commit {
-    pub proposals: Vec<ProposalOrRef>,
-    pub path: Option<UpdatePath>,
+pub struct Commit<'a> {
+    pub proposals: Vec<ProposalOrRef<'a>>,
+    pub path: Option<UpdatePath<'a>>,
 }

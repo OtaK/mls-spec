@@ -1,23 +1,20 @@
 use crate::{SensitiveBytes, ToPrefixedLabel, defs::CiphersuiteId, key_schedule::PreSharedKeyId};
 
-pub type Mac = SensitiveBytes;
-pub type HpkePublicKey = SensitiveBytes;
-pub type HpkePublicKeyRef<'a> = &'a SensitiveBytes;
-pub type HpkePrivateKey = SensitiveBytes;
-pub type HpkePrivateKeyRef<'a> = &'a SensitiveBytes;
-pub type SignaturePublicKey = SensitiveBytes;
-pub type SignaturePublicKeyRef<'a> = &'a SensitiveBytes;
-pub type SignaturePrivateKey = SensitiveBytes;
+pub type Mac<'a> = SensitiveBytes<'a>;
+pub type HpkePublicKey<'a> = SensitiveBytes<'a>;
+pub type HpkePrivateKey<'a> = SensitiveBytes<'a>;
+pub type SignaturePublicKey<'a> = SensitiveBytes<'a>;
+pub type SignaturePrivateKey<'a> = SensitiveBytes<'a>;
 
 #[derive(Debug, PartialEq, Eq, Clone, zeroize::Zeroize, zeroize::ZeroizeOnDrop)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct KeyPair {
+pub struct KeyPair<'a> {
     #[zeroize(skip)]
     pub kem_id: u16,
     #[zeroize(skip)]
     pub ciphersuite: CiphersuiteId,
-    pub pk: SensitiveBytes,
-    pub sk: SensitiveBytes,
+    pub pk: SensitiveBytes<'a>,
+    pub sk: SensitiveBytes<'a>,
 }
 
 macro_rules! impl_keypair_alias {
@@ -26,26 +23,26 @@ macro_rules! impl_keypair_alias {
         #[repr(transparent)]
         #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
         #[cfg_attr(feature = "serde", serde(transparent))]
-        pub struct $newtype(KeyPair);
+        pub struct $newtype<'a>(KeyPair<'a>);
 
-        impl $newtype {
-            pub fn extract_public_key(&mut self) -> SensitiveBytes {
+        impl $newtype<'_> {
+            pub fn extract_public_key(&mut self) -> SensitiveBytes<'_> {
                 std::mem::take(&mut self.0.pk)
             }
 
-            pub fn extract_secret_key(&mut self) -> SensitiveBytes {
+            pub fn extract_secret_key(&mut self) -> SensitiveBytes<'_> {
                 std::mem::take(&mut self.0.sk)
             }
         }
 
-        impl From<KeyPair> for $newtype {
-            fn from(value: KeyPair) -> Self {
+        impl<'a> From<KeyPair<'a>> for $newtype<'a> {
+            fn from(value: KeyPair<'a>) -> Self {
                 Self(value)
             }
         }
 
-        impl std::ops::Deref for $newtype {
-            type Target = KeyPair;
+        impl<'a> std::ops::Deref for $newtype<'a> {
+            type Target = KeyPair<'a>;
             fn deref(&self) -> &Self::Target {
                 &self.0
             }
@@ -57,8 +54,8 @@ impl_keypair_alias!(SignatureKeyPair);
 impl_keypair_alias!(HpkeKeyPair);
 impl_keypair_alias!(KeyPackageKeyPair);
 
-impl From<HpkeKeyPair> for KeyPackageKeyPair {
-    fn from(mut value: HpkeKeyPair) -> Self {
+impl<'a> From<HpkeKeyPair<'a>> for KeyPackageKeyPair<'a> {
+    fn from(mut value: HpkeKeyPair<'a>) -> Self {
         Self(KeyPair {
             kem_id: value.0.kem_id,
             ciphersuite: value.0.ciphersuite,
@@ -70,15 +67,15 @@ impl From<HpkeKeyPair> for KeyPackageKeyPair {
 
 #[derive(Debug, Clone, PartialEq, Eq, zeroize::Zeroize, zeroize::ZeroizeOnDrop)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct PreSharedKeyPair {
-    pub psk_id: PreSharedKeyId,
-    pub psk_secret: SensitiveBytes,
+pub struct PreSharedKeyPair<'a> {
+    pub psk_id: PreSharedKeyId<'a>,
+    pub psk_secret: SensitiveBytes<'a>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, zeroize::Zeroize, zeroize::ZeroizeOnDrop)]
-pub struct HpkeExport {
-    pub kem_output: SensitiveBytes,
-    pub export: SensitiveBytes,
+pub struct HpkeExport<'a> {
+    pub kem_output: SensitiveBytes<'a>,
+    pub export: SensitiveBytes<'a>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -91,54 +88,38 @@ impl std::fmt::Display for ExternalInitSecret {
 }
 impl ToPrefixedLabel for ExternalInitSecret {}
 
-#[derive(
-    Debug,
-    Clone,
-    Eq,
-    PartialEq,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, Eq, PartialEq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct HpkeCiphertext {
-    pub kem_output: SensitiveBytes,
-    pub ciphertext: SensitiveBytes,
+pub struct HpkeCiphertext<'a> {
+    pub kem_output: SensitiveBytes<'a>,
+    pub ciphertext: SensitiveBytes<'a>,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, tls_codec::TlsSerialize, tls_codec::TlsSize)]
+#[derive(Debug, Clone, Eq, PartialEq, thalassa::TlsplSerialize, thalassa::TlsplSize)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SignContent<'a> {
-    #[tls_codec(with = "crate::tlspl::string")]
     pub label: &'a str,
-    #[tls_codec(with = "crate::tlspl::bytes")]
     pub content: &'a [u8],
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, tls_codec::TlsSerialize, tls_codec::TlsSize)]
+#[derive(Debug, Clone, Eq, PartialEq, thalassa::TlsplSerialize, thalassa::TlsplSize)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EncryptContext<'a> {
-    #[tls_codec(with = "crate::tlspl::string")]
     pub label: &'a str,
-    #[tls_codec(with = "crate::tlspl::bytes")]
     pub context: &'a [u8],
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, tls_codec::TlsSerialize, tls_codec::TlsSize)]
+#[derive(Debug, Clone, Eq, PartialEq, thalassa::TlsplSerialize, thalassa::TlsplSize)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct HashReferenceInput<'a> {
-    #[tls_codec(with = "crate::tlspl::string")]
     pub label: &'a str,
-    #[tls_codec(with = "crate::tlspl::bytes")]
     pub value: &'a [u8],
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, tls_codec::TlsSerialize, tls_codec::TlsSize)]
+#[derive(Debug, Clone, Eq, PartialEq, thalassa::TlsplSerialize, thalassa::TlsplSize)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct KdfLabel<'a> {
     pub length: u16,
-    #[tls_codec(with = "crate::tlspl::string")]
     pub label: &'a str,
-    #[tls_codec(with = "crate::tlspl::bytes")]
     pub context: &'a [u8],
 }

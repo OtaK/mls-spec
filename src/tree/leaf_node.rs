@@ -1,22 +1,12 @@
 use crate::{
     SensitiveBytes,
     credential::Credential,
-    crypto::{HpkePublicKey, HpkePublicKeyRef, SignaturePublicKey, SignaturePublicKeyRef},
+    crypto::{HpkePublicKey, SignaturePublicKey},
     defs::{Capabilities, LeafIndex},
     group::{GroupIdRef, KeyPackageLifetime, RequiredCapabilities, extensions::Extension},
 };
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    tls_codec::TlsSize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSerialize,
-    strum::Display,
-)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, thalassa::TlsplAll, strum::Display)]
 #[cfg_attr(
     feature = "serde",
     derive(serde_repr::Serialize_repr, serde_repr::Deserialize_repr)
@@ -29,28 +19,19 @@ pub enum LeafNodeSourceType {
     Commit = 0x03,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u8)]
-pub enum LeafNodeSource {
-    #[tls_codec(discriminant = "LeafNodeSourceType::KeyPackage")]
+pub enum LeafNodeSource<'a> {
+    #[tlspl(discriminant = "LeafNodeSourceType::KeyPackage")]
     KeyPackage { lifetime: KeyPackageLifetime },
-    #[tls_codec(discriminant = "LeafNodeSourceType::Update")]
+    #[tlspl(discriminant = "LeafNodeSourceType::Update")]
     Update,
-    #[tls_codec(discriminant = "LeafNodeSourceType::Commit")]
-    Commit { parent_hash: SensitiveBytes },
+    #[tlspl(discriminant = "LeafNodeSourceType::Commit")]
+    Commit { parent_hash: SensitiveBytes<'a> },
 }
 
-impl From<&LeafNodeSource> for LeafNodeSourceType {
+impl From<&LeafNodeSource<'_>> for LeafNodeSourceType {
     fn from(value: &LeafNodeSource) -> Self {
         match value {
             LeafNodeSource::KeyPackage { .. } => Self::KeyPackage,
@@ -60,36 +41,26 @@ impl From<&LeafNodeSource> for LeafNodeSourceType {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, tls_codec::TlsSerialize, tls_codec::TlsSize)]
+#[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplSerialize, thalassa::TlsplSize)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct LeafNodeMemberInfo<'a> {
-    #[tls_codec(with = "crate::tlspl::bytes")]
-    pub group_id: GroupIdRef<'a>,
+    pub group_id: GroupId<'a>,
     pub leaf_index: LeafIndex,
 }
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    tls_codec::TlsSerialize,
-    tls_codec::TlsDeserialize,
-    tls_codec::TlsSize,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct LeafNode {
-    pub encryption_key: HpkePublicKey,
-    pub signature_key: SignaturePublicKey,
-    pub credential: Credential,
+pub struct LeafNode<'a> {
+    pub encryption_key: HpkePublicKey<'a>,
+    pub signature_key: SignaturePublicKey<'a>,
+    pub credential: Credential<'a>,
     pub capabilities: Capabilities,
-    pub source: LeafNodeSource,
-    pub extensions: Vec<Extension>,
-    pub signature: SensitiveBytes,
+    pub source: LeafNodeSource<'a>,
+    pub extensions: Vec<Extension<'a>>,
+    pub signature: SensitiveBytes<'a>,
 }
 
-impl LeafNode {
+impl LeafNode<'_> {
     #[inline]
     pub fn requires_member_info(&self) -> bool {
         matches!(
@@ -128,7 +99,7 @@ impl LeafNode {
     pub fn application_id(&self) -> Option<&[u8]> {
         self.extensions.iter().find_map(|ext| {
             if let Extension::ApplicationId(app_id) = ext {
-                Some(app_id.as_slice())
+                Some(&**app_id)
             } else {
                 None
             }
@@ -164,40 +135,40 @@ impl LeafNode {
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct LeafNodeTBS<'a> {
-    pub encryption_key: HpkePublicKeyRef<'a>,
-    pub signature_key: SignaturePublicKeyRef<'a>,
-    pub credential: &'a Credential,
+    pub encryption_key: &'a HpkePublicKey<'a>,
+    pub signature_key: &'a SignaturePublicKey<'a>,
+    pub credential: &'a Credential<'a>,
     pub capabilities: &'a Capabilities,
-    pub source: &'a LeafNodeSource,
-    pub extensions: &'a Vec<Extension>,
+    pub source: &'a LeafNodeSource<'a>,
+    pub extensions: &'a Vec<Extension<'a>>,
     pub member_info: Option<LeafNodeMemberInfo<'a>>,
 }
 
-impl tls_codec::Size for LeafNodeTBS<'_> {
-    fn tls_serialized_len(&self) -> usize {
-        self.encryption_key.tls_serialized_len()
-            + self.signature_key.tls_serialized_len()
-            + self.credential.tls_serialized_len()
-            + self.capabilities.tls_serialized_len()
-            + self.source.tls_serialized_len()
-            + self.extensions.tls_serialized_len()
-            + self.member_info.map_or(0, |mi| mi.tls_serialized_len())
-    }
-}
+// impl tls_codec::Size for LeafNodeTBS<'_> {
+//     fn tls_serialized_len(&self) -> usize {
+//         self.encryption_key.tls_serialized_len()
+//             + self.signature_key.tls_serialized_len()
+//             + self.credential.tls_serialized_len()
+//             + self.capabilities.tls_serialized_len()
+//             + self.source.tls_serialized_len()
+//             + self.extensions.tls_serialized_len()
+//             + self.member_info.map_or(0, |mi| mi.tls_serialized_len())
+//     }
+// }
 
-impl tls_codec::Serialize for LeafNodeTBS<'_> {
-    fn tls_serialize<W: std::io::Write>(&self, writer: &mut W) -> Result<usize, tls_codec::Error> {
-        let mut written = 0;
-        written += crate::tlspl::bytes::tls_serialize(self.encryption_key, writer)?;
-        written += crate::tlspl::bytes::tls_serialize(self.signature_key, writer)?;
-        written += self.credential.tls_serialize(writer)?;
-        written += self.capabilities.tls_serialize(writer)?;
-        written += self.source.tls_serialize(writer)?;
-        written += self.extensions.tls_serialize(writer)?;
-        if let Some(member_info) = self.member_info {
-            written += member_info.tls_serialize(writer)?;
-        }
+// impl tls_codec::Serialize for LeafNodeTBS<'_> {
+//     fn tls_serialize<W: std::io::Write>(&self, writer: &mut W) -> Result<usize, tls_codec::Error> {
+//         let mut written = 0;
+//         written += crate::tlspl::bytes::tls_serialize(self.encryption_key, writer)?;
+//         written += crate::tlspl::bytes::tls_serialize(self.signature_key, writer)?;
+//         written += self.credential.tls_serialize(writer)?;
+//         written += self.capabilities.tls_serialize(writer)?;
+//         written += self.source.tls_serialize(writer)?;
+//         written += self.extensions.tls_serialize(writer)?;
+//         if let Some(member_info) = self.member_info {
+//             written += member_info.tls_serialize(writer)?;
+//         }
 
-        Ok(written)
-    }
-}
+//         Ok(written)
+//     }
+// }
