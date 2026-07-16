@@ -15,7 +15,7 @@ impl SensitiveBytes<'_> {
 
     #[inline]
     pub fn as_slice(&self) -> &[u8] {
-        &*self.0
+        &self.0
     }
 
     pub fn ct_eq_slice(&self, slice: impl AsRef<[u8]>) -> bool {
@@ -101,7 +101,7 @@ impl<'a> std::ops::Deref for SensitiveBytes<'a> {
     type Target = [u8];
     #[inline]
     fn deref(&self) -> &Self::Target {
-        &*self.0
+        &self.0
     }
 }
 

@@ -651,7 +651,7 @@ dependencies = [
 
 [[package]]
 name = "mls-spec"
-version = "3.0.0-pre.1"
+version = "3.0.0-pre.2"
 dependencies = [
  "async-trait",
  "color-eyre",
@@ -1023,9 +1023,9 @@ dependencies = [
 
 [[package]]
 name = "thalassa"
-version = "0.0.1-pre.4"
+version = "0.0.1-pre.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b03f9d9b1701ce7e38f1243b88ab48563d80bf3e119ec3776b23e2b4150a89b8"
+checksum = "621b94a5ff84ffdf45fa4b93e00a566f641a382d1d0931b076dd9be1ef00ff86"
 dependencies = [
  "parsio",
  "simdutf8",
@@ -1035,9 +1035,9 @@ dependencies = [
 
 [[package]]
 name = "thalassa-derive"
-version = "0.0.1-pre.4"
+version = "0.0.1-pre.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f20b9202aac102a49541a58e1978fa1b8aa41267b59f6fd4356af35cb310c8cb"
+checksum = "2117a9f3f29df023e51f11d2c90b93c1efcfdf53585e5ac59f2dd771c30bf692"
 dependencies = [
  "bitflags",
  "darling 0.23.0",

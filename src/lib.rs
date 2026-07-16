@@ -9,7 +9,7 @@
 mod error;
 pub use self::error::*;
 
-pub(crate) const CRATE_NAME: &'static str = std::env!("CARGO_PKG_NAME");
+pub(crate) const CRATE_NAME: &str = std::env!("CARGO_PKG_NAME");
 
 pub mod reexports {
     #[cfg(feature = "draft-ietf-mls-extensions-content-advertisement-parse")]
@@ -60,7 +60,7 @@ pub(crate) fn consume_padding<'a, R: thalassa::io::Read<'a>>(
 ) -> Result<usize, thalassa::error::TlsplReadError> {
     let bytes = reader.read_till_eof()?;
     let len = bytes.len();
-    if bytes.into_iter().any(|&b| b != 0x00) {
+    if bytes.iter().any(|&b| b != 0x00) {
         return Err(thalassa::error::TlsplReadError::Parsio(
             thalassa::io::ReadError::IoError(std::io::ErrorKind::InvalidData),
         ));
