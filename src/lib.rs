@@ -145,7 +145,7 @@ pub mod mls_rs_compat {
     /// ```
     ///
     pub trait MlsRsTranscode: mls_rs_codec::MlsDecode + mls_rs_codec::MlsEncode {
-        type Target: crate::Parsable + crate::Serializable;
+        type Target: for<'tlspl> crate::Parsable<'tlspl> + crate::Serializable;
 
         fn transcode_from_mls_spec(item: &Self::Target) -> Result<Self, crate::MlsSpecError>
         where

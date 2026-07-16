@@ -1023,9 +1023,9 @@ dependencies = [
 
 [[package]]
 name = "thalassa"
-version = "0.0.1-pre.3"
+version = "0.0.1-pre.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "08270ec48eb31667dbcb02b498742a109a122c7d7c232f08505485b0ed975dfe"
+checksum = "b03f9d9b1701ce7e38f1243b88ab48563d80bf3e119ec3776b23e2b4150a89b8"
 dependencies = [
  "parsio",
  "simdutf8",
@@ -1035,9 +1035,9 @@ dependencies = [
 
 [[package]]
 name = "thalassa-derive"
-version = "0.0.1-pre.3"
+version = "0.0.1-pre.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "854c23551ee7d1462c9c8bb709a333b30550572c3a03dc6607c855d224d6dce6"
+checksum = "f20b9202aac102a49541a58e1978fa1b8aa41267b59f6fd4356af35cb310c8cb"
 dependencies = [
  "bitflags",
  "darling 0.23.0",
@@ -1077,9 +1077,9 @@ dependencies = [
 
 [[package]]
 name = "tokio"
-version = "1.52.3"
+version = "1.52.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8fc7f01b389ac15039e4dc9531aa973a135d7a4135281b12d7c1bc79fd57fffe"
+checksum = "317fafbbe3f02fc663dad00ea6186197de963cd4190e86a26d8d0fae095539af"
 dependencies = [
  "bytes",
  "libc",

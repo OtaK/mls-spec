@@ -18,7 +18,7 @@ pub struct MediaType<'a> {
 }
 
 #[cfg(feature = "draft-ietf-mls-extensions-content-advertisement-parse")]
-impl MediaType {
+impl<'a> MediaType<'a> {
     pub fn to_parsed_repr(&self) -> crate::MlsSpecResult<mediatype::MediaType<'_>> {
         let mt = std::str::from_utf8(&self.media_type)
             .map_err(|_| crate::MlsSpecError::ContentAdvertisementUtf8ParameterError)?;
@@ -26,14 +26,14 @@ impl MediaType {
         let mut mt_struct = mediatype::MediaType::parse(mt)?;
         use mediatype::WriteParams as _;
         for p in &self.parameters {
-            let name = std::str::from_utf8(p.parameter_name.as_slice())
+            let name = std::str::from_utf8(&*p.parameter_name)
                 .map_err(|_| crate::MlsSpecError::ContentAdvertisementUtf8ParameterError)
                 .and_then(|s| {
                     mediatype::Name::new(s)
                         .ok_or(crate::MlsSpecError::ContentAdvertisementUtf8ParameterError)
                 })?;
 
-            let value = std::str::from_utf8(p.parameter_value.as_slice())
+            let value = std::str::from_utf8(&*p.parameter_value)
                 .map_err(|_| crate::MlsSpecError::ContentAdvertisementUtf8ParameterError)
                 .and_then(|s| {
                     mediatype::Value::new(s)
