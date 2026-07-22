@@ -43,7 +43,7 @@ The following draft features were modified by extrapolating the current status o
 
 Please note that all the `drafts` are semver-excluded.
 
-Additionally, this crate makes use of RustCrypto's `tls_codec` crate, and has a `mls-rs` compatibility layer (gated under the `mls-rs-compat` feature)
+Additionally, this crate makes use of the `thalassa` crate for TLS Presentation Language, and has a `mls-rs` compatibility layer (gated under the `mls-rs-compat` feature)
 that allows to transcode `mls-spec` to `mls-rs` types and vice-versa.
 
 ## License

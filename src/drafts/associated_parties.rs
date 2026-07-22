@@ -101,25 +101,25 @@ pub mod key_schedule {
         pub const LABEL: &'static [u8] = b"AP Commit Secret";
     }
 
-    // impl tls_codec::Size for AssociatedPartyEncryptionContext<'_> {
-    //     fn tls_serialized_len(&self) -> usize {
-    //         crate::tlspl::tls_serialized_len_as_vlvec(Self::LABEL.len())
-    //             + self.group_context.tls_serialized_len()
-    //             + crate::tlspl::tls_serialized_len_as_vlvec(self.ap_commit_secret_id.len())
-    //     }
-    // }
+    impl thalassa::TlsplSize for AssociatedPartyEncryptionContext<'_> {
+        fn tlspl_serialized_len(&self) -> usize {
+            Self::LABEL.tlspl_serialized_len()
+                + self.group_context.tlspl_serialized_len()
+                + self.ap_commit_secret_id.tlspl_serialized_len()
+        }
+    }
 
-    // impl tls_codec::Serialize for AssociatedPartyEncryptionContext<'_> {
-    //     fn tls_serialize<W: std::io::Write>(
-    //         &self,
-    //         writer: &mut W,
-    //     ) -> Result<usize, tls_codec::Error> {
-    //         let mut written = crate::tlspl::bytes::tls_serialize(Self::LABEL, writer)?;
-    //         written += self.group_context.tls_serialize(writer)?;
-    //         written += crate::tlspl::bytes::tls_serialize(self.ap_commit_secret_id, writer)?;
-    //         Ok(written)
-    //     }
-    // }
+    impl thalassa::TlsplSerialize for AssociatedPartyEncryptionContext<'_> {
+        fn tlspl_serialize_to<W: thalassa::io::Write>(
+            &self,
+            writer: &mut W,
+        ) -> thalassa::error::TlsplWriteResult<usize> {
+            let mut written = Self::LABEL.tlspl_serialize_to(writer)?;
+            written += self.group_context.tlspl_serialize_to(writer)?;
+            written += self.ap_commit_secret_id.tlspl_serialize_to(writer)?;
+            Ok(written)
+        }
+    }
 
     #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
