@@ -651,7 +651,7 @@ dependencies = [
 
 [[package]]
 name = "mls-spec"
-version = "3.0.0-pre.4"
+version = "3.0.0-pre.5"
 dependencies = [
  "async-trait",
  "color-eyre",
