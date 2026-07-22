@@ -144,31 +144,37 @@ pub struct LeafNodeTBS<'a> {
     pub member_info: Option<LeafNodeMemberInfo<'a>>,
 }
 
-// impl tls_codec::Size for LeafNodeTBS<'_> {
-//     fn tls_serialized_len(&self) -> usize {
-//         self.encryption_key.tls_serialized_len()
-//             + self.signature_key.tls_serialized_len()
-//             + self.credential.tls_serialized_len()
-//             + self.capabilities.tls_serialized_len()
-//             + self.source.tls_serialized_len()
-//             + self.extensions.tls_serialized_len()
-//             + self.member_info.map_or(0, |mi| mi.tls_serialized_len())
-//     }
-// }
+impl thalassa::TlsplSize for LeafNodeTBS<'_> {
+    fn tlspl_serialized_len(&self) -> usize {
+        self.encryption_key.tlspl_serialized_len()
+            + self.signature_key.tlspl_serialized_len()
+            + self.credential.tlspl_serialized_len()
+            + self.capabilities.tlspl_serialized_len()
+            + self.source.tlspl_serialized_len()
+            + self.extensions.tlspl_serialized_len()
+            + self
+                .member_info
+                .as_ref()
+                .map_or(0, |mi| mi.tlspl_serialized_len())
+    }
+}
 
-// impl tls_codec::Serialize for LeafNodeTBS<'_> {
-//     fn tls_serialize<W: std::io::Write>(&self, writer: &mut W) -> Result<usize, tls_codec::Error> {
-//         let mut written = 0;
-//         written += crate::tlspl::bytes::tls_serialize(self.encryption_key, writer)?;
-//         written += crate::tlspl::bytes::tls_serialize(self.signature_key, writer)?;
-//         written += self.credential.tls_serialize(writer)?;
-//         written += self.capabilities.tls_serialize(writer)?;
-//         written += self.source.tls_serialize(writer)?;
-//         written += self.extensions.tls_serialize(writer)?;
-//         if let Some(member_info) = self.member_info {
-//             written += member_info.tls_serialize(writer)?;
-//         }
+impl thalassa::TlsplSerialize for LeafNodeTBS<'_> {
+    fn tlspl_serialize_to<W: thalassa::io::Write>(
+        &self,
+        writer: &mut W,
+    ) -> thalassa::error::TlsplWriteResult<usize> {
+        let mut written = 0;
+        written += self.encryption_key.tlspl_serialize_to(writer)?;
+        written += self.signature_key.tlspl_serialize_to(writer)?;
+        written += self.credential.tlspl_serialize_to(writer)?;
+        written += self.capabilities.tlspl_serialize_to(writer)?;
+        written += self.source.tlspl_serialize_to(writer)?;
+        written += self.extensions.tlspl_serialize_to(writer)?;
+        if let Some(member_info) = &self.member_info {
+            written += member_info.tlspl_serialize_to(writer)?;
+        }
 
-//         Ok(written)
-//     }
-// }
+        Ok(written)
+    }
+}
