@@ -666,6 +666,7 @@ dependencies = [
  "mls-spec",
  "postcard",
  "pretty_assertions",
+ "rand_core",
  "serde",
  "serde_json",
  "serde_repr",
@@ -794,6 +795,12 @@ checksum = "dfbc457d0c7a0759a614551b11a6409e5951f6c7537be1f1b7682b9ae9230368"
 dependencies = [
  "proc-macro2",
 ]
+
+[[package]]
+name = "rand_core"
+version = "0.10.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "63b8176103e19a2643978565ca18b50549f6101881c443590420e4dc998a3c69"
 
 [[package]]
 name = "redox_syscall"
