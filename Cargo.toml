@@ -17,6 +17,7 @@ rust-version = "1.85"
 features = [
     "all-drafts",
     "mls-rs-compat",
+    "provider-traits",
     "serde",
 ]
 rustdoc-args = ["--cfg", "docsrs", "--generate-link-to-definition"]
@@ -41,6 +42,7 @@ all-drafts = [
 ]
 alloc = []
 std = ["alloc"]
+provider-traits = ["dep:rand_core"]
 hazmat = []
 test-vectors = []
 test-utils = ["dep:pretty_assertions", "dep:color-eyre", "dep:postcard", "dep:serde_json"]
@@ -83,6 +85,7 @@ static_assertions = "1.1"
 subtle = "2.6"
 zeroize = { version = "1", features = ["derive"] }
 hex = "0.4"
+rand_core = { version = "0.10", optional = true }
 mediatype = { version = "0.21", default-features = false, optional = true }
 serde = { version = "1", features = ["derive"], optional = true }
 serde_repr = { version = "0.1", optional = true }
