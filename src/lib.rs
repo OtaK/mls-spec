@@ -49,10 +49,12 @@ pub trait ToPrefixedLabel: std::fmt::Display {
 /// Delegate trait for implementors to implement spec-compliant validation of credentials
 /// with their Authentication Service (MLS AS)
 pub trait AuthenticationServiceDelegate: Send + Sync {
-    fn validate_credential(
-        &self,
-        credential: &crate::credential::Credential,
-    ) -> impl std::future::Future<Output = bool> + Send;
+    fn validate_credential<'life>(
+        &'life self,
+        credential: &'life crate::credential::Credential,
+    ) -> std::pin::Pin<Box<dyn core::future::Future<Output = bool> + Send + 'life>>
+    where
+        Self: 'life;
 }
 
 pub(crate) fn consume_padding<'a, R: thalassa::io::Read<'a>>(
