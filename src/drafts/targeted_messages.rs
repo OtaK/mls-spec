@@ -40,7 +40,7 @@ pub struct TargetedMessageTBS<'a> {
 impl thalassa::TlsplSize for TargetedMessageTBS<'_> {
     fn tlspl_serialized_len(&self) -> usize {
         ProtocolVersion::Mls10.tlspl_serialized_len()
-            + WireFormat::new_unchecked(WireFormat::MLS_TARGETED_MESSAGE).tlspl_serialized_len()
+            + WireFormat::MLS_TARGETED_MESSAGE.tlspl_serialized_len()
             + self.group_id.tlspl_serialized_len()
             + self.epoch.tlspl_serialized_len()
             + self.recipient_leaf_index.tlspl_serialized_len()
@@ -57,8 +57,7 @@ impl thalassa::TlsplSerialize for TargetedMessageTBS<'_> {
         writer: &mut W,
     ) -> thalassa::error::TlsplWriteResult<usize> {
         let mut written = ProtocolVersion::Mls10.tlspl_serialize_to(writer)?;
-        written += WireFormat::new_unchecked(WireFormat::MLS_TARGETED_MESSAGE)
-            .tlspl_serialize_to(writer)?;
+        written += WireFormat::MLS_TARGETED_MESSAGE.tlspl_serialize_to(writer)?;
         written += self.group_id.tlspl_serialize_to(writer)?;
         written += self.epoch.tlspl_serialize_to(writer)?;
         written += self.recipient_leaf_index.tlspl_serialize_to(writer)?;
