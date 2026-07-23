@@ -100,7 +100,7 @@ pub(crate) mod testing {
         ctx: &str,
     ) -> color_eyre::eyre::Result<()> {
         let _ = color_eyre::install();
-        let value2 = T::from_tls_bytes(&value_bytes)?;
+        let value2 = T::from_tls_bytes(value_bytes)?;
         super::assertions::assert_eq_err!(value, &value2);
         println!("==== --> [{ctx}] TLSPL OK");
 
@@ -124,7 +124,7 @@ pub(crate) mod testing {
         ($testname:ident, $iv:expr) => {
             #[test]
             fn $testname() -> color_eyre::eyre::Result<()> {
-                use crate::Serializable as _;
+                use $crate::Serializable as _;
                 let bytes = $iv.to_tls_bytes()?;
                 $crate::test_utils::testing::roundtrip(&$iv, &bytes, stringify!($testname))?;
                 Ok(())
