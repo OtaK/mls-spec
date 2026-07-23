@@ -80,7 +80,7 @@ thiserror = "2"
 miette = "7"
 async-trait = "0.1"
 strum = { version = "0.28", features = ["derive"] }
-thalassa = { version = "0.0.2", features = ["derive"] }
+thalassa = { version = "0.0.3", features = ["derive"] }
 static_assertions = "1.1"
 subtle = "2.6"
 zeroize = { version = "1", features = ["derive"] }

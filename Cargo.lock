@@ -1030,9 +1030,9 @@ dependencies = [
 
 [[package]]
 name = "thalassa"
-version = "0.0.2"
+version = "0.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dbf8341c1637da46c8cba065b866e7ba0b12ee7ee3242825eef32a12dbb42edf"
+checksum = "27c041967639987f3fcb9fe47a2b05e646b89fa6e5a86c65fa30f97e0195bf0c"
 dependencies = [
  "parsio",
  "simdutf8",
@@ -1043,9 +1043,9 @@ dependencies = [
 
 [[package]]
 name = "thalassa-derive"
-version = "0.0.2"
+version = "0.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bb6cd2f522e2f5f52d7b80bc4193158c4363c5908c850ca9d0e86bb459a80b21"
+checksum = "4975614f965f814734ef72eace332d3f210282845f516e1bf795721197ac0384"
 dependencies = [
  "bitflags",
  "darling 0.23.0",
