@@ -1,6 +1,6 @@
 [package]
 name = "mls-spec"
-version = "3.0.0-pre.9"
+version = "3.0.0-pre.10"
 description = "This crate is a repository of MLS / RFC9420-related data structures."
 readme = "README.md"
 documentation = "https://docs.rs/mls-spec"
@@ -80,7 +80,7 @@ thiserror = "2"
 miette = "7"
 async-trait = "0.1"
 strum = { version = "0.28", features = ["derive"] }
-thalassa = { version = "0.0.3", features = ["derive"] }
+thalassa = { version = "0.0.4", features = ["derive"] }
 static_assertions = "1.1"
 subtle = "2.6"
 zeroize = { version = "1", features = ["derive"] }
