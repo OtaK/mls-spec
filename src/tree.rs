@@ -71,7 +71,10 @@ pub struct ParentNode {
     tls_codec::TlsDeserialize,
     tls_codec::TlsSize,
 )]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde_repr::Serialize_repr, serde_repr::Deserialize_repr)
+)]
 #[repr(u8)]
 pub enum NodeType {
     Reserved = 0x00,

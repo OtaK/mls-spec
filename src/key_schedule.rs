@@ -131,7 +131,10 @@ impl<'a> From<&'a [u8]> for InterimTranscriptHashInput<'a> {
     tls_codec::TlsDeserialize,
     tls_codec::TlsSize,
 )]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde_repr::Serialize_repr, serde_repr::Deserialize_repr)
+)]
 #[repr(u8)]
 pub enum PskType {
     Reserved = 0x00,
@@ -152,7 +155,10 @@ pub enum PskType {
     tls_codec::TlsDeserialize,
     tls_codec::TlsSize,
 )]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde_repr::Serialize_repr, serde_repr::Deserialize_repr)
+)]
 #[repr(u8)]
 pub enum ResumptionPskUsage {
     Reserved = 0x00,
