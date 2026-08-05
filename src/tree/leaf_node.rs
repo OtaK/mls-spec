@@ -3,7 +3,7 @@ use crate::{
     credential::Credential,
     crypto::{HpkePublicKey, SignaturePublicKey},
     defs::{Capabilities, LeafIndex},
-    group::{GroupIdRef, KeyPackageLifetime, RequiredCapabilities, extensions::Extension},
+    group::{GroupId, KeyPackageLifetime, RequiredCapabilities, extensions::Extension},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, thalassa::TlsplAll, strum::Display)]

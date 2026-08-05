@@ -18,7 +18,7 @@ impl super::TestVector for DeserializationVector {
         let deserialized = mls_spec::SensitiveBytes::from_tls_bytes(&self.vlbytes_header)?;
         assert_eq_err!(deserialized.len(), self.length);
         // Make sure it's all zeroes
-        for &b in deserialized.into_iter() {
+        for &b in deserialized.iter() {
             assert_eq_err!(b, 0);
         }
         Ok(())

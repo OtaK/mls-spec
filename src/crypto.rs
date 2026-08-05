@@ -1,8 +1,5 @@
 use crate::{SensitiveBytes, ToPrefixedLabel, defs::CiphersuiteId, key_schedule::PreSharedKeyId};
 
-#[cfg(feature = "provider-traits")]
-pub mod provider;
-
 pub type Mac<'a> = SensitiveBytes<'a>;
 pub type HpkePublicKey<'a> = SensitiveBytes<'a>;
 pub type HpkePrivateKey<'a> = SensitiveBytes<'a>;
