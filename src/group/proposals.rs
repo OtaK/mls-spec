@@ -46,23 +46,19 @@ impl Proposal<'_> {
 impl From<&Proposal<'_>> for ProposalType {
     fn from(val: &Proposal) -> Self {
         match val {
-            Proposal::Add(_) => ProposalType::new_unchecked(ProposalType::ADD),
-            Proposal::Update(_) => ProposalType::new_unchecked(ProposalType::UPDATE),
-            Proposal::Remove(_) => ProposalType::new_unchecked(ProposalType::REMOVE),
-            Proposal::PreSharedKey(_) => ProposalType::new_unchecked(ProposalType::PSK),
-            Proposal::ReInit(_) => ProposalType::new_unchecked(ProposalType::REINIT),
-            Proposal::ExternalInit(_) => ProposalType::new_unchecked(ProposalType::EXTERNAL_INIT),
-            Proposal::GroupContextExtensions(_) => {
-                ProposalType::new_unchecked(ProposalType::GROUP_CONTEXT_EXTENSIONS)
-            }
+            Proposal::Add(_) => ProposalType::ADD,
+            Proposal::Update(_) => ProposalType::UPDATE,
+            Proposal::Remove(_) => ProposalType::REMOVE,
+            Proposal::PreSharedKey(_) => ProposalType::PSK,
+            Proposal::ReInit(_) => ProposalType::REINIT,
+            Proposal::ExternalInit(_) => ProposalType::EXTERNAL_INIT,
+            Proposal::GroupContextExtensions(_) => ProposalType::GROUP_CONTEXT_EXTENSIONS,
             #[cfg(feature = "draft-ietf-mls-extensions")]
-            Proposal::AppDataUpdate(_) => {
-                ProposalType::new_unchecked(ProposalType::APP_DATA_UPDATE)
-            }
+            Proposal::AppDataUpdate(_) => ProposalType::APP_DATA_UPDATE,
             #[cfg(feature = "draft-ietf-mls-extensions")]
-            Proposal::AppEphemeral(_) => ProposalType::new_unchecked(ProposalType::APP_EPHEMERAL),
+            Proposal::AppEphemeral(_) => ProposalType::APP_EPHEMERAL,
             #[cfg(feature = "draft-ietf-mls-extensions")]
-            Proposal::SelfRemove(_) => ProposalType::new_unchecked(ProposalType::SELF_REMOVE),
+            Proposal::SelfRemove(_) => ProposalType::SELF_REMOVE,
         }
     }
 }

@@ -1,7 +1,6 @@
 macro_rules! impl_spec_enum {
     (
         $typename:ident($storage:ty);
-        serde_repr $serde_repr:literal;
         reserved_priv $reserved_priv_range:expr => $range_error:expr;
         default_range $spec_default_range:expr;
         $(
@@ -21,22 +20,26 @@ macro_rules! impl_spec_enum {
         )]
         #[cfg_attr(
             feature = "serde",
-            derive(serde::Serialize, serde::Deserialize)
+            derive(serde::Serialize, serde::Deserialize),
+            serde(transparent)
         )]
-        #[cfg_attr(feature = "serde", serde(try_from = $serde_repr))]
         #[repr(transparent)]
         pub struct $typename($storage);
 
         impl $typename {
             $(
                 $(#[cfg($attr)])*
-                pub const $identifier: $storage = $value as $storage;
+                pub const $identifier: Self = Self($value as $storage);
             )+
             pub(crate) const RESERVED_PRIVATE_USE_RANGE: std::ops::RangeInclusive<$storage> = $reserved_priv_range;
             pub(crate) const SPEC_DEFAULT_RANGE: Option<std::ops::RangeInclusive<$storage>> = $spec_default_range;
         }
 
         impl $typename {
+            pub const fn as_repr(&self) -> $storage {
+                self.0
+            }
+
             #[must_use]
             pub fn all_without_spec_default() -> Vec<Self> {
                 let all = [
@@ -96,7 +99,7 @@ macro_rules! impl_spec_enum {
                 let mut const_name = match self {
                     $(
                         $(#[cfg($attr)])*
-                        &Self(Self::$identifier) => Some(stringify!($identifier)),
+                        &Self::$identifier => Some(stringify!($identifier)),
                     )+
                     _ => None
                 };
@@ -124,13 +127,14 @@ macro_rules! impl_spec_enum {
         impl TryFrom<$storage> for $typename {
             type Error = crate::MlsSpecError;
             fn try_from(value: $storage) -> Result<Self, Self::Error> {
+                let value = Self(value);
                 match value {
                     $(
                         $(#[cfg($attr)])*
-                        Self::$identifier => Ok(Self(value)),
+                        Self::$identifier => Ok(value),
                     )+
-                    v if Self::RESERVED_PRIVATE_USE_RANGE.contains(&v) => Ok(Self(value)),
-                    v if GREASE_VALUES.contains(&v) => Ok(Self(value)),
+                    v if Self::RESERVED_PRIVATE_USE_RANGE.contains(&v.0) => Ok(value),
+                    v if GREASE_VALUES.contains(&v.0) => Ok(value),
                     _ => Err(crate::MlsSpecError::InvalidSpecValue)
                 }
             }

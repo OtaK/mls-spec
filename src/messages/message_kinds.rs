@@ -38,8 +38,7 @@ pub struct PublicMessage<'a> {
 }
 
 impl<'a> PublicMessage<'a> {
-    const AUTH_CONTENT_REF_WF: WireFormat =
-        WireFormat::new_unchecked(WireFormat::MLS_PUBLIC_MESSAGE);
+    const AUTH_CONTENT_REF_WF: WireFormat = WireFormat::MLS_PUBLIC_MESSAGE;
 
     pub fn into_authenticated_content(self) -> AuthenticatedContent<'a> {
         AuthenticatedContent {

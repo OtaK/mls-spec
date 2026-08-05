@@ -5,16 +5,7 @@ use crate::{
     group::{commits::Commit, proposals::Proposal},
 };
 
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    thalassa::TlsplAll,
-    strum::Display,
-)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, thalassa::TlsplAll, strum::Display)]
 #[strum(prefix = "ContentType")]
 #[cfg_attr(
     feature = "serde",

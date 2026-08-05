@@ -295,43 +295,25 @@ impl MlsMessageContent<'_> {
 impl Into<WireFormat> for &MlsMessageContent<'_> {
     fn into(self) -> WireFormat {
         match self {
-            MlsMessageContent::MlsPublicMessage(_) => {
-                WireFormat::new_unchecked(WireFormat::MLS_PUBLIC_MESSAGE)
-            }
-            MlsMessageContent::MlsPrivateMessage(_) => {
-                WireFormat::new_unchecked(WireFormat::MLS_PRIVATE_MESSAGE)
-            }
-            MlsMessageContent::Welcome(_) => WireFormat::new_unchecked(WireFormat::MLS_WELCOME),
-            MlsMessageContent::GroupInfo(_) => {
-                WireFormat::new_unchecked(WireFormat::MLS_GROUP_INFO)
-            }
-            MlsMessageContent::KeyPackage(_) => {
-                WireFormat::new_unchecked(WireFormat::MLS_KEY_PACKAGE)
-            }
+            MlsMessageContent::MlsPublicMessage(_) => WireFormat::MLS_PUBLIC_MESSAGE,
+            MlsMessageContent::MlsPrivateMessage(_) => WireFormat::MLS_PRIVATE_MESSAGE,
+            MlsMessageContent::Welcome(_) => WireFormat::MLS_WELCOME,
+            MlsMessageContent::GroupInfo(_) => WireFormat::MLS_GROUP_INFO,
+            MlsMessageContent::KeyPackage(_) => WireFormat::MLS_KEY_PACKAGE,
             #[cfg(feature = "draft-ietf-mls-targeted-messages")]
-            MlsMessageContent::MlsTargetedMessage(_) => {
-                WireFormat::new_unchecked(WireFormat::MLS_TARGETED_MESSAGE)
-            }
+            MlsMessageContent::MlsTargetedMessage(_) => WireFormat::MLS_TARGETED_MESSAGE,
             #[cfg(feature = "draft-mahy-mls-semiprivatemessage")]
-            MlsMessageContent::MlsSemiPrivateMessage(_) => {
-                WireFormat::new_unchecked(WireFormat::MLS_SEMIPRIVATE_MESSAGE)
-            }
+            MlsMessageContent::MlsSemiPrivateMessage(_) => WireFormat::MLS_SEMIPRIVATE_MESSAGE,
             #[cfg(feature = "draft-mularczyk-mls-splitcommit")]
-            MlsMessageContent::MlsSplitCommitMessage(_) => {
-                WireFormat::new_unchecked(WireFormat::MLS_SPLIT_COMMIT)
-            }
+            MlsMessageContent::MlsSplitCommitMessage(_) => WireFormat::MLS_SPLIT_COMMIT,
             #[cfg(feature = "draft-pham-mls-additional-wire-formats")]
-            MlsMessageContent::MlsMessageWithoutAad(_) => {
-                WireFormat::new_unchecked(WireFormat::MLS_MESSAGE_WITHOUT_AAD)
-            }
+            MlsMessageContent::MlsMessageWithoutAad(_) => WireFormat::MLS_MESSAGE_WITHOUT_AAD,
             #[cfg(feature = "draft-mahy-mls-private-external")]
             MlsMessageContent::MlsPrivateExternalMessage(_) => {
-                WireFormat::new_unchecked(WireFormat::MLS_PRIVATE_EXTERNAL_MESSAGE)
+                WireFormat::MLS_PRIVATE_EXTERNAL_MESSAGE
             }
             #[cfg(feature = "draft-kohbrok-mls-leaf-operation-intents")]
-            MlsMessageContent::MlsLeafOperationIntent(_) => {
-                WireFormat::new_unchecked(WireFormat::MLS_LEAF_OPERATION_INTENT)
-            }
+            MlsMessageContent::MlsLeafOperationIntent(_) => WireFormat::MLS_LEAF_OPERATION_INTENT,
         }
     }
 }
