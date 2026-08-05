@@ -54,7 +54,6 @@ impl ProtocolVersion {
 
 impl_spec_enum! {
     CiphersuiteId(u16);
-    serde_repr "u16";
     reserved_priv 0xF000..=0xFFFF => crate::MlsSpecError::InvalidPrivateRangeCiphersuite;
     default_range None;
     SPEC_RESERVED = 0x0000,
@@ -69,13 +68,12 @@ impl_spec_enum! {
 
 impl Default for CiphersuiteId {
     fn default() -> Self {
-        Self(Self::MLS_128_DHKEMX25519_AES128GCM_SHA256_ED25519)
+        Self::MLS_128_DHKEMX25519_AES128GCM_SHA256_ED25519
     }
 }
 
 impl_spec_enum! {
     ExtensionType(u16);
-    serde_repr "u16";
     reserved_priv 0xF000..=0xFFFF => crate::MlsSpecError::InvalidPrivateRangeExtensionType;
     default_range Some(0x0001..=0x0005);
     SPEC_RESERVED = 0x0000,
@@ -100,13 +98,12 @@ impl_spec_enum! {
 
 impl Default for ExtensionType {
     fn default() -> Self {
-        Self(Self::SPEC_RESERVED)
+        Self::SPEC_RESERVED
     }
 }
 
 impl_spec_enum! {
     ProposalType(u16);
-    serde_repr "u16";
     reserved_priv 0xF000..=0xFFFF => crate::MlsSpecError::InvalidPrivateRangeProposalType;
     default_range Some(0x0001..=0x0007);
     SPEC_RESERVED = 0x0000,
@@ -130,13 +127,13 @@ impl ProposalType {
     pub fn is_allowed_in_external_proposals(&self) -> bool {
         #[allow(unused_mut)]
         let mut allowed = matches!(
-            self.0,
+            *self,
             Self::ADD | Self::REMOVE | Self::PSK | Self::REINIT | Self::GROUP_CONTEXT_EXTENSIONS
         );
 
         #[cfg(feature = "draft-ietf-mls-extensions")]
         {
-            allowed |= matches!(self.0, Self::APP_DATA_UPDATE | Self::APP_EPHEMERAL);
+            allowed |= matches!(*self, Self::APP_DATA_UPDATE | Self::APP_EPHEMERAL);
         }
 
         allowed
@@ -146,13 +143,13 @@ impl ProposalType {
     pub fn needs_update_path(&self) -> bool {
         #[allow(unused_mut)]
         let mut needs_update_path = matches!(
-            self.0,
+            *self,
             Self::UPDATE | Self::REMOVE | Self::EXTERNAL_INIT | Self::GROUP_CONTEXT_EXTENSIONS
         );
 
         #[cfg(feature = "draft-ietf-mls-extensions")]
         {
-            needs_update_path |= matches!(self.0, Self::SELF_REMOVE);
+            needs_update_path |= matches!(*self, Self::SELF_REMOVE);
         }
 
         needs_update_path
@@ -161,7 +158,6 @@ impl ProposalType {
 
 impl_spec_enum! {
     CredentialType(u16);
-    serde_repr "u16";
     reserved_priv 0xF000..=0xFFFF => crate::MlsSpecError::InvalidPrivateRangeCredentialType;
     default_range None;
     SPEC_RESERVED = 0x0000,
@@ -179,13 +175,12 @@ impl_spec_enum! {
 
 impl Default for CredentialType {
     fn default() -> Self {
-        Self(Self::BASIC)
+        Self::BASIC
     }
 }
 
 impl_spec_enum! {
     WireFormat(u16);
-    serde_repr "u16";
     reserved_priv 0xF000..=0xFFFF => crate::MlsSpecError::InvalidPrivateRangeWireFormat;
     default_range None;
     SPEC_RESERVED = 0x0000,

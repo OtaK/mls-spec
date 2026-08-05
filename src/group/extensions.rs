@@ -53,7 +53,7 @@ pub enum Extension<'a> {
 
 impl From<&Extension<'_>> for ExtensionType {
     fn from(value: &Extension) -> Self {
-        ExtensionType::new_unchecked(match value {
+        match value {
             Extension::ApplicationId(_) => ExtensionType::APPLICATION_ID,
             Extension::RatchetTree(_) => ExtensionType::RATCHET_TREE,
             Extension::RequiredCapabilities(_) => ExtensionType::REQUIRED_CAPABILITIES,
@@ -67,8 +67,8 @@ impl From<&Extension<'_>> for ExtensionType {
             Extension::RequiredWireFormats(_) => ExtensionType::REQUIRED_WIRE_FORMATS,
             #[cfg(feature = "draft-ietf-mls-ratchet-tree-options")]
             Extension::RatchetTreeSourceDomains(_) => ExtensionType::RATCHET_TREE_SOURCE_DOMAINS,
-            Extension::Arbitrary(id, _) => *id,
-        })
+            Extension::Arbitrary(id, _) => ExtensionType::new_unchecked(*id),
+        }
     }
 }
 
@@ -85,7 +85,7 @@ impl<'a> Extension<'a> {
     ) -> crate::MlsSpecResult<Self> {
         use thalassa::TlsplDeserialize as _;
 
-        Ok(match extension_id {
+        Ok(match ExtensionType::new_unchecked(extension_id) {
             ExtensionType::APPLICATION_ID => {
                 Self::ApplicationId(<_>::tlspl_deserialize_from(&mut extension_data)?)
             }
@@ -117,7 +117,7 @@ impl<'a> Extension<'a> {
             ExtensionType::RATCHET_TREE_SOURCE_DOMAINS => {
                 Self::RatchetTreeSourceDomains(<_>::tlspl_deserialize_from(&mut extension_data)?)
             }
-            discr => Self::Arbitrary(discr, extension_data),
+            discr => Self::Arbitrary(*discr, extension_data),
         })
     }
 

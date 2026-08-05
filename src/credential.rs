@@ -64,8 +64,5 @@ impl<'a> From<&'a Credential<'a>> for CredentialType {
             #[cfg(feature = "draft-mahy-mls-sd-cwt-credential")]
             Credential::SdJwtCredential(_) => CredentialType::SD_JWT_CREDENTIAL,
         }
-        .try_into()
-        // SAFETY: We only handle known, safe values so this cannot fail
-        .unwrap()
     }
 }

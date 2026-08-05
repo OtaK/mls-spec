@@ -81,7 +81,7 @@ impl<'a> thalassa::TlsplDeserialize<'a> for SplitCommitMessage<'a> {
     {
         let version = ProtocolVersion::tlspl_deserialize_from(reader)?;
         let wire_format = WireFormat::tlspl_deserialize_from(reader)?;
-        let split_commit_message = match *wire_format {
+        let split_commit_message = match wire_format {
             WireFormat::MLS_PRIVATE_MESSAGE => MlsMessage {
                 version,
                 content: MlsMessageContent::MlsPrivateMessage(<_>::tlspl_deserialize_from(reader)?),
