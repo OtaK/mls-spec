@@ -56,6 +56,20 @@ impl<'a> GroupContext<'a> {
             }
         })
     }
+
+    #[cfg(feature = "draft-ietf-mls-extensions")]
+    pub fn app_data_dict(
+        &self,
+    ) -> Option<&crate::drafts::mls_extensions::safe_application::ApplicationDataDictionary<'_>>
+    {
+        self.extensions.iter().find_map(|ext| {
+            if let Extension::ApplicationData(add) = ext {
+                Some(add)
+            } else {
+                None
+            }
+        })
+    }
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]

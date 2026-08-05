@@ -43,7 +43,7 @@ pub struct MlsMessage<'a> {
     pub content: MlsMessageContent<'a>,
 }
 
-impl MlsMessage {
+impl<'a> MlsMessage<'a> {
     pub fn group_id_and_epoch(&self) -> Option<(&[u8], &Epoch)> {
         Some(match &self.content {
             MlsMessageContent::MlsPublicMessage(public_message) => (
