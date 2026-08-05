@@ -9,6 +9,7 @@ use crate::{
     Copy,
     PartialEq,
     Eq,
+    Hash,
     tls_codec::TlsSerialize,
     tls_codec::TlsDeserialize,
     tls_codec::TlsSize,

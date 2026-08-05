@@ -9,6 +9,7 @@ pub use self::message_kinds::*;
 mod content_encryption;
 pub use self::content_encryption::*;
 
+use crate::defs::Epoch;
 use crate::defs::ProtocolVersion;
 
 /// MLS Message
@@ -48,4 +49,46 @@ use crate::defs::ProtocolVersion;
 pub struct MlsMessage {
     pub version: ProtocolVersion,
     pub content: MlsMessageContent,
+}
+
+impl MlsMessage {
+    pub fn group_id_and_epoch(&self) -> Option<(&[u8], &Epoch)> {
+        Some(match &self.content {
+            MlsMessageContent::MlsPublicMessage(public_message) => (
+                &public_message.content.group_id,
+                &public_message.content.epoch,
+            ),
+            MlsMessageContent::MlsPrivateMessage(private_message) => {
+                (&private_message.group_id, &private_message.epoch)
+            }
+            MlsMessageContent::GroupInfo(group_info) => (
+                group_info.group_context.group_id(),
+                &group_info.group_context.epoch,
+            ),
+            #[cfg(feature = "draft-ietf-mls-targeted-messages")]
+            MlsMessageContent::MlsTargetedMessage(targeted_message) => {
+                (&targeted_message.group_id, &targeted_message.epoch)
+            }
+            #[cfg(feature = "draft-mahy-mls-semiprivatemessage")]
+            MlsMessageContent::MlsSemiPrivateMessage(semi_private_message) => {
+                (&semi_private_message.group_id, &semi_private_message.epoch)
+            }
+            #[cfg(feature = "draft-mularczyk-mls-splitcommit")]
+            MlsMessageContent::MlsSplitCommitMessage(split_commit_message) => {
+                return split_commit_message
+                    .split_commit_message
+                    .group_id_and_epoch();
+            }
+            #[cfg(feature = "draft-pham-mls-additional-wire-formats")]
+            MlsMessageContent::MlsMessageWithoutAad(message_without_aad) => {
+                match message_without_aad {
+                    crate::drafts::additional_wire_formats::MessageWithoutAad::PublicMessageWithoutAad(public_message_without_aad) => (&public_message_without_aad.content.group_id, &public_message_without_aad.content.epoch),
+                    crate::drafts::additional_wire_formats::MessageWithoutAad::PrivateMessageWithoutAad(private_message_without_aad) => (&private_message_without_aad.group_id, &private_message_without_aad.epoch),
+                }
+            },
+            #[cfg(feature = "draft-mahy-mls-private-external")]
+            MlsMessageContent::MlsPrivateExternalMessage(private_external_message) => (&private_external_message.group_id, &private_external_message.epoch),
+            _ => return None,
+        })
+    }
 }

@@ -3,7 +3,7 @@ use crate::{
     credential::Credential,
     crypto::{HpkePublicKey, HpkePublicKeyRef, SignaturePublicKey, SignaturePublicKeyRef},
     defs::{Capabilities, LeafIndex},
-    group::{GroupIdRef, KeyPackageLifetime, extensions::Extension},
+    group::{GroupIdRef, KeyPackageLifetime, RequiredCapabilities, extensions::Extension},
 };
 
 #[derive(
@@ -129,6 +129,32 @@ impl LeafNode {
                 None
             }
         })
+    }
+
+    pub fn supports_required_capabilities(&self, required_caps: &RequiredCapabilities) -> bool {
+        if !required_caps.extension_types.iter().all(|req_ext| {
+            req_ext.is_grease_value()
+                || req_ext.is_spec_default()
+                || self.capabilities.extensions.contains(req_ext)
+        }) {
+            return false;
+        }
+
+        if !required_caps.proposal_types.iter().all(|req_prop| {
+            req_prop.is_grease_value()
+                || req_prop.is_spec_default()
+                || self.capabilities.proposals.contains(req_prop)
+        }) {
+            return false;
+        }
+
+        if !required_caps.credential_types.iter().all(|req_cred| {
+            req_cred.is_grease_value() || self.capabilities.credentials.contains(req_cred)
+        }) {
+            return false;
+        }
+
+        true
     }
 }
 

@@ -47,14 +47,14 @@ impl std::fmt::Display for SensitiveBytes {
 #[cfg(feature = "hazmat")]
 impl std::fmt::Debug for SensitiveBytes {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", &self.0)
+        write!(f, "{:?}", self.0)
     }
 }
 
 #[cfg(feature = "hazmat")]
 impl std::fmt::Display for SensitiveBytes {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", &hex::encode(self.0.as_slice()))
+        write!(f, "{}", hex::encode(self.0.as_slice()))
     }
 }
 
