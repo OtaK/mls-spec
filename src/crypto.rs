@@ -26,6 +26,13 @@ macro_rules! impl_keypair_alias {
         pub struct $newtype<'a>(KeyPair<'a>);
 
         impl $newtype<'_> {
+            // Returns (sk, pk)
+            pub fn into_pair<'sk, 'pk>(mut self) -> (SensitiveBytes<'sk>, SensitiveBytes<'pk>) {
+                let pk = self.extract_public_key().into_vec().into();
+                let sk = self.extract_secret_key().into_vec().into();
+                (sk, pk)
+            }
+
             pub fn extract_public_key(&mut self) -> SensitiveBytes<'_> {
                 std::mem::take(&mut self.0.pk)
             }

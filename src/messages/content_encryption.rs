@@ -3,7 +3,6 @@ use thalassa::{error::TlsplReadError, io::Read};
 use crate::{
     CRATE_NAME,
     defs::{Epoch, Generation, LeafIndex},
-    group::GroupId,
     messages::{ContentType, ContentTypeInner, FramedContentAuthData},
 };
 
@@ -108,7 +107,7 @@ impl<'a> PrivateMessageContent<'a> {
 /// ````
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplSerialize, thalassa::TlsplSize)]
 pub struct PrivateContentAAD<'a> {
-    pub group_id: GroupId<'a>,
+    pub group_id: &'a [u8],
     pub epoch: &'a Epoch,
     pub content_type: &'a ContentType,
     pub authenticated_data: &'a [u8],
@@ -149,7 +148,7 @@ pub struct SenderData {
 /// ````
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplSerialize, thalassa::TlsplSize)]
 pub struct SenderDataAAD<'a> {
-    pub group_id: GroupId<'a>,
+    pub group_id: &'a [u8],
     pub epoch: &'a Epoch,
     pub content_type: &'a ContentType,
 }
