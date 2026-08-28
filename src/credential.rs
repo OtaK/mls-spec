@@ -43,6 +43,31 @@ pub enum Credential<'a> {
 }
 
 impl Credential<'_> {
+    pub fn to_owned<'out>(&self) -> Credential<'out> {
+        match self {
+            Credential::Basic(basic_credential) => {
+                Credential::basic(basic_credential.identity.to_owned().into())
+            }
+            Credential::X509(x509_credential) => Credential::X509(X509Credential {
+                certificates: x509_credential
+                    .certificates
+                    .iter()
+                    .map(|cert| Certificate {
+                        cert_data: cert.cert_data.to_vec().into(),
+                    })
+                    .collect(),
+            }),
+            // FIXME: Finish this
+            #[cfg(feature = "draft-ietf-mls-extensions")]
+            MultiCredential(mc) => todo!(),
+            #[cfg(feature = "draft-ietf-mls-extensions")]
+            WeakMultiCredential(wmc) => todo!(),
+            #[cfg(feature = "draft-mahy-mls-sd-cwt-credential")]
+            SdCwtCredential(sd_cwt) => todo!(),
+            #[cfg(feature = "draft-mahy-mls-sd-cwt-credential")]
+            SdJwtCredential(sd_jwt) => todo!(),
+        }
+    }
     pub fn basic(identity: Vec<u8>) -> Self {
         Self::Basic(BasicCredential {
             identity: Cow::Owned(identity),

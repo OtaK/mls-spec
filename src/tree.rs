@@ -12,6 +12,7 @@ use crate::{
 
 pub trait RatchetTreeItem<'a>: PartialEq + Default + std::fmt::Debug + 'a {
     fn as_treenode(&self) -> Option<&TreeNode<'a>>;
+    fn as_treenode_mut(&mut self) -> Option<&mut TreeNode<'a>>;
     fn is_blank(&self) -> bool;
     fn unmerged_leaves(&self) -> Option<impl Iterator<Item = &u32>>;
     fn add_unmerged_leaf(&mut self, leaf_idx: LeafIndex);
@@ -24,6 +25,11 @@ impl<'a> RatchetTreeItem<'a> for Option<TreeNode<'a>> {
     #[inline]
     fn as_treenode(&self) -> Option<&TreeNode<'a>> {
         self.as_ref()
+    }
+
+    #[inline]
+    fn as_treenode_mut(&mut self) -> Option<&mut TreeNode<'a>> {
+        self.as_mut()
     }
 
     #[inline]
@@ -77,8 +83,8 @@ impl<'a, N: RatchetTreeItem<'a>> RatchetTree<'a, N> {
     }
 }
 
-impl<'a> From<Vec<Option<TreeNode<'a>>>> for RatchetTree<'a> {
-    fn from(inner: Vec<Option<TreeNode<'a>>>) -> Self {
+impl<'a, N: RatchetTreeItem<'a>> From<Vec<N>> for RatchetTree<'a, N> {
+    fn from(inner: Vec<N>) -> Self {
         Self {
             inner,
             _boo: Default::default(),
@@ -108,6 +114,16 @@ pub struct ParentNode<'a> {
     pub encryption_key: HpkePublicKey<'a>,
     pub parent_hash: ParentNodeHash<'a>,
     pub unmerged_leaves: BTreeSet<LeafIndex>,
+}
+
+impl ParentNode<'_> {
+    pub fn to_owned<'out>(&self) -> ParentNode<'out> {
+        ParentNode {
+            encryption_key: self.encryption_key.to_vec().into(),
+            parent_hash: self.parent_hash.to_vec().into(),
+            unmerged_leaves: self.unmerged_leaves.clone(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
@@ -146,6 +162,13 @@ impl<'a> From<ParentNode<'a>> for TreeNode<'a> {
 }
 
 impl<'a> TreeNode<'a> {
+    pub fn to_owned<'out>(&'a self) -> TreeNode<'out> {
+        match self {
+            TreeNode::LeafNode(leaf_node) => TreeNode::LeafNode(leaf_node.to_owned()),
+            TreeNode::ParentNode(parent_node) => TreeNode::ParentNode(parent_node.to_owned()),
+        }
+    }
+
     pub fn as_leaf_node(&self) -> Option<&LeafNode<'a>> {
         if let Self::LeafNode(leaf_node) = &self {
             Some(leaf_node)

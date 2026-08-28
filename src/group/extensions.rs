@@ -3,7 +3,7 @@ use std::borrow::Cow;
 use crate::{
     crypto::HpkePublicKey,
     group::{ExtensionType, ExternalSender, RequiredCapabilities},
-    tree::RatchetTree,
+    tree::{RatchetTree, TreeNode},
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
@@ -123,6 +123,45 @@ impl<'a> Extension<'a> {
 
     pub fn ext_type(&self) -> ExtensionType {
         self.into()
+    }
+
+    pub fn to_owned<'out>(&self) -> Extension<'out> {
+        match self {
+            Extension::ApplicationId(cow) => Extension::ApplicationId(cow.to_vec().into()),
+            Extension::RatchetTree(ratchet_tree_extension) => {
+                Extension::RatchetTree(RatchetTreeExtension {
+                    ratchet_tree: RatchetTree::<Option<TreeNode>>::from(
+                        ratchet_tree_extension
+                            .ratchet_tree
+                            .iter()
+                            .map(|tn| {
+                                if let Some(tn) = tn {
+                                    Some(tn.to_owned())
+                                } else {
+                                    None
+                                }
+                            })
+                            .collect::<Vec<_>>(),
+                    ),
+                })
+            }
+            Extension::RequiredCapabilities(required_capabilities) => {
+                Extension::RequiredCapabilities(required_capabilities.clone())
+            }
+            Extension::ExternalPub(external_pub) => Extension::ExternalPub(ExternalPub {
+                external_pub: external_pub.external_pub.to_vec().into(),
+            }),
+            Extension::ExternalSenders(external_senders) => Extension::ExternalSenders(
+                external_senders
+                    .iter()
+                    .map(|es| ExternalSender {
+                        credential: es.credential.to_owned(),
+                        signature_key: es.signature_key.to_vec().into(),
+                    })
+                    .collect(),
+            ),
+            Extension::Arbitrary(id, cow) => Extension::Arbitrary(*id, cow.to_vec().into()),
+        }
     }
 }
 

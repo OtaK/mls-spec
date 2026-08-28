@@ -7,7 +7,12 @@ use std::borrow::Cow;
 #[repr(transparent)]
 pub struct SensitiveBytes<'a>(Cow<'a, [u8]>);
 
-impl SensitiveBytes<'_> {
+impl<'a> SensitiveBytes<'a> {
+    #[inline]
+    pub fn into_vec(mut self) -> Vec<u8> {
+        std::mem::take(&mut self.0).into_owned()
+    }
+
     #[inline]
     pub fn to_vec(&self) -> Vec<u8> {
         self.0.to_vec()

@@ -16,7 +16,7 @@ pub struct ParentNodeHashInput<'a> {
 
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplSerialize, thalassa::TlsplSize)]
 pub struct LeafNodeHashInput<'a> {
-    pub leaf_index: &'a LeafIndex,
+    pub leaf_index: LeafIndex,
     pub leaf_node: Option<&'a LeafNode<'a>>,
 }
 

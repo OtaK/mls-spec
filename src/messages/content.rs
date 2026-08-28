@@ -24,7 +24,7 @@ impl FramedContent<'_> {
     pub fn to_tbs<'a>(
         &'a self,
         wire_format: &'a WireFormat,
-        ctx: &'a GroupContext,
+        ctx: &'a GroupContext<'a>,
     ) -> MlsSpecResult<FramedContentTBS<'a>> {
         let sender_type_raw: SenderType = (&self.sender).into();
         let sender_type =
