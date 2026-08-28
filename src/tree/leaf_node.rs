@@ -31,6 +31,20 @@ pub enum LeafNodeSource<'a> {
     Commit { parent_hash: SensitiveBytes<'a> },
 }
 
+impl LeafNodeSource<'_> {
+    pub fn to_owned<'out>(&self) -> LeafNodeSource<'out> {
+        match self {
+            LeafNodeSource::KeyPackage { lifetime } => LeafNodeSource::KeyPackage {
+                lifetime: *lifetime,
+            },
+            LeafNodeSource::Update => LeafNodeSource::Update,
+            LeafNodeSource::Commit { parent_hash } => LeafNodeSource::Commit {
+                parent_hash: parent_hash.to_vec().into(),
+            },
+        }
+    }
+}
+
 impl From<&LeafNodeSource<'_>> for LeafNodeSourceType {
     fn from(value: &LeafNodeSource) -> Self {
         match value {
@@ -61,6 +75,18 @@ pub struct LeafNode<'a> {
 }
 
 impl LeafNode<'_> {
+    pub fn to_owned<'out>(&self) -> LeafNode<'out> {
+        LeafNode {
+            encryption_key: self.encryption_key.to_vec().into(),
+            signature_key: self.signature_key.to_vec().into(),
+            credential: self.credential.to_owned(),
+            capabilities: self.capabilities.clone(),
+            source: self.source.to_owned(),
+            extensions: self.extensions.clone(),
+            signature: self.signature.to_vec().into(),
+        }
+    }
+
     #[inline]
     pub fn requires_member_info(&self) -> bool {
         matches!(

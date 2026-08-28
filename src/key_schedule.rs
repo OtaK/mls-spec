@@ -211,7 +211,7 @@ impl PreSharedKeyId<'_> {
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplSize, thalassa::TlsplSerialize)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct PskLabel<'a> {
-    pub id: PreSharedKeyId<'a>,
+    pub id: &'a PreSharedKeyId<'a>,
     pub index: u16,
     pub count: u16,
 }

@@ -12,6 +12,7 @@ use crate::{
 
 pub trait RatchetTreeItem<'a>: PartialEq + Default + std::fmt::Debug + 'a {
     fn as_treenode(&self) -> Option<&TreeNode<'a>>;
+    fn as_treenode_mut(&mut self) -> Option<&mut TreeNode<'a>>;
     fn is_blank(&self) -> bool;
     fn unmerged_leaves(&self) -> Option<impl Iterator<Item = &u32>>;
     fn add_unmerged_leaf(&mut self, leaf_idx: LeafIndex);
@@ -24,6 +25,11 @@ impl<'a> RatchetTreeItem<'a> for Option<TreeNode<'a>> {
     #[inline]
     fn as_treenode(&self) -> Option<&TreeNode<'a>> {
         self.as_ref()
+    }
+
+    #[inline]
+    fn as_treenode_mut(&mut self) -> Option<&mut TreeNode<'a>> {
+        self.as_mut()
     }
 
     #[inline]
@@ -77,8 +83,8 @@ impl<'a, N: RatchetTreeItem<'a>> RatchetTree<'a, N> {
     }
 }
 
-impl<'a> From<Vec<Option<TreeNode<'a>>>> for RatchetTree<'a> {
-    fn from(inner: Vec<Option<TreeNode<'a>>>) -> Self {
+impl<'a, N: RatchetTreeItem<'a>> From<Vec<N>> for RatchetTree<'a, N> {
+    fn from(inner: Vec<N>) -> Self {
         Self {
             inner,
             _boo: Default::default(),
