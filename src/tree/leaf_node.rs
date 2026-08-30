@@ -82,7 +82,7 @@ impl LeafNode<'_> {
             credential: self.credential.to_owned(),
             capabilities: self.capabilities.clone(),
             source: self.source.to_owned(),
-            extensions: self.extensions.clone(),
+            extensions: self.extensions.iter().map(|ext| ext.to_owned()).collect(),
             signature: self.signature.to_vec().into(),
         }
     }

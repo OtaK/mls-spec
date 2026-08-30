@@ -116,6 +116,16 @@ pub struct ParentNode<'a> {
     pub unmerged_leaves: BTreeSet<LeafIndex>,
 }
 
+impl ParentNode<'_> {
+    pub fn to_owned<'out>(&self) -> ParentNode<'out> {
+        ParentNode {
+            encryption_key: self.encryption_key.to_vec().into(),
+            parent_hash: self.parent_hash.to_vec().into(),
+            unmerged_leaves: self.unmerged_leaves.clone(),
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(
     feature = "serde",
@@ -152,6 +162,13 @@ impl<'a> From<ParentNode<'a>> for TreeNode<'a> {
 }
 
 impl<'a> TreeNode<'a> {
+    pub fn to_owned<'out>(&'a self) -> TreeNode<'out> {
+        match self {
+            TreeNode::LeafNode(leaf_node) => TreeNode::LeafNode(leaf_node.to_owned()),
+            TreeNode::ParentNode(parent_node) => TreeNode::ParentNode(parent_node.to_owned()),
+        }
+    }
+
     pub fn as_leaf_node(&self) -> Option<&LeafNode<'a>> {
         if let Self::LeafNode(leaf_node) = &self {
             Some(leaf_node)
