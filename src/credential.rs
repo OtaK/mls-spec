@@ -46,7 +46,7 @@ impl Credential<'_> {
     pub fn to_owned<'out>(&self) -> Credential<'out> {
         match self {
             Credential::Basic(basic_credential) => {
-                Credential::basic(basic_credential.identity.to_owned().into())
+                Credential::basic(basic_credential.identity.to_vec())
             }
             Credential::X509(x509_credential) => Credential::X509(X509Credential {
                 certificates: x509_credential

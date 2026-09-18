@@ -134,13 +134,7 @@ impl<'a> Extension<'a> {
                         ratchet_tree_extension
                             .ratchet_tree
                             .iter()
-                            .map(|tn| {
-                                if let Some(tn) = tn {
-                                    Some(tn.to_owned())
-                                } else {
-                                    None
-                                }
-                            })
+                            .map(|tn| tn.as_ref().map(|tn| tn.to_owned()))
                             .collect::<Vec<_>>(),
                     ),
                 })
