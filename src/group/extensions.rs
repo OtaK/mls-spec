@@ -154,6 +154,14 @@ impl<'a> Extension<'a> {
                     })
                     .collect(),
             ),
+            #[cfg(feature = "draft-ietf-mls-extensions")]
+            Extension::ApplicationData(_add) => todo!(),
+            #[cfg(feature = "draft-ietf-mls-extensions")]
+            Extension::SupportedWireFormats(_swf) => todo!(),
+            #[cfg(feature = "draft-ietf-mls-extensions")]
+            Extension::RequiredWireFormats(_rwf) => todo!(),
+            #[cfg(feature = "draft-ietf-mls-extensions")]
+            Extension::RatchetTreeSourceDomains(_rtsd) => todo!(),
             Extension::Arbitrary(id, cow) => Extension::Arbitrary(*id, cow.to_vec().into()),
         }
     }

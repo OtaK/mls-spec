@@ -59,15 +59,16 @@ impl Credential<'_> {
             }),
             // FIXME: Finish this
             #[cfg(feature = "draft-ietf-mls-extensions")]
-            MultiCredential(mc) => todo!(),
+            Credential::MultiCredential(_mc) => todo!(),
             #[cfg(feature = "draft-ietf-mls-extensions")]
-            WeakMultiCredential(wmc) => todo!(),
+            Credential::WeakMultiCredential(_wmc) => todo!(),
             #[cfg(feature = "draft-mahy-mls-sd-cwt-credential")]
-            SdCwtCredential(sd_cwt) => todo!(),
+            Credential::SdCwtCredential(_sd_cwt) => todo!(),
             #[cfg(feature = "draft-mahy-mls-sd-cwt-credential")]
-            SdJwtCredential(sd_jwt) => todo!(),
+            Credential::SdJwtCredential(_sd_jwt) => todo!(),
         }
     }
+
     pub fn basic(identity: Vec<u8>) -> Self {
         Self::Basic(BasicCredential {
             identity: Cow::Owned(identity),
