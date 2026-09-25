@@ -14,6 +14,17 @@ pub struct CredentialBinding<'a> {
     pub signature: SensitiveBytes<'a>,
 }
 
+impl<'a> CredentialBinding<'a> {
+    pub fn to_tbs(&'a self, signature_key: &'a SignaturePublicKey<'a>) -> CredentialBindingTBS<'a> {
+        CredentialBindingTBS {
+            cipher_suite: &self.cipher_suite,
+            credential: &self.credential,
+            credential_key: &self.credential_key,
+            signature_key,
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MultiCredential<'a> {
