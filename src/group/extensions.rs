@@ -160,7 +160,7 @@ impl<'a> Extension<'a> {
             Extension::SupportedWireFormats(_swf) => todo!(),
             #[cfg(feature = "draft-ietf-mls-extensions")]
             Extension::RequiredWireFormats(_rwf) => todo!(),
-            #[cfg(feature = "draft-ietf-mls-extensions")]
+            #[cfg(feature = "draft-ietf-mls-ratchet-tree-options")]
             Extension::RatchetTreeSourceDomains(_rtsd) => todo!(),
             Extension::Arbitrary(id, cow) => Extension::Arbitrary(*id, cow.to_vec().into()),
         }
