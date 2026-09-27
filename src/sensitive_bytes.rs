@@ -92,6 +92,13 @@ impl From<Vec<u8>> for SensitiveBytes<'_> {
     }
 }
 
+impl<'a> From<&'a [u8]> for SensitiveBytes<'a> {
+    #[inline]
+    fn from(value: &'a [u8]) -> Self {
+        Self(Cow::Borrowed(value))
+    }
+}
+
 impl PartialEq for SensitiveBytes<'_> {
     #[inline]
     fn eq(&self, other: &Self) -> bool {
