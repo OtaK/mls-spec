@@ -167,6 +167,28 @@ pub enum PreSharedKeyIdPskType<'a> {
     Application(ApplicationPsk<'a>),
 }
 
+impl<'a> PreSharedKeyIdPskType<'a> {
+    pub fn to_owned<'out>(&self) -> PreSharedKeyIdPskType<'out> {
+        match self {
+            Self::External(external_psk) => PreSharedKeyIdPskType::External(ExternalPsk {
+                psk_id: external_psk.psk_id.to_vec().into(),
+            }),
+            Self::Resumption(resumption_psk) => PreSharedKeyIdPskType::Resumption(ResumptionPsk {
+                usage: resumption_psk.usage,
+                psk_group_id: resumption_psk.psk_group_id.to_vec().into(),
+                psk_epoch: resumption_psk.psk_epoch,
+            }),
+            #[cfg(feature = "draft-ietf-mls-extensions")]
+            Self::Application(application_psk) => {
+                PreSharedKeyIdPskType::Application(ApplicationPsk {
+                    component_id: application_psk.component_id,
+                    psk_id: application_psk.psk_id.to_vec().into(),
+                })
+            }
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ExternalPsk<'a> {
@@ -199,7 +221,14 @@ pub struct PreSharedKeyId<'a> {
     pub psk_nonce: SensitiveBytes<'a>,
 }
 
-impl PreSharedKeyId<'_> {
+impl<'a> PreSharedKeyId<'a> {
+    pub fn to_owned<'out>(&self) -> PreSharedKeyId<'out> {
+        PreSharedKeyId {
+            psktype: self.psktype.to_owned(),
+            psk_nonce: self.psk_nonce.to_vec().into(),
+        }
+    }
+
     pub fn with_default_nonce(&self) -> Self {
         Self {
             psktype: self.psktype.clone(),
