@@ -35,6 +35,7 @@ pub mod test_utils;
 
 mod sensitive_bytes;
 pub use sensitive_bytes::*;
+use thalassa::{error::TlsplReadError, io::DepthAwareReader};
 
 /// This trait allows implementers to automatically get a MLS-specific representation
 /// that takes in account protocol versions and the label format.
@@ -108,11 +109,15 @@ where
     T: thalassa::TlsplDeserialize<'tlspl>,
 {
     #[inline]
-    fn from_tls_bytes(mut bytes: &'tlspl [u8]) -> MlsSpecResult<Self>
+    fn from_tls_bytes(bytes: &'tlspl [u8]) -> MlsSpecResult<Self>
     where
         Self: 'tlspl,
     {
-        Ok(T::tlspl_deserialize_from(&mut bytes)?)
+        Ok(T::tlspl_deserialize_from(
+            &mut DepthAwareReader::from_reader(bytes)
+                .enter()
+                .map_err(TlsplReadError::from)?,
+        )?)
     }
 }
 

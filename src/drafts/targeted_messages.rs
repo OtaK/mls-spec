@@ -1,5 +1,7 @@
 use std::borrow::Cow;
 
+use thalassa::io::DepthAwareReaderGuard;
+
 use crate::{
     SensitiveBytes,
     defs::{Epoch, LeafIndex, ProtocolVersion, WireFormat, labels::KdfLabelKind},
@@ -125,7 +127,7 @@ impl thalassa::TlsplSerialize for TargetedMessageContent<'_> {
 
 impl<'a> thalassa::TlsplDeserialize<'a> for TargetedMessageContent<'a> {
     fn tlspl_deserialize_from<R: thalassa::io::Read<'a>>(
-        reader: &mut R,
+        reader: &mut DepthAwareReaderGuard<'_, R>,
     ) -> thalassa::error::TlsplReadResult<Self>
     where
         Self: Sized + 'a,

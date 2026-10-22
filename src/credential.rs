@@ -24,21 +24,21 @@ pub struct X509Credential<'a> {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u16)]
 pub enum Credential<'a> {
-    #[tlspl(discriminant = "CredentialType::BASIC")]
+    #[tlspl(discriminant = CredentialType::BASIC.as_repr())]
     Basic(BasicCredential<'a>),
-    #[tlspl(discriminant = "CredentialType::X509")]
+    #[tlspl(discriminant = CredentialType::X509.as_repr())]
     X509(X509Credential<'a>),
     #[cfg(feature = "draft-ietf-mls-extensions")]
-    #[tlspl(discriminant = "CredentialType::MULTI_CREDENTIAL")]
+    #[tlspl(discriminant = CredentialType::MULTI_CREDENTIAL.as_repr())]
     MultiCredential(crate::drafts::mls_extensions::multi_credentials::MultiCredential<'a>),
     #[cfg(feature = "draft-ietf-mls-extensions")]
-    #[tlspl(discriminant = "CredentialType::WEAK_MULTI_CREDENTIAL")]
+    #[tlspl(discriminant = CredentialType::WEAK_MULTI_CREDENTIAL.as_repr())]
     WeakMultiCredential(crate::drafts::mls_extensions::multi_credentials::WeakMultiCredential<'a>),
     #[cfg(feature = "draft-mahy-mls-sd-cwt-credential")]
-    #[tlspl(discriminant = "CredentialType::SD_CWT_CREDENTIAL")]
+    #[tlspl(discriminant = CredentialType::SD_CWT_CREDENTIAL.as_repr())]
     SdCwtCredential(crate::drafts::sd_cwt_credential::SdCwtCredential<'a>),
     #[cfg(feature = "draft-mahy-mls-sd-cwt-credential")]
-    #[tlspl(discriminant = "CredentialType::SD_JWT_CREDENTIAL")]
+    #[tlspl(discriminant = CredentialType::SD_JWT_CREDENTIAL.as_repr())]
     SdJwtCredential(crate::drafts::sd_cwt_credential::SdJwtCredential<'a>),
 }
 

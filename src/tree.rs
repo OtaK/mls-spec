@@ -3,6 +3,8 @@ pub mod leaf_node;
 
 use std::collections::BTreeSet;
 
+use thalassa::io::DepthAwareReaderGuard;
+
 use crate::{
     SensitiveBytes,
     crypto::{HpkeCiphertext, HpkePublicKey},
@@ -11,6 +13,9 @@ use crate::{
 };
 
 pub trait RatchetTreeItem<'a>: PartialEq + Default + std::fmt::Debug + 'a {
+    fn from_treenode(tn: Option<TreeNode<'a>>) -> Self
+    where
+        Self: Sized;
     fn as_treenode(&self) -> Option<&TreeNode<'a>>;
     fn as_treenode_mut(&mut self) -> Option<&mut TreeNode<'a>>;
     fn is_blank(&self) -> bool;
@@ -22,6 +27,14 @@ pub trait RatchetTreeItem<'a>: PartialEq + Default + std::fmt::Debug + 'a {
 }
 
 impl<'a> RatchetTreeItem<'a> for Option<TreeNode<'a>> {
+    #[inline]
+    fn from_treenode(tn: Option<TreeNode<'a>>) -> Self
+    where
+        Self: Sized,
+    {
+        tn
+    }
+
     #[inline]
     fn as_treenode(&self) -> Option<&TreeNode<'a>> {
         self.as_ref()
@@ -70,14 +83,63 @@ impl<'a> RatchetTreeItem<'a> for Option<TreeNode<'a>> {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Default, thalassa::TlsplAll)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RatchetTree<'a, N: RatchetTreeItem<'a> = Option<TreeNode<'a>>> {
     inner: Vec<N>,
     _boo: std::marker::PhantomData<&'a ()>,
 }
 
+impl<'a, N: RatchetTreeItem<'a>> thalassa::TlsplSize for RatchetTree<'a, N> {
+    #[inline]
+    fn tlspl_serialized_len(&self) -> usize {
+        let len = self.content_length();
+        thalassa::types::content_len_as_vlbytes_overhead(len) + len
+    }
+}
+
+impl<'a, N: RatchetTreeItem<'a>> thalassa::TlsplSerialize for RatchetTree<'a, N> {
+    #[inline]
+    fn tlspl_serialize_to<W: thalassa::io::Write>(
+        &self,
+        writer: &mut W,
+    ) -> thalassa::error::TlsplWriteResult<usize> {
+        let mut written =
+            thalassa::types::write_vlbytes_content_len(self.content_length(), writer)?;
+        for treenode in self.inner.iter().map(|item| item.as_treenode()) {
+            written += treenode.tlspl_serialize_to(writer)?;
+        }
+        Ok(written)
+    }
+}
+
+impl<'a, N: RatchetTreeItem<'a>> thalassa::TlsplDeserialize<'a> for RatchetTree<'a, N> {
+    #[inline]
+    fn tlspl_deserialize_from<R: thalassa::io::Read<'a>>(
+        reader: &mut DepthAwareReaderGuard<'_, R>,
+    ) -> thalassa::error::TlsplReadResult<Self>
+    where
+        Self: Sized + 'a,
+    {
+        let nodes = Vec::<Option<TreeNode>>::tlspl_deserialize_from(reader)?;
+        let inner = nodes.into_iter().map(|tn| N::from_treenode(tn)).collect();
+        Ok(Self {
+            inner,
+            _boo: std::marker::PhantomData,
+        })
+    }
+}
+
 impl<'a, N: RatchetTreeItem<'a>> RatchetTree<'a, N> {
+    #[inline]
+    fn content_length(&self) -> usize {
+        use thalassa::TlsplSize as _;
+        self.inner
+            .iter()
+            .map(|item| item.as_treenode().tlspl_serialized_len())
+            .sum()
+    }
+
     pub fn into_inner(self) -> Vec<N> {
         self.inner
     }

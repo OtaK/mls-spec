@@ -1,4 +1,8 @@
-use thalassa::{TlsplDeserialize, error::TlsplReadError, io::Read};
+use thalassa::{
+    TlsplDeserialize,
+    error::TlsplReadError,
+    io::{DepthAwareReaderGuard, Read},
+};
 
 use crate::{
     MlsSpecError, MlsSpecResult, SensitiveBytes,
@@ -181,7 +185,7 @@ impl thalassa::TlsplSerialize for FramedContentAuthData<'_> {
 
 impl<'a> FramedContentAuthData<'a> {
     pub fn tlspl_deserialize_from_with_content_type<R: Read<'a>>(
-        reader: &mut R,
+        reader: &mut DepthAwareReaderGuard<'_, R>,
         content_type: ContentType,
     ) -> Result<Self, TlsplReadError> {
         let signature = SensitiveBytes::tlspl_deserialize_from(reader)?;
@@ -200,33 +204,33 @@ impl<'a> FramedContentAuthData<'a> {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u16)]
 pub enum MlsMessageContent<'a> {
-    #[tlspl(discriminant = "WireFormat::MLS_PUBLIC_MESSAGE")]
+    #[tlspl(discriminant = WireFormat::MLS_PUBLIC_MESSAGE.as_repr())]
     MlsPublicMessage(PublicMessage<'a>),
-    #[tlspl(discriminant = "WireFormat::MLS_PRIVATE_MESSAGE")]
+    #[tlspl(discriminant = WireFormat::MLS_PRIVATE_MESSAGE.as_repr())]
     MlsPrivateMessage(PrivateMessage<'a>),
-    #[tlspl(discriminant = "WireFormat::MLS_WELCOME")]
+    #[tlspl(discriminant = WireFormat::MLS_WELCOME.as_repr())]
     Welcome(Welcome<'a>),
-    #[tlspl(discriminant = "WireFormat::MLS_GROUP_INFO")]
+    #[tlspl(discriminant = WireFormat::MLS_GROUP_INFO.as_repr())]
     GroupInfo(GroupInfo<'a>),
-    #[tlspl(discriminant = "WireFormat::MLS_KEY_PACKAGE")]
+    #[tlspl(discriminant = WireFormat::MLS_KEY_PACKAGE.as_repr())]
     KeyPackage(KeyPackage<'a>),
     #[cfg(feature = "draft-ietf-mls-targeted-messages")]
-    #[tlspl(discriminant = "WireFormat::MLS_TARGETED_MESSAGE")]
+    #[tlspl(discriminant = WireFormat::MLS_TARGETED_MESSAGE.as_repr())]
     MlsTargetedMessage(crate::drafts::targeted_messages::TargetedMessage<'a>),
     #[cfg(feature = "draft-mahy-mls-semiprivatemessage")]
-    #[tlspl(discriminant = "WireFormat::MLS_SEMIPRIVATE_MESSAGE")]
+    #[tlspl(discriminant = WireFormat::MLS_SEMIPRIVATE_MESSAGE.as_repr())]
     MlsSemiPrivateMessage(crate::drafts::semiprivate_message::messages::SemiPrivateMessage<'a>),
     #[cfg(feature = "draft-mularczyk-mls-splitcommit")]
-    #[tlspl(discriminant = "WireFormat::MLS_SPLIT_COMMIT")]
+    #[tlspl(discriminant = WireFormat::MLS_SPLIT_COMMIT.as_repr())]
     MlsSplitCommitMessage(crate::drafts::split_commit::SplitCommitMessage<'a>),
     #[cfg(feature = "draft-pham-mls-additional-wire-formats")]
-    #[tlspl(discriminant = "WireFormat::MLS_MESSAGE_WITHOUT_AAD")]
+    #[tlspl(discriminant = WireFormat::MLS_MESSAGE_WITHOUT_AAD.as_repr())]
     MlsMessageWithoutAad(crate::drafts::additional_wire_formats::MessageWithoutAad<'a>),
     #[cfg(feature = "draft-mahy-mls-private-external")]
-    #[tlspl(discriminant = "WireFormat::MLS_PRIVATE_EXTERNAL_MESSAGE")]
+    #[tlspl(discriminant = WireFormat::MLS_PRIVATE_EXTERNAL_MESSAGE.as_repr())]
     MlsPrivateExternalMessage(crate::drafts::private_external::PrivateExternalMessage<'a>),
     #[cfg(feature = "draft-kohbrok-mls-leaf-operation-intents")]
-    #[tlspl(discriminant = "WireFormat::MLS_LEAF_OPERATION_INTENT")]
+    #[tlspl(discriminant = WireFormat::MLS_LEAF_OPERATION_INTENT.as_repr())]
     MlsLeafOperationIntent(crate::drafts::leaf_operation_intents::LeafOperationIntent<'a>),
 }
 
@@ -353,12 +357,14 @@ impl AuthenticatedContent<'_> {
 }
 
 impl<'a> thalassa::TlsplDeserialize<'a> for AuthenticatedContent<'a> {
-    fn tlspl_deserialize_from<R: Read<'a>>(reader: &mut R) -> thalassa::error::TlsplReadResult<Self>
+    fn tlspl_deserialize_from<R: Read<'a>>(
+        reader: &mut DepthAwareReaderGuard<'_, R>,
+    ) -> thalassa::error::TlsplReadResult<Self>
     where
         Self: Sized + 'a,
     {
-        let wire_format = WireFormat::tlspl_deserialize_from(reader)?;
-        let content = FramedContent::tlspl_deserialize_from(reader)?;
+        let wire_format = WireFormat::tlspl_deserialize_from(&mut reader.enter()?)?;
+        let content = FramedContent::tlspl_deserialize_from(&mut reader.enter()?)?;
         let auth = FramedContentAuthData::tlspl_deserialize_from_with_content_type(
             reader,
             (&content.content).into(),

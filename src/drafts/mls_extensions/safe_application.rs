@@ -1,5 +1,7 @@
 use std::{borrow::Cow, collections::BTreeMap};
 
+use thalassa::io::DepthAwareReaderGuard;
+
 use crate::{SensitiveBytes, key_schedule::PreSharedKeyId};
 
 pub type ComponentId = u16;
@@ -65,7 +67,7 @@ impl thalassa::TlsplSerialize for ComponentOperationBaseLabel<'_> {
 
 impl<'a> thalassa::TlsplDeserialize<'a> for ComponentOperationBaseLabel<'a> {
     fn tlspl_deserialize_from<R: thalassa::io::Read<'a>>(
-        reader: &mut R,
+        reader: &mut DepthAwareReaderGuard<'_, R>,
     ) -> thalassa::error::TlsplReadResult<Self>
     where
         Self: Sized + 'a,

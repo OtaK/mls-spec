@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 
-use super::safe_application::{Component, ComponentId, ComponentsList};
+use super::safe_application::{Component, ComponentId};
 
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -46,9 +46,9 @@ pub type AcceptedMediaTypes<'a> = MediaTypeList<'a>;
 pub type RequiredMediaTypes<'a> = MediaTypeList<'a>;
 
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
-pub struct ContentMediaTypes(pub ComponentsList);
+pub struct ContentMediaTypes<'a>(pub MediaTypeList<'a>);
 
-impl<'a> Component<'a> for ContentMediaTypes {
+impl<'a> Component<'a> for ContentMediaTypes<'a> {
     fn component_id() -> ComponentId {
         super::CONTENT_MEDIA_TYPES_ID
     }
