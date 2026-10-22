@@ -1,3 +1,5 @@
+use thalassa::io::DepthAwareReaderGuard;
+
 use crate::{
     CRATE_NAME, SensitiveBytes,
     crypto::Mac,
@@ -101,7 +103,7 @@ impl thalassa::TlsplSerialize for PublicMessage<'_> {
 
 impl<'a> thalassa::TlsplDeserialize<'a> for PublicMessage<'a> {
     fn tlspl_deserialize_from<R: thalassa::io::Read<'a>>(
-        reader: &mut R,
+        reader: &mut DepthAwareReaderGuard<'_, R>,
     ) -> thalassa::error::TlsplReadResult<Self>
     where
         Self: Sized + 'a,

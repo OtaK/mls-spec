@@ -80,7 +80,11 @@ pub struct KeyForExternalReceiver<'a> {
 }
 
 pub mod messages {
-    use thalassa::{TlsplDeserialize, error::TlsplReadError, io::Read};
+    use thalassa::{
+        TlsplDeserialize,
+        error::TlsplReadError,
+        io::{DepthAwareReaderGuard, Read},
+    };
 
     use crate::{
         CRATE_NAME, SensitiveBytes,
@@ -135,15 +139,15 @@ pub mod messages {
 
     impl<'a> SemiPrivateMessageContent<'a> {
         pub fn tls_deserialize_with_content_type<R: Read<'a>>(
-            reader: &mut R,
+            reader: &mut DepthAwareReaderGuard<'_, R>,
             content_type: ContentType,
         ) -> Result<Self, TlsplReadError> {
             let inner = match content_type {
                 ContentType::Proposal => ContentTypeInner::Proposal {
-                    proposal: Proposal::tlspl_deserialize_from(reader)?,
+                    proposal: Proposal::tlspl_deserialize_from(&mut reader.enter()?)?,
                 },
                 ContentType::Commit => ContentTypeInner::Commit {
-                    commit: Commit::tlspl_deserialize_from(reader)?,
+                    commit: Commit::tlspl_deserialize_from(&mut reader.enter()?)?,
                 },
                 _ => {
                     return Err(TlsplReadError::custom(

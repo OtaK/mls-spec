@@ -1,4 +1,7 @@
-use thalassa::{error::TlsplReadError, io::Read};
+use thalassa::{
+    error::TlsplReadError,
+    io::{DepthAwareReaderGuard, Read},
+};
 
 use crate::{
     CRATE_NAME,
@@ -45,7 +48,7 @@ impl thalassa::TlsplSerialize for PrivateMessageContent<'_> {
 
 impl<'a> PrivateMessageContent<'a> {
     pub fn tlspl_deserialize_with_content_type<R: Read<'a>>(
-        bytes: &mut R,
+        reader: &mut DepthAwareReaderGuard<'_, R>,
         content_type: ContentType,
     ) -> Result<Self, TlsplReadError> {
         use thalassa::TlsplDeserialize as _;
@@ -57,31 +60,33 @@ impl<'a> PrivateMessageContent<'a> {
                 ));
             }
             ContentType::Application => ContentTypeInner::Application {
-                application_data: <_>::tlspl_deserialize_from(bytes)?,
+                application_data: <_>::tlspl_deserialize_from(reader)?,
             },
             ContentType::Proposal => ContentTypeInner::Proposal {
-                proposal: <_>::tlspl_deserialize_from(bytes)?,
+                proposal: <_>::tlspl_deserialize_from(reader)?,
             },
             ContentType::Commit => ContentTypeInner::Commit {
-                commit: <_>::tlspl_deserialize_from(bytes)?,
+                commit: <_>::tlspl_deserialize_from(reader)?,
             },
             #[cfg(feature = "draft-mahy-mls-new-content-types")]
             ContentType::Status => ContentTypeInner::Status {
-                application_data: <_>::tlspl_deserialize_from(bytes)?,
+                application_data: <_>::tlspl_deserialize_from(reader)?,
             },
             #[cfg(feature = "draft-mahy-mls-new-content-types")]
             ContentType::Ephemeral => ContentTypeInner::Ephemeral {
-                application_data: <_>::tlspl_deserialize_from(bytes)?,
+                application_data: <_>::tlspl_deserialize_from(reader)?,
             },
             #[cfg(feature = "draft-mularczyk-mls-splitcommit")]
             ContentType::SplitCommit => ContentTypeInner::SplitCommit {
-                split_commit: <_>::tlspl_deserialize_from(bytes)?,
+                split_commit: <_>::tlspl_deserialize_from(reader)?,
             },
         };
-        let auth =
-            FramedContentAuthData::tlspl_deserialize_from_with_content_type(bytes, content_type)?;
+        let auth = FramedContentAuthData::tlspl_deserialize_from_with_content_type(
+            &mut reader.enter().map_err(TlsplReadError::from)?,
+            content_type,
+        )?;
 
-        let padding_len = crate::consume_padding(bytes)?;
+        let padding_len = crate::consume_padding(reader)?;
 
         Ok(Self {
             inner,

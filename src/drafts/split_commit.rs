@@ -1,5 +1,7 @@
 use std::borrow::Cow;
 
+use thalassa::io::DepthAwareReaderGuard;
+
 use crate::{
     CRATE_NAME,
     crypto::HpkeCiphertext,
@@ -74,7 +76,7 @@ impl thalassa::TlsplSerialize for SplitCommitMessage<'_> {
 
 impl<'a> thalassa::TlsplDeserialize<'a> for SplitCommitMessage<'a> {
     fn tlspl_deserialize_from<R: thalassa::io::Read<'a>>(
-        reader: &mut R,
+        reader: &mut DepthAwareReaderGuard<'_, R>,
     ) -> thalassa::error::TlsplReadResult<Self>
     where
         Self: Sized + 'a,

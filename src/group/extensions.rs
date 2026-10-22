@@ -1,5 +1,7 @@
 use std::borrow::Cow;
 
+use thalassa::{error::TlsplReadError, io::DepthAwareReader};
+
 use crate::{
     crypto::HpkePublicKey,
     group::{ExtensionType, ExternalSender, RequiredCapabilities},
@@ -20,30 +22,30 @@ pub enum Extension<'a> {
     /// Extension to uniquely identify clients
     ///
     /// <https://www.rfc-editor.org/rfc/rfc9420.html#section-5.3.3>
-    #[tlspl(discriminant = "ExtensionType::APPLICATION_ID")]
+    #[tlspl(discriminant = ExtensionType::APPLICATION_ID.as_repr())]
     ApplicationId(Cow<'a, [u8]>),
     /// Sparse vec of TreeNodes, that is right-trimmed
-    #[tlspl(discriminant = "ExtensionType::RATCHET_TREE")]
+    #[tlspl(discriminant = ExtensionType::RATCHET_TREE.as_repr())]
     RatchetTree(RatchetTreeExtension<'a>),
-    #[tlspl(discriminant = "ExtensionType::REQUIRED_CAPABILITIES")]
+    #[tlspl(discriminant = ExtensionType::REQUIRED_CAPABILITIES.as_repr())]
     RequiredCapabilities(RequiredCapabilities),
     /// Extension that enables "External Joins" via external commits
-    #[tlspl(discriminant = "ExtensionType::EXTERNAL_PUB")]
+    #[tlspl(discriminant = ExtensionType::EXTERNAL_PUB.as_repr())]
     ExternalPub(ExternalPub<'a>),
     /// Extension that allows external proposals to be signed by a third party (i.e. a server or something)
-    #[tlspl(discriminant = "ExtensionType::EXTERNAL_SENDERS")]
+    #[tlspl(discriminant = ExtensionType::EXTERNAL_SENDERS.as_repr())]
     ExternalSenders(Vec<ExternalSender<'a>>),
     #[cfg(feature = "draft-ietf-mls-extensions")]
-    #[tlspl(discriminant = "ExtensionType::APPLICATION_DATA_DICTIONARY")]
+    #[tlspl(discriminant = ExtensionType::APPLICATION_DATA_DICTIONARY.as_repr())]
     ApplicationData(crate::drafts::mls_extensions::safe_application::ApplicationDataDictionary<'a>),
     #[cfg(feature = "draft-ietf-mls-extensions")]
-    #[tlspl(discriminant = "ExtensionType::SUPPORTED_WIRE_FORMATS")]
+    #[tlspl(discriminant = ExtensionType::SUPPORTED_WIRE_FORMATS.as_repr())]
     SupportedWireFormats(crate::drafts::mls_extensions::safe_application::WireFormats),
     #[cfg(feature = "draft-ietf-mls-extensions")]
-    #[tlspl(discriminant = "ExtensionType::REQUIRED_WIRE_FORMATS")]
+    #[tlspl(discriminant = ExtensionType::REQUIRED_WIRE_FORMATS.as_repr())]
     RequiredWireFormats(crate::drafts::mls_extensions::safe_application::WireFormats),
     #[cfg(feature = "draft-ietf-mls-ratchet-tree-options")]
-    #[tlspl(discriminant = "ExtensionType::RATCHET_TREE_SOURCE_DOMAINS")]
+    #[tlspl(discriminant = ExtensionType::RATCHET_TREE_SOURCE_DOMAINS.as_repr())]
     RatchetTreeSourceDomains(
         crate::drafts::ratchet_tree_options::RatchetTreeSourceDomainsExtension<'a>,
     ),
@@ -85,39 +87,47 @@ impl<'a> Extension<'a> {
     ) -> crate::MlsSpecResult<Self> {
         use thalassa::TlsplDeserialize as _;
 
+        let mut reader = DepthAwareReader::from_reader(&mut extension_data);
+        let mut guard = reader.enter().map_err(TlsplReadError::from)?;
+
         Ok(match ExtensionType::new_unchecked(extension_id) {
             ExtensionType::APPLICATION_ID => {
-                Self::ApplicationId(<_>::tlspl_deserialize_from(&mut extension_data)?)
+                Self::ApplicationId(<_>::tlspl_deserialize_from(&mut guard)?)
             }
             ExtensionType::RATCHET_TREE => {
-                Self::RatchetTree(<_>::tlspl_deserialize_from(&mut extension_data)?)
+                Self::RatchetTree(<_>::tlspl_deserialize_from(&mut guard)?)
             }
             ExtensionType::REQUIRED_CAPABILITIES => {
-                Self::RequiredCapabilities(<_>::tlspl_deserialize_from(&mut extension_data)?)
+                Self::RequiredCapabilities(<_>::tlspl_deserialize_from(&mut guard)?)
             }
             ExtensionType::EXTERNAL_PUB => {
-                Self::ExternalPub(<_>::tlspl_deserialize_from(&mut extension_data)?)
+                Self::ExternalPub(<_>::tlspl_deserialize_from(&mut guard)?)
             }
             ExtensionType::EXTERNAL_SENDERS => {
-                Self::ExternalSenders(<_>::tlspl_deserialize_from(&mut extension_data)?)
+                Self::ExternalSenders(<_>::tlspl_deserialize_from(&mut guard)?)
             }
             #[cfg(feature = "draft-ietf-mls-extensions")]
             ExtensionType::APPLICATION_DATA_DICTIONARY => {
-                Self::ApplicationData(<_>::tlspl_deserialize_from(&mut extension_data)?)
+                Self::ApplicationData(<_>::tlspl_deserialize_from(&mut guard)?)
             }
             #[cfg(feature = "draft-ietf-mls-extensions")]
             ExtensionType::SUPPORTED_WIRE_FORMATS => {
-                Self::SupportedWireFormats(<_>::tlspl_deserialize_from(&mut extension_data)?)
+                Self::SupportedWireFormats(<_>::tlspl_deserialize_from(&mut guard)?)
             }
             #[cfg(feature = "draft-ietf-mls-extensions")]
             ExtensionType::REQUIRED_WIRE_FORMATS => {
-                Self::RequiredWireFormats(<_>::tlspl_deserialize_from(&mut extension_data)?)
+                Self::RequiredWireFormats(<_>::tlspl_deserialize_from(&mut guard)?)
             }
             #[cfg(feature = "draft-ietf-mls-ratchet-tree-options")]
             ExtensionType::RATCHET_TREE_SOURCE_DOMAINS => {
-                Self::RatchetTreeSourceDomains(<_>::tlspl_deserialize_from(&mut extension_data)?)
+                Self::RatchetTreeSourceDomains(<_>::tlspl_deserialize_from(&mut guard)?)
             }
-            discr => Self::Arbitrary(*discr, extension_data),
+            discr => {
+                drop(guard);
+                drop(reader);
+
+                Self::Arbitrary(*discr, extension_data)
+            }
         })
     }
 

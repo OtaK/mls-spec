@@ -11,28 +11,28 @@ use crate::{
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u16)]
 pub enum Proposal<'a> {
-    #[tlspl(discriminant = "ProposalType::ADD")]
+    #[tlspl(discriminant = ProposalType::ADD.as_repr())]
     Add(AddProposal<'a>),
-    #[tlspl(discriminant = "ProposalType::UPDATE")]
+    #[tlspl(discriminant = ProposalType::UPDATE.as_repr())]
     Update(UpdateProposal<'a>),
-    #[tlspl(discriminant = "ProposalType::REMOVE")]
+    #[tlspl(discriminant = ProposalType::REMOVE.as_repr())]
     Remove(RemoveProposal),
-    #[tlspl(discriminant = "ProposalType::PSK")]
+    #[tlspl(discriminant = ProposalType::PSK.as_repr())]
     PreSharedKey(PreSharedKeyProposal<'a>),
-    #[tlspl(discriminant = "ProposalType::REINIT")]
+    #[tlspl(discriminant = ProposalType::REINIT.as_repr())]
     ReInit(ReInitProposal<'a>),
-    #[tlspl(discriminant = "ProposalType::EXTERNAL_INIT")]
+    #[tlspl(discriminant = ProposalType::EXTERNAL_INIT.as_repr())]
     ExternalInit(ExternalInitProposal<'a>),
-    #[tlspl(discriminant = "ProposalType::GROUP_CONTEXT_EXTENSIONS")]
+    #[tlspl(discriminant = ProposalType::GROUP_CONTEXT_EXTENSIONS.as_repr())]
     GroupContextExtensions(GroupContextExtensionsProposal<'a>),
     #[cfg(feature = "draft-ietf-mls-extensions")]
-    #[tlspl(discriminant = "ProposalType::APP_DATA_UPDATE")]
+    #[tlspl(discriminant = ProposalType::APP_DATA_UPDATE.as_repr())]
     AppDataUpdate(crate::drafts::mls_extensions::safe_application::AppDataUpdate<'a>),
     #[cfg(feature = "draft-ietf-mls-extensions")]
-    #[tlspl(discriminant = "ProposalType::APP_EPHEMERAL")]
+    #[tlspl(discriminant = ProposalType::APP_EPHEMERAL.as_repr())]
     AppEphemeral(crate::drafts::mls_extensions::safe_application::AppEphemeral<'a>),
     #[cfg(feature = "draft-ietf-mls-extensions")]
-    #[tlspl(discriminant = "ProposalType::SELF_REMOVE")]
+    #[tlspl(discriminant = ProposalType::SELF_REMOVE.as_repr())]
     SelfRemove(crate::drafts::mls_extensions::self_remove::SelfRemoveProposal),
 }
 
