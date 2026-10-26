@@ -124,7 +124,6 @@ impl<'a> Extension<'a> {
             }
             discr => {
                 drop(guard);
-                drop(reader);
 
                 Self::Arbitrary(*discr, extension_data)
             }
