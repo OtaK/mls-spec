@@ -6,6 +6,19 @@ use crate::{
     tree::leaf_node::LeafNode,
 };
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-10>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     ProtocolVersion version;
+///     CipherSuite cipher_suite;
+///     HPKEPublicKey init_key;
+///     LeafNode leaf_node;
+///     Extension extensions<V>;
+/// } KeyPackageTBS;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplSerialize, thalassa::TlsplSize)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct KeyPackageTBS<'a> {

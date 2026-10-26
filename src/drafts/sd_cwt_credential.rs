@@ -34,6 +34,25 @@ pub struct SdJwtDisclosure<'a> {
     pub disclosure: Cow<'a, [u8]>,
 }
 
+/// <https://www.ietf.org/archive/id/draft-mahy-mls-sd-cwt-credential-02.html#section-3.2>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     Bool compacted;
+///     select (compacted) {
+///         case true:
+///             opaque protected<V>;
+///             opaque payload<V>;
+///             opaque signature<V>;
+///             SdJwtDisclosure disclosures<V>;
+///             opaque sd_jwt_key_binding<V>;
+///         case false:
+///             opaque sd_jwt_kb<V>;
+///     };
+/// } SdJwt;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u8)]

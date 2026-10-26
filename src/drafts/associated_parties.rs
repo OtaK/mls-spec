@@ -7,6 +7,16 @@ use super::mls_extensions::safe_application::{Component, ComponentId};
 
 pub const COMPONENT_ID: ComponentId = 0x0007;
 
+/// <https://www.ietf.org/archive/id/draft-kohbrok-mls-associated-parties-00.html#section-3>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     HPKEPublicKey encryption_key;
+///     uint32 external_sender_index;
+/// } AssociatedPartyEntryTBS
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplSize, thalassa::TlsplSerialize)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct AssociatedPartyEntryTBS<'a> {
@@ -14,6 +24,17 @@ pub struct AssociatedPartyEntryTBS<'a> {
     pub external_sender_index: &'a SenderIndex,
 }
 
+/// <https://www.ietf.org/archive/id/draft-kohbrok-mls-associated-parties-00.html#section-3>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///   HPKEPublicKey encryption_key;
+///   uint32 external_sender_index;
+///   opaque signature<V>;
+/// } AssociatedPartyEntry
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AssociatedPartyEntry<'a> {
@@ -42,6 +63,15 @@ impl<'a> AssociatedPartyEntry<'a> {
     }
 }
 
+/// <https://www.ietf.org/archive/id/draft-kohbrok-mls-associated-parties-00.html#section-4>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///   AssociatedPartyEntry associated_parties<V>;
+/// } AssociatedParties
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AssociatedParties<'a> {
@@ -59,18 +89,45 @@ pub mod proposals {
 
     use super::AssociatedPartyEntry;
 
+    /// <https://www.ietf.org/archive/id/draft-kohbrok-mls-associated-parties-00.html#section-4>
+    ///
+    /// ### TLS Presentation Language
+    ///
+    /// ```notrust,ignore
+    /// struct {
+    ///   AssociatedPartyEntry new_party;
+    /// } AddAssociatedParty
+    /// ```
     #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     pub struct AddAssociatedPartyProposal<'a> {
         pub new_party: AssociatedPartyEntry<'a>,
     }
 
+    /// <https://www.ietf.org/archive/id/draft-kohbrok-mls-associated-parties-00.html#section-4>
+    ///
+    /// ### TLS Presentation Language
+    ///
+    /// ```notrust,ignore
+    /// struct {
+    ///   u32 removed_party_index;
+    /// } RemoveAssociatedParty
+    /// ```
     #[derive(Debug, Clone, Copy, PartialEq, Eq, thalassa::TlsplAll)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     pub struct RemoveAssociatedPartyProposal {
         pub removed_party_index: LeafIndex,
     }
 
+    /// <https://www.ietf.org/archive/id/draft-kohbrok-mls-associated-parties-00.html#section-4>
+    ///
+    /// ### TLS Presentation Language
+    ///
+    /// ```notrust,ignore
+    /// struct {
+    ///   AssociatedPartyEntry updated_party;
+    /// } UpdateAssociatedParty
+    /// ```
     #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     pub struct UpdateAssociatedPartyProposal<'a> {
@@ -83,6 +140,16 @@ pub mod key_schedule {
 
     use super::AssociatedPartyEntry;
 
+    /// <https://www.ietf.org/archive/id/draft-kohbrok-mls-associated-parties-00.html#section-6>
+    ///
+    /// ### TLS Presentation Language
+    ///
+    /// ```notrust,ignore
+    /// struct {
+    ///   u32 ap_index;
+    ///   AssociatedPartyEntry ap_entry;
+    /// } AssociatedPartyExportContext
+    /// ```
     #[derive(Debug, Clone, Copy, PartialEq, Eq, thalassa::TlsplSize, thalassa::TlsplSerialize)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize))]
     pub struct AssociatedPartyExportContext<'a> {
@@ -121,12 +188,30 @@ pub mod key_schedule {
         }
     }
 
+    /// <https://www.ietf.org/archive/id/draft-kohbrok-mls-associated-parties-00.html#section-6.1>
+    ///
+    /// ### TLS Presentation Language
+    ///
+    /// ```notrust,ignore
+    /// struct {
+    ///   opaque associated_party_proposal_secret<V>;
+    /// } AssociatedPartySecret;
+    /// ```
     #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     pub struct AssociatedPartySecret<'a> {
         pub associated_party_proposal_secret: SensitiveBytes<'a>,
     }
 
+    /// <https://www.ietf.org/archive/id/draft-kohbrok-mls-associated-parties-00.html#section-7>
+    ///
+    /// ### TLS Presentation Language
+    ///
+    /// ```notrust,ignore
+    /// struct {
+    ///   opaque associated_party_init_secret<V>;
+    /// } AssociatedPartySecrets
+    /// ```
     #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     pub struct AssociatedPartySecrets<'a> {

@@ -19,12 +19,32 @@ static_assertions::const_assert!(
 
 pub const CONTENT_TYPE_SPLIT_COMMIT: u8 = 0xF5;
 
+/// <https://www.ietf.org/archive/id/draft-mularczyk-mls-splitcommit-00.html#section-3>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     UpdatePathNode nodes<V>;
+/// } SplitUpdatePath;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, Default, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SplitUpdatePath<'a> {
     pub nodes: Vec<UpdatePathNode<'a>>,
 }
 
+/// <https://www.ietf.org/archive/id/draft-mularczyk-mls-splitcommit-00.html#section-3>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     opaque epoch_identifier<V>;
+///     ProposalOrRef proposals<V>;
+///     optional<LeafNode> leaf_node;
+/// } SplitCommit;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, Default, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SplitCommit<'a> {
@@ -107,6 +127,19 @@ impl<'a> thalassa::TlsplDeserialize<'a> for SplitCommitMessage<'a> {
     }
 }
 
+/// <https://www.ietf.org/archive/id/draft-mularczyk-mls-splitcommit-00.html#section-3>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     // PrivateMessage or PublicMessage
+///     // content_type = split_commit
+///     MLSMessage split_commit_message;
+///
+///     optional<HPKECiphertext> encrypted_path_secret;
+/// } PerMemberCommit;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PerMemberCommit<'a> {

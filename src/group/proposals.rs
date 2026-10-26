@@ -7,6 +7,24 @@ use crate::{
     tree::leaf_node::LeafNode,
 };
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-12.1>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     ProposalType proposal_type;
+///     select (Proposal.proposal_type) {
+///         case add:                      Add;
+///         case update:                   Update;
+///         case remove:                   Remove;
+///         case psk:                      PreSharedKey;
+///         case reinit:                   ReInit;
+///         case external_init:            ExternalInit;
+///         case group_context_extensions: GroupContextExtensions;
+///     };
+/// } Proposal;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u16)]
@@ -70,30 +88,78 @@ impl Proposal<'_> {
     }
 }
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-12.1.1>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     KeyPackage key_package;
+/// } Add;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AddProposal<'a> {
     pub key_package: KeyPackage<'a>,
 }
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-12.1.2>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     LeafNode leaf_node;
+/// } Update;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UpdateProposal<'a> {
     pub leaf_node: LeafNode<'a>,
 }
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-12.1.3>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     uint32 removed;
+/// } Remove;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RemoveProposal {
     pub removed: LeafIndex,
 }
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-12.1.4>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     PreSharedKeyID psk;
+/// } PreSharedKey;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PreSharedKeyProposal<'a> {
     pub psk: PreSharedKeyId<'a>,
 }
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-12.1.5>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     opaque group_id<V>;
+///     ProtocolVersion version;
+///     CipherSuite cipher_suite;
+///     Extension extensions<V>;
+/// } ReInit;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ReInitProposal<'a> {
@@ -112,12 +178,30 @@ impl ReInitProposal<'_> {
     }
 }
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-12.1.6>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///   opaque kem_output<V>;
+/// } ExternalInit;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ExternalInitProposal<'a> {
     pub kem_output: SensitiveBytes<'a>,
 }
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-12.1.7>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///   Extension extensions<V>;
+/// } GroupContextExtensions;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GroupContextExtensionsProposal<'a> {

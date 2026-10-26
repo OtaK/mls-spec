@@ -6,6 +6,19 @@ use crate::{
     group::{GroupId, KeyPackageLifetime, RequiredCapabilities, extensions::Extension},
 };
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-7.2>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// enum {
+///     reserved(0),
+///     key_package(1),
+///     update(2),
+///     commit(3),
+///     (255)
+/// } LeafNodeSource;
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, thalassa::TlsplAll, strum::Display)]
 #[cfg_attr(
     feature = "serde",
@@ -62,6 +75,34 @@ pub struct LeafNodeMemberInfo<'a> {
     pub leaf_index: LeafIndex,
 }
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-7.2>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     HPKEPublicKey encryption_key;
+///     SignaturePublicKey signature_key;
+///     Credential credential;
+///     Capabilities capabilities;
+///
+///     LeafNodeSource leaf_node_source;
+///     select (LeafNode.leaf_node_source) {
+///         case key_package:
+///             Lifetime lifetime;
+///
+///         case update:
+///             struct{};
+///
+///         case commit:
+///             opaque parent_hash<V>;
+///     };
+///
+///     Extension extensions<V>;
+///     /* SignWithLabel(., "LeafNodeTBS", LeafNodeTBS) */
+///     opaque signature<V>;
+/// } LeafNode;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct LeafNode<'a> {

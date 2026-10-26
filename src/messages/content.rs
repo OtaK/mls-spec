@@ -14,6 +14,28 @@ use crate::{
     messages::{ContentType, ContentTypeInner, PrivateMessage, PublicMessage, Sender, SenderType},
 };
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-6>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     opaque group_id<V>;
+///     uint64 epoch;
+///     Sender sender;
+///     opaque authenticated_data<V>;
+///
+///     ContentType content_type;
+///     select (FramedContent.content_type) {
+///         case application:
+///           opaque application_data<V>;
+///         case proposal:
+///           Proposal proposal;
+///         case commit:
+///           Commit commit;
+///     };
+/// } FramedContent;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FramedContent<'a> {
@@ -322,6 +344,17 @@ impl Into<WireFormat> for &MlsMessageContent<'_> {
     }
 }
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-6>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     WireFormat wire_format;
+///     FramedContent content;
+///     FramedContentAuthData auth;
+/// } AuthenticatedContent;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplSerialize, thalassa::TlsplSize)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AuthenticatedContent<'a> {

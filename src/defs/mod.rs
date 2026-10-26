@@ -235,6 +235,19 @@ impl_spec_enum! {
     MLS_LEAF_OPERATION_INTENT = crate::drafts::leaf_operation_intents::WIRE_FORMAT_MLS_LEAF_OPERATION_INTENT
 }
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-7.2>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     ProtocolVersion versions<V>;
+///     CipherSuite cipher_suites<V>;
+///     ExtensionType extensions<V>;
+///     ProposalType proposals<V>;
+///     CredentialType credentials<V>;
+/// } Capabilities;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Capabilities {
