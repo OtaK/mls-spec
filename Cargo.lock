@@ -691,7 +691,7 @@ dependencies = [
 
 [[package]]
 name = "mls-spec"
-version = "3.0.0-pre.17"
+version = "3.0.0-pre.18"
 dependencies = [
  "async-trait",
  "color-eyre",
@@ -984,9 +984,9 @@ checksum = "0c790de23124f9ab44544d7ac05d60440adc586479ce501c1d6d7da3cd8c9cf5"
 
 [[package]]
 name = "smallvec"
-version = "1.16.3"
+version = "1.16.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b3dc8af474f516a851ff4bd12db780f948b9250ad37211e4eec0bccea54e01b"
+checksum = "d0d5d4b1981b8bbbb7aed204cae5726d683d5d6ac7e74ec54122ea28f315e7c8"
 
 [[package]]
 name = "socket2"
@@ -1076,9 +1076,9 @@ dependencies = [
 
 [[package]]
 name = "thalassa"
-version = "0.1.0-rc.2"
+version = "0.1.0-rc.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7fc4f9365f36306434c2f78a0a7e2823f553bc2fc151dccc39a3eb92765ab4be"
+checksum = "d9758a9caf9d473cd60e7199664f52256d1ca4b0128f882afd254a722835b019"
 dependencies = [
  "parsio",
  "simdutf8",
@@ -1089,9 +1089,9 @@ dependencies = [
 
 [[package]]
 name = "thalassa-derive"
-version = "0.1.0-rc.2"
+version = "0.1.0-rc.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c9a41ce6106bb142f992f85269fe5b82e8496e61b4b81a4138cf62b27bb06356"
+checksum = "672d91a44a1f4993660dc053f1cfe437d3b070bd58f57644f72411cbed92fd84"
 dependencies = [
  "bitflags 2.13.2",
  "darling 0.24.1",
