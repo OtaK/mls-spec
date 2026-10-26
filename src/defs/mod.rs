@@ -32,10 +32,6 @@ pub const GREASE_VALUES: [u16; 15] = [
     strum::Display,
     strum::EnumString,
 )]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde_repr::Serialize_repr, serde_repr::Deserialize_repr)
-)]
 #[repr(u16)]
 #[non_exhaustive]
 pub enum ProtocolVersion {
@@ -43,12 +39,48 @@ pub enum ProtocolVersion {
     #[strum(serialize = "MLS 1.0")]
     #[default]
     Mls10 = 0x0001,
+    #[tlspl(other)]
+    Other(u16),
+}
+
+#[cfg(feature = "serde")]
+impl serde::Serialize for ProtocolVersion {
+    #[inline]
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_u16(self.as_repr())
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for ProtocolVersion {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let value = <u16 as serde::Deserialize>::deserialize(deserializer)?;
+        Ok(match value {
+            0x0000 => Self::Reserved,
+            0x0001 => Self::Mls10,
+            _ => Self::Other(value),
+        })
+    }
 }
 
 impl ProtocolVersion {
     #[must_use]
     pub fn all_without_spec_default() -> Vec<Self> {
         vec![Self::Mls10]
+    }
+
+    pub const fn as_repr(&self) -> u16 {
+        match self {
+            ProtocolVersion::Reserved => 0x0000,
+            ProtocolVersion::Mls10 => 0x0001,
+            ProtocolVersion::Other(value) => *value,
+        }
     }
 }
 
@@ -211,4 +243,15 @@ pub struct Capabilities {
     pub extensions: Vec<ExtensionType>,
     pub proposals: Vec<ProposalType>,
     pub credentials: Vec<CredentialType>,
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::generate_roundtrip_test;
+
+    use super::*;
+
+    generate_roundtrip_test!(can_roundtrip_protocol_version_other, {
+        ProtocolVersion::Other(999)
+    });
 }
