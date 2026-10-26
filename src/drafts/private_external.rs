@@ -24,11 +24,20 @@ static_assertions::const_assert!(
 );
 pub const EXT_ENCRYPTION_INFO_ID: ComponentId = 0xFEE1;
 static_assertions::const_assert!(
-    *super::mls_extensions::COMPONENT_RESERVED_PRIVATE_RANGE.start() <= ROOT_PRIVATE_SIGNATURE_ID
-        && ROOT_PRIVATE_SIGNATURE_ID
+    *super::mls_extensions::COMPONENT_RESERVED_PRIVATE_RANGE.start() <= EXT_ENCRYPTION_INFO_ID
+        && EXT_ENCRYPTION_INFO_ID
             <= *super::mls_extensions::COMPONENT_RESERVED_PRIVATE_RANGE.end()
 );
 
+/// <https://www.ietf.org/archive/id/draft-mahy-mls-private-external-01.html#section-3.2>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     opaque root_private_signature_key<V>;
+/// } RootPrivateSignature;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RootPrivateSignature<'a> {
@@ -41,6 +50,20 @@ impl<'a> safe_application::Component<'a> for RootPrivateSignature<'a> {
     }
 }
 
+/// <https://www.ietf.org/archive/id/draft-mahy-mls-private-external-01.html#section-3.2>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     ProtocolVersion version = mls10;
+///     opaque group_id<V>;
+///     uint64 epoch;
+///     CipherSuite ciphersuite;
+///     HPKEPublicKey external_encryption_public_key;
+///     SignaturePublicKey root_public_signature_key;
+/// } ExternalEncryptionInfoTBS;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplSize, thalassa::TlsplSerialize)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct ExternalEncryptionInfoTBS<'a> {
@@ -52,6 +75,20 @@ pub struct ExternalEncryptionInfoTBS<'a> {
     pub root_public_signature_key: &'a SignaturePublicKey<'a>,
 }
 
+/// <https://www.ietf.org/archive/id/draft-mahy-mls-private-external-01.html#section-3.2>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     CipherSuite ciphersuite;
+///     HPKEPublicKey external_encryption_public_key;
+///     SignaturePublicKey root_public_signature_key;
+///     /* SignWithLabel(root_private_signature_key, */
+///     /*    "ExternalEncryptionInfoTBS", ExternalEncryptionInfoTBS) */
+///     opaque external_encryption_signature<V>;
+/// } ExternalEncryptionInfo;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ExternalEncryptionInfo<'a> {
@@ -85,10 +122,31 @@ impl<'a> ExternalEncryptionInfo<'a> {
     }
 }
 
+/// <https://www.ietf.org/archive/id/draft-mahy-mls-private-external-01.html#section-3.3>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+/// } PrivateExternalMessageContext;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrivateExternalMessageContext;
 
+/// <https://www.ietf.org/archive/id/draft-mahy-mls-private-external-01.html#section-3.3>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     opaque group_id<V>;
+///     uint64 epoch;
+///     ContentType content_type;
+///     opaque authenticated_data<V>;
+///     HPKECiphertext encrypted_public_message;
+/// } PrivateExternalMessage;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrivateExternalMessage<'a> {

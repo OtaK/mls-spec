@@ -14,6 +14,16 @@ pub struct RatchetTreeExtension<'a> {
     pub ratchet_tree: RatchetTree<'a>,
 }
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-7.2>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     ExtensionType extension_type;
+///     opaque extension_data<V>;
+/// } Extension;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[tlspl(extensible)]
@@ -164,18 +174,45 @@ impl<'a> Extension<'a> {
                     .collect(),
             ),
             #[cfg(feature = "draft-ietf-mls-extensions")]
-            Extension::ApplicationData(_add) => todo!(),
+            Extension::ApplicationData(add) => Extension::ApplicationData(
+                crate::drafts::mls_extensions::safe_application::ApplicationDataDictionary {
+                    component_data: add.component_data.to_owned(),
+                },
+            ),
             #[cfg(feature = "draft-ietf-mls-extensions")]
-            Extension::SupportedWireFormats(_swf) => todo!(),
+            Extension::SupportedWireFormats(swf) => Extension::SupportedWireFormats(swf.clone()),
             #[cfg(feature = "draft-ietf-mls-extensions")]
-            Extension::RequiredWireFormats(_rwf) => todo!(),
+            Extension::RequiredWireFormats(rwf) => Extension::RequiredWireFormats(rwf.clone()),
             #[cfg(feature = "draft-ietf-mls-ratchet-tree-options")]
-            Extension::RatchetTreeSourceDomains(_rtsd) => todo!(),
+            Extension::RatchetTreeSourceDomains(rtsd) => {
+                use crate::drafts::ratchet_tree_options::{
+                    Domain, DomainList, RatchetTreeSourceDomainsExtension,
+                };
+                Extension::RatchetTreeSourceDomains(RatchetTreeSourceDomainsExtension(DomainList {
+                    domains: rtsd
+                        .0
+                        .domains
+                        .iter()
+                        .map(|d| Domain {
+                            domain: d.domain.to_string().into(),
+                        })
+                        .collect(),
+                }))
+            }
             Extension::Arbitrary(id, cow) => Extension::Arbitrary(*id, cow.to_vec().into()),
         }
     }
 }
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-12.4.3.2>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     HPKEPublicKey external_pub;
+/// } ExternalPub;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ExternalPub<'a> {

@@ -2,6 +2,18 @@ use std::borrow::Cow;
 
 use super::safe_application::{Component, ComponentId};
 
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-6.2.2>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     opaque parameter_name<V>;
+///     /* Note: parameter_value never includes the quotation marks of */
+///     /* an RFC 2045 quoted-string or the first "\" of a quoted-pair */
+///     opaque parameter_value<V>;
+/// } Parameter;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Parameter<'a> {
@@ -9,6 +21,20 @@ pub struct Parameter<'a> {
     pub parameter_value: Cow<'a, str>,
 }
 
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-6.2.2>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     /* type is an IANA top-level media type, a "/" character,
+///      * and the IANA media subtype */
+///     opaque type<V>;
+///
+///     /* a list of zero or more parameters defined for the subtype */
+///     Parameter parameters<V>;
+/// } MediaType;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MediaType<'a> {
@@ -36,6 +62,16 @@ impl<'a> MediaType<'a> {
     }
 }
 
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-6.2.2>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     /* must contain at least one item */
+///     MediaType media_type_list<V>;
+/// } MediaTypeList;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct MediaTypeList<'a> {
@@ -54,6 +90,16 @@ impl<'a> Component<'a> for ContentMediaTypes<'a> {
     }
 }
 
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-6.2.4>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     MediaType media_type;
+///     opaque inner_application_content<V>;
+/// } ApplicationFraming;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ApplicationFraming<'a> {

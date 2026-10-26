@@ -95,6 +95,16 @@ impl std::fmt::Display for ExternalInitSecret {
 }
 impl ToPrefixedLabel for ExternalInitSecret {}
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-7.6>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     opaque kem_output<V>;
+///     opaque ciphertext<V>;
+/// } HPKECiphertext;
+/// ```
 #[derive(Debug, Clone, Eq, PartialEq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct HpkeCiphertext<'a> {
@@ -102,6 +112,16 @@ pub struct HpkeCiphertext<'a> {
     pub ciphertext: SensitiveBytes<'a>,
 }
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-5.1.2>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     opaque label<V>;
+///     opaque content<V>;
+/// } SignContent;
+/// ```
 #[derive(Debug, Clone, Eq, PartialEq, thalassa::TlsplSerialize, thalassa::TlsplSize)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SignContent<'a> {
@@ -109,6 +129,16 @@ pub struct SignContent<'a> {
     pub content: &'a [u8],
 }
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-5.1.3>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///   opaque label<V>;
+///   opaque context<V>;
+/// } EncryptContext;
+/// ```
 #[derive(Debug, Clone, Eq, PartialEq, thalassa::TlsplSerialize, thalassa::TlsplSize)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct EncryptContext<'a> {
@@ -116,6 +146,16 @@ pub struct EncryptContext<'a> {
     pub context: &'a [u8],
 }
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-5.2>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///   opaque label<V>;
+///   opaque value<V>;
+/// } RefHashInput;
+/// ```
 #[derive(Debug, Clone, Eq, PartialEq, thalassa::TlsplSerialize, thalassa::TlsplSize)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct HashReferenceInput<'a> {
@@ -123,6 +163,17 @@ pub struct HashReferenceInput<'a> {
     pub value: &'a [u8],
 }
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-8>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     uint16 length;
+///     opaque label<V>;
+///     opaque context<V>;
+/// } KDFLabel;
+/// ```
 #[derive(Debug, Clone, Eq, PartialEq, thalassa::TlsplSerialize, thalassa::TlsplSize)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct KdfLabel<'a> {

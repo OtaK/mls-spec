@@ -21,6 +21,16 @@ pub type LeafNodeRef<'a> = HashReference<'a>;
 
 pub type GroupId<'a> = Cow<'a, [u8]>;
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-7.2>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     uint64 not_before;
+///     uint64 not_after;
+/// } Lifetime;
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KeyPackageLifetime {
@@ -84,6 +94,16 @@ impl Default for KeyPackageLifetime {
     }
 }
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-12.1.8.1>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///   SignaturePublicKey signature_key;
+///   Credential credential;
+/// } ExternalSender;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ExternalSender<'a> {
@@ -91,6 +111,17 @@ pub struct ExternalSender<'a> {
     pub credential: Credential<'a>,
 }
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-11.1>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     ExtensionType extension_types<V>;
+///     ProposalType proposal_types<V>;
+///     CredentialType credential_types<V>;
+/// } RequiredCapabilities;
+/// ```
 #[derive(Debug, Clone, Default, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RequiredCapabilities {

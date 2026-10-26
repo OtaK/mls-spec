@@ -25,6 +25,16 @@ static_assertions::const_assert!(
 
 pub type ExternalReceiverRef<'a> = HashReference<'a>;
 
+/// <https://www.ietf.org/archive/id/draft-mahy-mls-semiprivatemessage-07.html#section-3>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///   HPKEPublicKey external_receiver_public_key;
+///   Credential credential;
+/// } ExternalReceiver;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ExternalReceiver<'a> {
@@ -64,6 +74,17 @@ pub struct PerMessageKeyAndNonces<'a> {
     pub sender_leaf_index: LeafIndex,
 }
 
+/// <https://www.ietf.org/archive/id/draft-mahy-mls-semiprivatemessage-07.html#section-3.1>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///   opaque group_id<V>;
+///   uint64 epoch;
+///   opaque partial_context_hash<V>;
+/// } SemiPrivateMessageContext;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplSerialize, thalassa::TlsplSize)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct SemiPrivateMessageContext<'a> {
@@ -72,6 +93,16 @@ pub struct SemiPrivateMessageContext<'a> {
     pub partial_context_hash: &'a [u8],
 }
 
+/// <https://www.ietf.org/archive/id/draft-mahy-mls-semiprivatemessage-07.html#section-3.1>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///   ExternalReceiverRef external_receiver_ref;
+///   HPKECiphertext encrypted_keys_and_nonces;
+/// } KeyForExternalReceiver;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct KeyForExternalReceiver<'a> {
@@ -95,6 +126,21 @@ pub mod messages {
 
     use super::KeyForExternalReceiver;
 
+    /// <https://www.ietf.org/archive/id/draft-mahy-mls-semiprivatemessage-07.html#section-3.1>
+    ///
+    /// ### TLS Presentation Language
+    ///
+    /// ```notrust,ignore
+    /// struct {
+    ///     opaque group_id<V>;
+    ///     uint64 epoch;
+    ///     ContentType content_type;
+    ///     opaque authenticated_data<V>;
+    ///     opaque partial_context_hash<V>;
+    ///     KeyForExternalReceiver keys_for_external_receivers<V>;
+    ///     opaque framed_content_tbs_hash<V>;
+    /// } SemiPrivateContentAAD;
+    /// ```
     #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplSerialize, thalassa::TlsplSize)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize))]
     pub struct SemiPrivateContentAad<'a> {
@@ -173,6 +219,23 @@ pub mod messages {
         }
     }
 
+    /// <https://www.ietf.org/archive/id/draft-mahy-mls-semiprivatemessage-07.html#section-3.1>
+    ///
+    /// ### TLS Presentation Language
+    ///
+    /// ```notrust,ignore
+    /// struct {
+    ///     opaque group_id<V>;
+    ///     uint64 epoch;
+    ///     ContentType content_type;
+    ///     opaque authenticated_data<V>;
+    ///     opaque partial_context_hash<V>;
+    ///     KeyForExternalReceiver keys_for_external_receivers<V>;
+    ///     opaque framed_content_tbs_hash<V>;
+    ///     opaque encrypted_sender_data<V>;
+    ///     opaque ciphertext<V>;
+    /// } SemiPrivateMessage;
+    /// ```
     #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
     #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     pub struct SemiPrivateMessage<'a> {

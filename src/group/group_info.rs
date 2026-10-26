@@ -8,6 +8,18 @@ use crate::{
     tree::RatchetTree,
 };
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-12.4.3>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     GroupContext group_context;
+///     Extension extensions<V>;
+///     MAC confirmation_tag;
+///     uint32 signer;
+/// } GroupInfoTBS;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplSerialize, thalassa::TlsplSize)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct GroupInfoTBS<'a> {
@@ -17,6 +29,20 @@ pub struct GroupInfoTBS<'a> {
     pub signer: &'a LeafIndex,
 }
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-12.4.3>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     GroupContext group_context;
+///     Extension extensions<V>;
+///     MAC confirmation_tag;
+///     uint32 signer;
+///     /* SignWithLabel(., "GroupInfoTBS", GroupInfoTBS) */
+///     opaque signature<V>;
+/// } GroupInfo;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GroupInfo<'a> {

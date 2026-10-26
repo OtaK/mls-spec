@@ -170,6 +170,17 @@ impl<'a, N: RatchetTreeItem<'a>> std::ops::DerefMut for RatchetTree<'a, N> {
 
 pub type TreeHash<'a> = SensitiveBytes<'a>;
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-7.1>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     HPKEPublicKey encryption_key;
+///     opaque parent_hash<V>;
+///     uint32 unmerged_leaves<V>;
+/// } ParentNode;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ParentNode<'a> {
@@ -188,6 +199,18 @@ impl ParentNode<'_> {
     }
 }
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-7.8>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// enum {
+///     reserved(0),
+///     leaf(1),
+///     parent(2),
+///     (255)
+/// } NodeType;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(
     feature = "serde",
@@ -200,6 +223,19 @@ pub enum NodeType {
     Parent = 0x02,
 }
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-12.4.3.3>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     NodeType node_type;
+///     select (Node.node_type) {
+///         case leaf:   LeafNode leaf_node;
+///         case parent: ParentNode parent_node;
+///     };
+/// } Node;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u8)]
@@ -264,6 +300,16 @@ impl<'a> TreeNode<'a> {
     }
 }
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-7.6>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     HPKEPublicKey encryption_key;
+///     HPKECiphertext encrypted_path_secret<V>;
+/// } UpdatePathNode;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UpdatePathNode<'a> {
@@ -271,6 +317,16 @@ pub struct UpdatePathNode<'a> {
     pub encrypted_path_secret: Vec<HpkeCiphertext<'a>>,
 }
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-7.6>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     LeafNode leaf_node;
+///     UpdatePathNode nodes<V>;
+/// } UpdatePath;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct UpdatePath<'a> {

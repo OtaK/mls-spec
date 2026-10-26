@@ -5,6 +5,19 @@ use crate::{
     group::{commits::Commit, proposals::Proposal},
 };
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-6>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// enum {
+///     reserved(0),
+///     application(1),
+///     proposal(2),
+///     commit(3),
+///     (255)
+/// } ContentType;
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, thalassa::TlsplAll, strum::Display)]
 #[strum(prefix = "ContentType")]
 #[cfg_attr(

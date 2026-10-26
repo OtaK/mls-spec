@@ -8,6 +8,21 @@ use crate::{
     tree::TreeHash,
 };
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-8.1>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     ProtocolVersion version = mls10;
+///     CipherSuite cipher_suite;
+///     opaque group_id<V>;
+///     uint64 epoch;
+///     opaque tree_hash<V>;
+///     opaque confirmed_transcript_hash<V>;
+///     Extension extensions<V>;
+/// } GroupContext;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, Default, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct GroupContext<'a> {
@@ -107,6 +122,17 @@ impl From<EpochSecretExport> for KdfLabelKind {
 
 pub type TranscriptHash<'a> = SensitiveBytes<'a>;
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-8.2>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     WireFormat wire_format;
+///     FramedContent content; /* with content_type == commit */
+///     opaque signature<V>;
+/// } ConfirmedTranscriptHashInput;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplSize, thalassa::TlsplSerialize)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct ConfirmedTranscriptHashInput<'a> {
@@ -115,6 +141,15 @@ pub struct ConfirmedTranscriptHashInput<'a> {
     pub signature: &'a [u8],
 }
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-8.2>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     MAC confirmation_tag;
+/// } InterimTranscriptHashInput;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplSize, thalassa::TlsplSerialize)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct InterimTranscriptHashInput<'a> {
@@ -127,6 +162,18 @@ impl<'a> From<&'a [u8]> for InterimTranscriptHashInput<'a> {
     }
 }
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-8.4>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// enum {
+///   reserved(0),
+///   external(1),
+///   resumption(2),
+///   (255)
+/// } PSKType;
+/// ```
 #[derive(Debug, Copy, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(
     feature = "serde",
@@ -141,6 +188,19 @@ pub enum PskType {
     Application = 0x03,
 }
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-8.4>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// enum {
+///   reserved(0),
+///   application(1),
+///   reinit(2),
+///   branch(3),
+///   (255)
+/// } ResumptionPSKUsage;
+/// ```
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(
     feature = "serde",
@@ -237,6 +297,17 @@ impl<'a> PreSharedKeyId<'a> {
     }
 }
 
+/// <https://www.rfc-editor.org/rfc/rfc9420.html#section-8.4>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     PreSharedKeyID id;
+///     uint16 index;
+///     uint16 count;
+/// } PSKLabel;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplSize, thalassa::TlsplSerialize)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct PskLabel<'a> {

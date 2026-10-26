@@ -5,7 +5,7 @@ use crate::{
 ///
 /// ```notrust,ignore
 /// struct {
-///     opaque hash_value;
+///     opaque hash_value<V>;
 /// } CopathHash;
 /// ```
 ///

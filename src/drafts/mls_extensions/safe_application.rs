@@ -33,24 +33,37 @@ pub trait Component<'a>: crate::Parsable<'a> + crate::Serializable {
     }
 }
 
-#[derive(
-    Debug, Clone, Default, PartialEq, Eq, strum::IntoStaticStr, strum::EnumString, strum::Display,
-)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(u8)]
 pub enum ComponentOperationBaseLabel<'a> {
     #[default]
-    #[strum(serialize = "MLS Component")]
     MlsComponent,
     /// Other cases. Unlikely to ever happen but whatever!
     Custom(Cow<'a, str>),
 }
 
+impl ComponentOperationBaseLabel<'_> {
+    const MLS_COMPONENT: &'static str = "MLS Component";
+
+    pub fn as_str(&self) -> &str {
+        match self {
+            Self::MlsComponent => Self::MLS_COMPONENT,
+            Self::Custom(label) => label,
+        }
+    }
+}
+
+impl std::fmt::Display for ComponentOperationBaseLabel<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.as_str())
+    }
+}
+
 impl thalassa::TlsplSize for ComponentOperationBaseLabel<'_> {
     #[inline]
     fn tlspl_serialized_len(&self) -> usize {
-        let str: &str = self.into();
-        str.tlspl_serialized_len()
+        self.as_str().tlspl_serialized_len()
     }
 }
 
@@ -60,8 +73,7 @@ impl thalassa::TlsplSerialize for ComponentOperationBaseLabel<'_> {
         &self,
         writer: &mut W,
     ) -> thalassa::error::TlsplWriteResult<usize> {
-        let str: &str = self.into();
-        str.tlspl_serialize_to(writer)
+        self.as_str().tlspl_serialize_to(writer)
     }
 }
 
@@ -72,11 +84,26 @@ impl<'a> thalassa::TlsplDeserialize<'a> for ComponentOperationBaseLabel<'a> {
     where
         Self: Sized + 'a,
     {
-        let str = Cow::<str>::tlspl_deserialize_from(reader)?;
-        Ok(Self::try_from(&*str).unwrap_or(Self::Custom(str)))
+        let label = Cow::<str>::tlspl_deserialize_from(reader)?;
+        Ok(if label == Self::MLS_COMPONENT {
+            Self::MlsComponent
+        } else {
+            Self::Custom(label)
+        })
     }
 }
 
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-4.1>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///   opaque base_label<V>; /* = "MLS Component" */
+///   ComponentID component_id;
+///   opaque label<V>;
+/// } ComponentOperationLabel;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ComponentOperationLabel<'a> {
@@ -85,6 +112,16 @@ pub struct ComponentOperationLabel<'a> {
     pub label: Cow<'a, [u8]>,
 }
 
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-4.6>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     ComponentID component_id;
+///     opaque data<V>;
+/// } ComponentData;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ComponentData<'a> {
@@ -119,6 +156,17 @@ pub struct ComponentDataRef<'a> {
     serde(from = "Vec<ComponentData>", into = "Vec<ComponentData>")
 )]
 pub struct ComponentDataMap<'a>(BTreeMap<ComponentId, Cow<'a, [u8]>>);
+
+impl ComponentDataMap<'_> {
+    pub fn to_owned<'out>(&self) -> ComponentDataMap<'out> {
+        ComponentDataMap(
+            self.0
+                .iter()
+                .map(|(&id, data)| (id, Cow::Owned(data.to_vec())))
+                .collect(),
+        )
+    }
+}
 
 impl<'a> ComponentDataMap<'a> {
     fn extract_component<C: Component<'a> + 'a>(&'a self) -> crate::MlsSpecResult<Option<C>> {
@@ -192,6 +240,16 @@ impl<'a> Into<Vec<ComponentData<'a>>> for ComponentDataMap<'a> {
 /// take care of ordering and deduplication automatically.
 ///
 /// The conversion from/to a `Vec<ComponentData>` is done at serialization/deserialization time
+///
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-4.6>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     ComponentData component_data<V>;
+/// } AppDataDictionary;
+/// ```
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ApplicationDataDictionary<'a> {
@@ -238,6 +296,18 @@ impl<'a> From<ApplicationDataDictionary<'a>> for crate::group::extensions::Exten
     }
 }
 
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-4.7>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// enum {
+///     invalid(0),
+///     update(1),
+///     remove(2),
+///     (255)
+/// } AppDataUpdateOperation;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[repr(u8)]
 #[cfg_attr(
@@ -260,6 +330,21 @@ pub enum ApplicationDataUpdateOperation<'a> {
     Remove,
 }
 
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-4.7>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     ComponentID component_id;
+///     AppDataUpdateOperation op;
+///
+///     select (AppDataUpdate.op) {
+///         case update: opaque update<V>;
+///         case remove: struct{};
+///     };
+/// } AppDataUpdate;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct AppDataUpdate<'a> {
@@ -291,6 +376,16 @@ impl<'a> AppDataUpdate<'a> {
     }
 }
 
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-4.8>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     ComponentID component_id;
+///     opaque data<V>;
+/// } AppEphemeral;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ApplicationData<'a> {
@@ -300,6 +395,16 @@ pub struct ApplicationData<'a> {
 
 pub type AppEphemeral<'a> = ApplicationData<'a>;
 
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-4.9>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///   ComponentID component_id;
+///   opaque aad_item_data<V>;
+/// } SafeAADItem;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[repr(transparent)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -337,6 +442,15 @@ impl<'a> SafeAadItemRef<'a> {
     }
 }
 
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-4.9>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///   SafeAADItem aad_items<V>;
+/// } SafeAAD;
+/// ```
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct SafeAad<'a> {
@@ -407,12 +521,30 @@ impl<'a> From<&'a [&'a SafeAadItemRef<'a>]> for SafeAadRef<'a> {
     }
 }
 
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-5>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///    WireFormat wire_formats<V>;
+/// } WireFormats;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, Hash, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct WireFormats {
     pub wire_formats: Vec<crate::defs::WireFormat>,
 }
 
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-5>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     ComponentID component_ids<V>;
+/// } ComponentsList;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ComponentsList {
@@ -484,5 +616,21 @@ mod tests {
         let items = &[&aad_item_ref];
         let safe_ref = SafeAadRef::from(items.as_slice());
         assert!(safe_ref.is_ordered_and_unique());
+    }
+
+    #[test]
+    fn base_label_roundtrips_custom_value() {
+        use super::ComponentOperationBaseLabel;
+        use crate::{Parsable as _, Serializable as _};
+
+        for label in [
+            ComponentOperationBaseLabel::MlsComponent,
+            ComponentOperationBaseLabel::Custom("Custom".into()),
+            ComponentOperationBaseLabel::Custom("Hello Label".into()),
+        ] {
+            let bytes = label.to_tls_bytes().unwrap();
+            assert_eq!(&bytes[1..], label.as_str().as_bytes());
+            assert_eq!(ComponentOperationBaseLabel::from_tls_bytes(&bytes).unwrap(), label);
+        }
     }
 }

@@ -64,8 +64,8 @@ draft-kohbrok-mls-associated-parties = [
 ] # draft-00++
 draft-kohbrok-mls-leaf-operation-intents = [] # draft-01
 draft-mahy-mls-new-content-types = [] # draft-01
-draft-mahy-mls-private-external = [] # draft-00
-draft-mahy-mls-ratchet-tree-options = ["draft-ietf-mls-ratchet-tree-options"] # draft-04 == ietf-draft-00 alias
+draft-mahy-mls-private-external = ["draft-ietf-mls-extensions"] # draft-01
+draft-mahy-mls-ratchet-tree-options = ["draft-ietf-mls-ratchet-tree-options"] # alias since WG adoption (mahy-04 => ietf-01)
 draft-mahy-mls-semiprivatemessage = ["draft-ietf-mls-extensions"] # draft-07
 draft-mahy-mls-sd-cwt-credential = [] # draft-02
 draft-mularczyk-mls-splitcommit = [] # draft-00

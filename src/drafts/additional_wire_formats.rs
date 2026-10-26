@@ -14,6 +14,16 @@ static_assertions::const_assert!(
         && WIRE_FORMAT_MLS_MESSAGE_WITHOUT_AAD <= *WireFormat::RESERVED_PRIVATE_USE_RANGE.end()
 );
 
+/// <https://www.ietf.org/archive/id/draft-pham-mls-additional-wire-formats-00.html#section-2>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// enum {
+///     PublicMessageWithoutAAD(0),
+///     PrivateMessageWithoutAAD(1),
+/// } MessageWithoutAAD;
+/// ```
 #[derive(Debug, Clone, Copy, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(
     feature = "serde",
@@ -153,6 +163,19 @@ impl<'a> thalassa::TlsplDeserialize<'a> for PublicMessageWithoutAad<'a> {
     }
 }
 
+/// <https://www.ietf.org/archive/id/draft-pham-mls-additional-wire-formats-00.html#section-6>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///     opaque group_id<V>;
+///     uint64 epoch;
+///     ContentType content_type;
+///     opaque encrypted_sender_data<V>;
+///     opaque ciphertext<V>;
+/// } PrivateMessageWithoutAAD;
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplAll)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrivateMessageWithoutAad<'a> {
