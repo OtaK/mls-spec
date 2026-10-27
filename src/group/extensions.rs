@@ -1,6 +1,9 @@
 use std::borrow::Cow;
 
-use thalassa::{error::TlsplReadError, io::DepthAwareReader};
+use thalassa::{
+    error::TlsplReadError,
+    io::{CowDeque, DepthAwareReader},
+};
 
 use crate::{
     crypto::HpkePublicKey,
@@ -85,19 +88,12 @@ impl From<&Extension<'_>> for ExtensionType {
 }
 
 impl<'a> Extension<'a> {
-    #[deprecated(since = "3.0.0", note = "Use `Extension::try_new` for this API")]
-    #[inline]
-    pub fn new(extension_id: u16, extension_data: Cow<'a, [u8]>) -> crate::MlsSpecResult<Self> {
-        Self::try_new(extension_id, extension_data)
-    }
-
-    pub fn try_new(
-        extension_id: u16,
-        mut extension_data: Cow<'a, [u8]>,
-    ) -> crate::MlsSpecResult<Self> {
+    pub fn try_new(extension_id: u16, extension_data: Cow<'a, [u8]>) -> crate::MlsSpecResult<Self> {
         use thalassa::TlsplDeserialize as _;
 
-        let mut reader = DepthAwareReader::from_reader(&mut extension_data);
+        let mut data = CowDeque::from(extension_data);
+
+        let mut reader = DepthAwareReader::from_reader(&mut data);
         let mut guard = reader.enter().map_err(TlsplReadError::from)?;
 
         Ok(match ExtensionType::new_unchecked(extension_id) {
@@ -135,7 +131,7 @@ impl<'a> Extension<'a> {
             discr => {
                 drop(guard);
 
-                Self::Arbitrary(*discr, extension_data)
+                Self::Arbitrary(*discr, data.into())
             }
         })
     }
