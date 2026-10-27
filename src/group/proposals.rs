@@ -59,6 +59,66 @@ impl Proposal<'_> {
     pub fn proposal_type(&self) -> ProposalType {
         self.into()
     }
+
+    pub fn to_owned<'out>(&self) -> Proposal<'out> {
+        let owned_extensions =
+            |exts: &[Extension<'_>]| exts.iter().map(|ext| ext.to_owned()).collect();
+
+        match self {
+            Proposal::Add(add) => Proposal::Add(AddProposal {
+                key_package: add.key_package.to_owned(),
+            }),
+            Proposal::Update(update) => Proposal::Update(UpdateProposal {
+                leaf_node: update.leaf_node.to_owned(),
+            }),
+            Proposal::Remove(remove) => Proposal::Remove(remove.clone()),
+            Proposal::PreSharedKey(psk) => Proposal::PreSharedKey(PreSharedKeyProposal {
+                psk: psk.psk.to_owned(),
+            }),
+            Proposal::ReInit(reinit) => Proposal::ReInit(ReInitProposal {
+                group_id: reinit.group_id.to_vec().into(),
+                version: reinit.version,
+                cipher_suite: reinit.cipher_suite,
+                extensions: owned_extensions(&reinit.extensions),
+            }),
+            Proposal::ExternalInit(ei) => Proposal::ExternalInit(ExternalInitProposal {
+                kem_output: ei.kem_output.to_vec().into(),
+            }),
+            Proposal::GroupContextExtensions(gce) => {
+                Proposal::GroupContextExtensions(GroupContextExtensionsProposal {
+                    extensions: owned_extensions(&gce.extensions),
+                })
+            }
+            #[cfg(feature = "draft-ietf-mls-extensions")]
+            Proposal::AppDataUpdate(adu) => {
+                use crate::drafts::mls_extensions::safe_application::{
+                    AppDataUpdate, ApplicationDataUpdateOperation,
+                };
+                Proposal::AppDataUpdate(AppDataUpdate {
+                    component_id: adu.component_id,
+                    op: match &adu.op {
+                        ApplicationDataUpdateOperation::Update { update } => {
+                            ApplicationDataUpdateOperation::Update {
+                                update: update.to_vec().into(),
+                            }
+                        }
+                        ApplicationDataUpdateOperation::Remove => {
+                            ApplicationDataUpdateOperation::Remove
+                        }
+                    },
+                })
+            }
+            #[cfg(feature = "draft-ietf-mls-extensions")]
+            Proposal::AppEphemeral(ae) => {
+                Proposal::AppEphemeral(crate::drafts::mls_extensions::safe_application::AppEphemeral {
+                    component_id: ae.component_id,
+                    data: ae.data.to_vec().into(),
+                })
+            }
+            #[cfg(feature = "draft-ietf-mls-extensions")]
+            Proposal::SelfRemove(sr) => Proposal::SelfRemove(sr.clone()),
+        }
+    }
 }
 
 impl From<&Proposal<'_>> for ProposalType {

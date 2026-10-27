@@ -57,6 +57,17 @@ impl<'a> KeyPackage<'a> {
         }
     }
 
+    pub fn to_owned<'out>(&self) -> KeyPackage<'out> {
+        KeyPackage {
+            version: self.version,
+            cipher_suite: self.cipher_suite,
+            init_key: self.init_key.to_vec().into(),
+            leaf_node: self.leaf_node.to_owned(),
+            extensions: self.extensions.iter().map(|ext| ext.to_owned()).collect(),
+            signature: self.signature.to_vec().into(),
+        }
+    }
+
     pub fn into_message(self) -> MlsMessage<'a> {
         MlsMessage {
             version: ProtocolVersion::default(),
