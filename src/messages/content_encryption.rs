@@ -27,7 +27,21 @@ impl Eq for PrivateMessageContent<'_> {}
 
 impl thalassa::TlsplSize for PrivateMessageContent<'_> {
     fn tlspl_serialized_len(&self) -> usize {
-        self.inner.tlspl_serialized_len() + self.auth.tlspl_serialized_len() + self.padding_len
+        let inner_len = match &self.inner {
+            ContentTypeInner::Application { application_data } => {
+                application_data.tlspl_serialized_len()
+            }
+            ContentTypeInner::Proposal { proposal } => proposal.tlspl_serialized_len(),
+            ContentTypeInner::Commit { commit } => commit.tlspl_serialized_len(),
+            #[cfg(feature = "draft-mularczyk-mls-splitcommit")]
+            ContentTypeInner::SplitCommit { split_commit } => split_commit.tlspl_serialized_len(),
+            #[cfg(feature = "draft-mahy-mls-new-content-types")]
+            ContentTypeInner::Status { application_data }
+            | ContentTypeInner::Ephemeral { application_data } => {
+                application_data.tlspl_serialized_len()
+            }
+        };
+        inner_len + self.auth.tlspl_serialized_len() + self.padding_len
     }
 }
 
@@ -36,9 +50,23 @@ impl thalassa::TlsplSerialize for PrivateMessageContent<'_> {
         &self,
         writer: &mut W,
     ) -> thalassa::error::TlsplWriteResult<usize> {
-        let written = self.inner.tlspl_serialize_to(writer)?
-            + self.auth.tlspl_serialize_to(writer)?
-            + self.padding_len;
+        let mut written = match &self.inner {
+            ContentTypeInner::Application { application_data } => {
+                application_data.tlspl_serialize_to(writer)?
+            }
+            ContentTypeInner::Proposal { proposal } => proposal.tlspl_serialize_to(writer)?,
+            ContentTypeInner::Commit { commit } => commit.tlspl_serialize_to(writer)?,
+            #[cfg(feature = "draft-mularczyk-mls-splitcommit")]
+            ContentTypeInner::SplitCommit { split_commit } => {
+                split_commit.tlspl_serialize_to(writer)?
+            }
+            #[cfg(feature = "draft-mahy-mls-new-content-types")]
+            ContentTypeInner::Status { application_data }
+            | ContentTypeInner::Ephemeral { application_data } => {
+                application_data.tlspl_serialize_to(writer)?
+            }
+        };
+        written += self.auth.tlspl_serialize_to(writer)? + self.padding_len;
 
         writer.write_all(&vec![0u8; self.padding_len])?;
 
@@ -156,4 +184,38 @@ pub struct SenderDataAAD<'a> {
     pub group_id: &'a [u8],
     pub epoch: &'a Epoch,
     pub content_type: &'a ContentType,
+}
+
+#[cfg(test)]
+mod tests {
+    use thalassa::io::DepthAwareReader;
+
+    use crate::Serializable;
+
+    use super::*;
+
+    #[test]
+    fn can_roundtrip_private_message_content() -> color_eyre::eyre::Result<()> {
+        let _ = color_eyre::install();
+        let value = PrivateMessageContent {
+            inner: ContentTypeInner::Application {
+                application_data: b"Hello world!".into(),
+            },
+            auth: FramedContentAuthData {
+                signature: Default::default(),
+                confirmation_tag: None,
+            },
+            padding_len: 10,
+        };
+
+        let mut bytes = value.to_tls_bytes()?;
+
+        let value2 = PrivateMessageContent::tlspl_deserialize_with_content_type(
+            &mut DepthAwareReader::from_reader(&mut bytes).enter()?,
+            ContentType::Application,
+        )?;
+        crate::test_utils::assertions::assert_eq_err!(value, value2);
+
+        Ok(())
+    }
 }
