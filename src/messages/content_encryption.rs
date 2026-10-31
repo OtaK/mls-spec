@@ -22,17 +22,42 @@ impl Eq for PrivateMessageContent {}
 
 impl tls_codec::Size for PrivateMessageContent {
     fn tls_serialized_len(&self) -> usize {
-        self.inner.tls_serialized_len() + self.auth.tls_serialized_len() + self.padding_len
+        let inner_len = match &self.inner {
+            ContentTypeInner::Application { application_data } => {
+                crate::tlspl::bytes::tls_serialized_len(application_data)
+            }
+            ContentTypeInner::Proposal { proposal } => proposal.tls_serialized_len(),
+            ContentTypeInner::Commit { commit } => commit.tls_serialized_len(),
+            #[cfg(feature = "draft-mularczyk-mls-splitcommit")]
+            ContentTypeInner::SplitCommit { split_commit } => split_commit.tls_serialized_len(),
+            #[cfg(feature = "draft-mahy-mls-new-content-types")]
+            ContentTypeInner::Status { application_data }
+            | ContentTypeInner::Ephemeral { application_data } => {
+                crate::tlspl::bytes::tls_serialized_len(application_data)
+            }
+        };
+        inner_len + self.auth.tls_serialized_len() + self.padding_len
     }
 }
 
 impl tls_codec::Serialize for PrivateMessageContent {
     fn tls_serialize<W: std::io::Write>(&self, writer: &mut W) -> Result<usize, tls_codec::Error> {
-        let mut written = 0;
-        written += self.inner.tls_serialize(writer)?;
-        written += self.auth.tls_serialize(writer)?;
+        let mut written = match &self.inner {
+            ContentTypeInner::Application { application_data } => {
+                crate::tlspl::bytes::tls_serialize(application_data, writer)?
+            }
+            ContentTypeInner::Proposal { proposal } => proposal.tls_serialize(writer)?,
+            ContentTypeInner::Commit { commit } => commit.tls_serialize(writer)?,
+            #[cfg(feature = "draft-mularczyk-mls-splitcommit")]
+            ContentTypeInner::SplitCommit { split_commit } => split_commit.tls_serialize(writer)?,
+            #[cfg(feature = "draft-mahy-mls-new-content-types")]
+            ContentTypeInner::Status { application_data }
+            | ContentTypeInner::Ephemeral { application_data } => {
+                crate::tlspl::bytes::tls_serialize(application_data, writer)?
+            }
+        };
+        written += self.auth.tls_serialize(writer)? + self.padding_len;
         writer.write_all(&vec![0u8; self.padding_len][..])?;
-        written += self.padding_len;
         Ok(written)
     }
 }
@@ -172,4 +197,36 @@ pub struct SenderDataAAD<'a> {
     pub group_id: GroupIdRef<'a>,
     pub epoch: &'a Epoch,
     pub content_type: &'a ContentType,
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::Serializable;
+
+    use super::*;
+
+    #[test]
+    fn can_roundtrip_private_message_content() -> color_eyre::eyre::Result<()> {
+        let _ = color_eyre::install();
+        let value = PrivateMessageContent {
+            inner: ContentTypeInner::Application {
+                application_data: b"Hello world!".into(),
+            },
+            auth: FramedContentAuthData {
+                signature: Default::default(),
+                confirmation_tag: None,
+            },
+            padding_len: 10,
+        };
+
+        let bytes = value.to_tls_bytes()?;
+
+        let value2 = PrivateMessageContent::tls_deserialize_with_content_type(
+            &mut &bytes[..],
+            ContentType::Application,
+        )?;
+        crate::test_utils::assertions::assert_eq_err!(value, value2);
+
+        Ok(())
+    }
 }
