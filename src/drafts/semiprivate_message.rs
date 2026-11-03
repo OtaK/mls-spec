@@ -120,7 +120,7 @@ pub mod messages {
     use crate::{
         CRATE_NAME, SensitiveBytes,
         defs::Epoch,
-        group::{GroupId, commits::Commit, proposals::Proposal},
+        group::GroupId,
         messages::{ContentType, ContentTypeInner, FramedContentAuthData},
     };
 
@@ -199,7 +199,7 @@ pub mod messages {
                     split_commit.tlspl_serialize_to(writer)?
                 }
                 _ => {
-                    return Err(TlsplReadError::custom(
+                    return Err(thalassa::error::TlsplWriteError::custom(
                         CRATE_NAME,
                         format!(
                             "Tried to serialize a {content_type}, which is invalid for a SemiPrivateMessage"
@@ -228,8 +228,8 @@ pub mod messages {
                     commit: <_>::tlspl_deserialize_from(&mut reader.enter()?)?,
                 },
                 #[cfg(feature = "draft-mularczyk-mls-splitcommit")]
-                ContentType::SplitCommit { split_commit } => ContentTypeInner::SplitCommit {
-                    commit: <_>::tlspl_deserialize_from(&mut reader.enter()?)?,
+                ContentType::SplitCommit => ContentTypeInner::SplitCommit {
+                    split_commit: <_>::tlspl_deserialize_from(&mut reader.enter()?)?,
                 },
                 _ => {
                     return Err(TlsplReadError::custom(
