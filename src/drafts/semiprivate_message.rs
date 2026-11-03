@@ -124,7 +124,7 @@ pub mod messages {
     use crate::{
         SensitiveBytes,
         defs::Epoch,
-        group::{GroupId, GroupIdRef, commits::Commit, proposals::Proposal},
+        group::{GroupId, GroupIdRef},
         messages::{ContentType, ContentTypeInner, FramedContentAuthData, PrivateMessageContent},
     };
 
@@ -211,10 +211,14 @@ pub mod messages {
 
             let inner = match content_type {
                 ContentType::Proposal => ContentTypeInner::Proposal {
-                    proposal: Proposal::tls_deserialize(bytes)?,
+                    proposal: <_>::tls_deserialize(bytes)?,
                 },
                 ContentType::Commit => ContentTypeInner::Commit {
-                    commit: Commit::tls_deserialize(bytes)?,
+                    commit: <_>::tls_deserialize(bytes)?,
+                },
+                #[cfg(feature = "draft-mularczyk-mls-splitcommit")]
+                ContentType::SplitCommit => ContentTypeInner::SplitCommit {
+                    split_commit: <_>::tls_deserialize(bytes)?,
                 },
                 _ => {
                     return Err(tls_codec::Error::DecodingError(format!(
