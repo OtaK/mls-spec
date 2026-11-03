@@ -156,7 +156,21 @@ pub mod messages {
 
     impl tls_codec::Size for SemiPrivateMessageContent {
         fn tls_serialized_len(&self) -> usize {
-            self.inner.tls_serialized_len() + self.auth.tls_serialized_len() + self.padding_len
+            let inner_len = match &self.inner {
+                ContentTypeInner::Application { application_data } => {
+                    crate::tlspl::bytes::tls_serialized_len(application_data)
+                }
+                ContentTypeInner::Proposal { proposal } => proposal.tls_serialized_len(),
+                ContentTypeInner::Commit { commit } => commit.tls_serialized_len(),
+                #[cfg(feature = "draft-mularczyk-mls-splitcommit")]
+                ContentTypeInner::SplitCommit { split_commit } => split_commit.tls_serialized_len(),
+                #[cfg(feature = "draft-mahy-mls-new-content-types")]
+                ContentTypeInner::Status { application_data }
+                | ContentTypeInner::Ephemeral { application_data } => {
+                    crate::tlspl::bytes::tls_serialized_len(application_data)
+                }
+            };
+            inner_len + self.auth.tls_serialized_len() + self.padding_len
         }
     }
 
@@ -165,11 +179,25 @@ pub mod messages {
             &self,
             writer: &mut W,
         ) -> Result<usize, tls_codec::Error> {
-            let mut written = 0;
-            written += self.inner.tls_serialize(writer)?;
-            written += self.auth.tls_serialize(writer)?;
+            let content_type: ContentType = (&self.inner).into();
+
+            let mut written = match &self.inner {
+                ContentTypeInner::Proposal { proposal } => proposal.tls_serialize(writer)?,
+                ContentTypeInner::Commit { commit } => commit.tls_serialize(writer)?,
+                #[cfg(feature = "draft-mularczyk-mls-splitcommit")]
+                ContentTypeInner::SplitCommit { split_commit } => {
+                    split_commit.tls_serialize(writer)?
+                }
+                _ => {
+                    return Err(tls_codec::Error::DecodingError(format!(
+                        "Tried to serialize a {content_type}, which is invalid for a SemiPrivateMessage"
+                    )));
+                }
+            };
+            written += self.auth.tls_serialize(writer)? + self.padding_len;
+
             writer.write_all(&vec![0u8; self.padding_len][..])?;
-            written += self.padding_len;
+
             Ok(written)
         }
     }
