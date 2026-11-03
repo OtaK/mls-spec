@@ -9,7 +9,7 @@ use crate::{
 
 use super::mls_extensions::safe_application::{Component, ComponentId};
 
-pub const EXTERNAL_RECEIVERS_COMPONENT_ID: ComponentId = 0xFEEE; // TODO: Waiting for IANA registration (suggested 0x0008)
+pub const EXTERNAL_RECEIVERS_COMPONENT_ID: ComponentId = 0xFEEE; // TODO: Waiting for IANA registration (suggested 0x0007)
 static_assertions::const_assert!(
     *super::mls_extensions::COMPONENT_RESERVED_PRIVATE_RANGE.start()
         <= EXTERNAL_RECEIVERS_COMPONENT_ID
@@ -164,7 +164,23 @@ pub mod messages {
     impl thalassa::TlsplSize for SemiPrivateMessageContent<'_> {
         #[inline]
         fn tlspl_serialized_len(&self) -> usize {
-            self.inner.tlspl_serialized_len() + self.auth.tlspl_serialized_len() + self.padding_len
+            let inner_len = match &self.inner {
+                ContentTypeInner::Application { application_data } => {
+                    application_data.tlspl_serialized_len()
+                }
+                ContentTypeInner::Proposal { proposal } => proposal.tlspl_serialized_len(),
+                ContentTypeInner::Commit { commit } => commit.tlspl_serialized_len(),
+                #[cfg(feature = "draft-mularczyk-mls-splitcommit")]
+                ContentTypeInner::SplitCommit { split_commit } => {
+                    split_commit.tlspl_serialized_len()
+                }
+                #[cfg(feature = "draft-mahy-mls-new-content-types")]
+                ContentTypeInner::Status { application_data }
+                | ContentTypeInner::Ephemeral { application_data } => {
+                    application_data.tlspl_serialized_len()
+                }
+            };
+            inner_len + self.auth.tlspl_serialized_len() + self.padding_len
         }
     }
 
@@ -174,9 +190,25 @@ pub mod messages {
             &self,
             writer: &mut W,
         ) -> thalassa::error::TlsplWriteResult<usize> {
-            let written = self.inner.tlspl_serialize_to(writer)?
-                + self.auth.tlspl_serialize_to(writer)?
-                + self.padding_len;
+            let content_type: ContentType = (&self.inner).into();
+            let mut written = match &self.inner {
+                ContentTypeInner::Proposal { proposal } => proposal.tlspl_serialize_to(writer)?,
+                ContentTypeInner::Commit { commit } => commit.tlspl_serialize_to(writer)?,
+                #[cfg(feature = "draft-mularczyk-mls-splitcommit")]
+                ContentTypeInner::SplitCommit { split_commit } => {
+                    split_commit.tlspl_serialize_to(writer)?
+                }
+                _ => {
+                    return Err(TlsplReadError::custom(
+                        CRATE_NAME,
+                        format!(
+                            "Tried to serialize a {content_type}, which is invalid for a SemiPrivateMessage"
+                        ),
+                    ));
+                }
+            };
+            written += self.auth.tlspl_serialize_to(writer)? + self.padding_len;
+
             writer.write_all(&vec![0u8; self.padding_len])?;
 
             Ok(written)
@@ -190,10 +222,14 @@ pub mod messages {
         ) -> Result<Self, TlsplReadError> {
             let inner = match content_type {
                 ContentType::Proposal => ContentTypeInner::Proposal {
-                    proposal: Proposal::tlspl_deserialize_from(&mut reader.enter()?)?,
+                    proposal: <_>::tlspl_deserialize_from(&mut reader.enter()?)?,
                 },
                 ContentType::Commit => ContentTypeInner::Commit {
-                    commit: Commit::tlspl_deserialize_from(&mut reader.enter()?)?,
+                    commit: <_>::tlspl_deserialize_from(&mut reader.enter()?)?,
+                },
+                #[cfg(feature = "draft-mularczyk-mls-splitcommit")]
+                ContentType::SplitCommit { split_commit } => ContentTypeInner::SplitCommit {
+                    commit: <_>::tlspl_deserialize_from(&mut reader.enter()?)?,
                 },
                 _ => {
                     return Err(TlsplReadError::custom(
