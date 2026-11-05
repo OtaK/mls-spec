@@ -2,6 +2,9 @@ use std::borrow::Cow;
 
 use crate::{group::extensions::Extension, tree::RatchetTree};
 
+// I don't even know why a WireFormat is defined, PartialGroupInfo isn't present
+// as a case in MlsMessage in *any* spec. Gibberish?
+
 /// <https://www.ietf.org/archive/id/draft-ietf-mls-ratchet-tree-options-01.html#section-3.1>
 ///
 /// ### TLS Presentation Language
@@ -69,7 +72,7 @@ pub const EXTENSION_RATCHET_TREE_SOURCE_DOMAINS: u16 = 0xF4C0;
 pub enum RatchetTreeRepresentation {
     Reserved = 0x00,
     Full = 0x01,
-    HttpsUri = 0x02,
+    HttpsUrl = 0x02,
     OutOfBand = 0x03,
     DistributionService = 0x04,
 }
@@ -100,8 +103,8 @@ pub enum RatchetTreeRepresentation {
 pub enum RatchetTreeOption<'a> {
     #[tlspl(discriminant = "RatchetTreeRepresentation::Full")]
     Full { ratchet_tree: RatchetTree<'a> },
-    #[tlspl(discriminant = "RatchetTreeRepresentation::HttpsUri")]
-    HttpsUri { ratchet_tree_url: Cow<'a, str> },
+    #[tlspl(discriminant = "RatchetTreeRepresentation::HttpsUrl")]
+    HttpsUrl { ratchet_tree_url: Cow<'a, str> },
     #[tlspl(discriminant = "RatchetTreeRepresentation::OutOfBand")]
     OutOfBand,
     #[tlspl(discriminant = "RatchetTreeRepresentation::DistributionService")]

@@ -28,7 +28,7 @@ There's also some definitions for the following drafted extensions, enabled by t
 - [`draft-kohbrok-mls-leaf-operation-intents`](https://www.ietf.org/archive/id/draft-kohbrok-mls-leaf-operation-intents-01.html) @ draft-01
 - [`draft-mahy-mls-new-content-types`](https://www.ietf.org/archive/id/draft-mahy-mls-new-content-types-01.html) @ draft-01
 - [`draft-mahy-mls-private-external`](https://www.ietf.org/archive/id/draft-mahy-mls-private-external-01.html) @ draft-01
-- [`draft-ietf-mls-ratchet-tree-options`](https://www.ietf.org/archive/id/draft-ietf-mls-ratchet-tree-options-01.html) @ draft-01
+- [`draft-ietf-mls-ratchet-tree-options`](https://www.ietf.org/archive/id/draft-ietf-mls-ratchet-tree-options-02.html) @ draft-02
   - aliased by feature `draft-mahy-mls-ratchet-tree-options` (last individual revision: draft-04) since its IETF MLS WG adoption
 - [`draft-mahy-mls-sd-cwt-credential`](https://www.ietf.org/archive/id/draft-mahy-mls-sd-cwt-credential-02.html) @ draft-02
 - [`draft-mahy-mls-semiprivatemessage`](https://www.ietf.org/archive/id/draft-mahy-mls-semiprivatemessage-07.html) @ draft-07
