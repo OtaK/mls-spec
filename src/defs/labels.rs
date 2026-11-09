@@ -26,6 +26,8 @@ pub enum SignatureLabel {
     #[cfg(feature = "test-vectors")]
     #[strum(serialize = "SignWithLabel")]
     TestVectorSignWithLabel,
+    #[strum(serialize = "{0}")]
+    Arbitrary(&'static str),
 }
 
 impl ToPrefixedLabel for SignatureLabel {}
@@ -58,6 +60,8 @@ pub enum PublicKeyEncryptionLabel {
     #[cfg(feature = "test-vectors")]
     #[strum(serialize = "EncryptWithLabel")]
     TestVectorEncryptWithLabel,
+    #[strum(serialize = "{0}")]
+    Arbitrary(&'static str),
 }
 
 impl ToPrefixedLabel for PublicKeyEncryptionLabel {}
@@ -81,6 +85,8 @@ pub enum HashReferenceKind {
     #[cfg(feature = "test-vectors")]
     #[strum(serialize = "RefHash")]
     TestVectorRefHash,
+    #[strum(serialize = "{0}")]
+    Arbitrary(&'static str),
 }
 
 impl ToPrefixedLabel for HashReferenceKind {}
@@ -174,11 +180,7 @@ pub enum KdfLabelKind {
     #[strum(serialize = "ExpandWithLabel")]
     TestVectorExpandWithLabel,
     #[strum(serialize = "{0}")]
-    Arbitrary(String),
+    Arbitrary(&'static str),
 }
 
-impl ToPrefixedLabel for KdfLabelKind {
-    fn to_prefixed_string(&self, protocol_version: crate::defs::ProtocolVersion) -> String {
-        format!("{protocol_version} {self}")
-    }
-}
+impl ToPrefixedLabel for KdfLabelKind {}

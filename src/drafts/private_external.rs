@@ -25,8 +25,7 @@ static_assertions::const_assert!(
 pub const EXT_ENCRYPTION_INFO_ID: ComponentId = 0xFEE1;
 static_assertions::const_assert!(
     *super::mls_extensions::COMPONENT_RESERVED_PRIVATE_RANGE.start() <= EXT_ENCRYPTION_INFO_ID
-        && EXT_ENCRYPTION_INFO_ID
-            <= *super::mls_extensions::COMPONENT_RESERVED_PRIVATE_RANGE.end()
+        && EXT_ENCRYPTION_INFO_ID <= *super::mls_extensions::COMPONENT_RESERVED_PRIVATE_RANGE.end()
 );
 
 /// <https://www.ietf.org/archive/id/draft-mahy-mls-private-external-01.html#section-3.2>

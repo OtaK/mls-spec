@@ -630,7 +630,10 @@ mod tests {
         ] {
             let bytes = label.to_tls_bytes().unwrap();
             assert_eq!(&bytes[1..], label.as_str().as_bytes());
-            assert_eq!(ComponentOperationBaseLabel::from_tls_bytes(&bytes).unwrap(), label);
+            assert_eq!(
+                ComponentOperationBaseLabel::from_tls_bytes(&bytes).unwrap(),
+                label
+            );
         }
     }
 }
