@@ -109,12 +109,12 @@ impl Proposal<'_> {
                 })
             }
             #[cfg(feature = "draft-ietf-mls-extensions")]
-            Proposal::AppEphemeral(ae) => {
-                Proposal::AppEphemeral(crate::drafts::mls_extensions::safe_application::AppEphemeral {
+            Proposal::AppEphemeral(ae) => Proposal::AppEphemeral(
+                crate::drafts::mls_extensions::safe_application::AppEphemeral {
                     component_id: ae.component_id,
                     data: ae.data.to_vec().into(),
-                })
-            }
+                },
+            ),
             #[cfg(feature = "draft-ietf-mls-extensions")]
             Proposal::SelfRemove(sr) => Proposal::SelfRemove(sr.clone()),
         }
