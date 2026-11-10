@@ -95,9 +95,7 @@ pub enum RatchetTreeOption {
     #[tls_codec(discriminant = "RatchetTreeRepresentation::DistributionService")]
     DistributionService,
     #[tls_codec(discriminant = "RatchetTreeRepresentation::DeflateZlibCompressed")]
-    DeflateZlibCompressed {
-        ratchet_tree_compressed: Vec<u8>
-    },
+    DeflateZlibCompressed { ratchet_tree_compressed: Vec<u8> },
 }
 
 #[derive(
