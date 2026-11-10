@@ -68,6 +68,7 @@ pub enum RatchetTreeRepresentation {
     HttpsUri = 0x02,
     OutOfBand = 0x03,
     DistributionService = 0x04,
+    DeflateZlibCompressed = 0xF0,
 }
 
 #[derive(
@@ -93,6 +94,10 @@ pub enum RatchetTreeOption {
     OutOfBand,
     #[tls_codec(discriminant = "RatchetTreeRepresentation::DistributionService")]
     DistributionService,
+    #[tls_codec(discriminant = "RatchetTreeRepresentation::DeflateZlibCompressed")]
+    DeflateZlibCompressed {
+        ratchet_tree_compressed: Vec<u8>
+    },
 }
 
 #[derive(
