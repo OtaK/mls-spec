@@ -37,6 +37,8 @@ all-drafts = [
     "draft-mahy-mls-new-content-types",
     "draft-mularczyk-mls-splitcommit",
     "draft-pham-mls-additional-wire-formats",
+    "draft-mahy-mls-credential-by-ref",
+    "draft-ietf-mls-pq-ciphersuites",
     "draft-kohbrok-mls-leaf-operation-intents"
 ]
 alloc = []
@@ -59,10 +61,12 @@ draft-ietf-mls-combiner = ["draft-ietf-mls-extensions"] # draft-02++ @ git:c511d
 draft-ietf-mls-targeted-messages = ["draft-ietf-mls-extensions"] # draft-02
 draft-ietf-mls-partial = [] # draft-02
 draft-ietf-mls-ratchet-tree-options = [] # draft-02
+draft-ietf-mls-pq-ciphersuites = [] # draft-07
 draft-kohbrok-mls-associated-parties = [
     "draft-ietf-mls-extensions",
 ] # draft-00++
 draft-kohbrok-mls-leaf-operation-intents = [] # draft-01
+draft-mahy-mls-credential-by-ref = [] # draft-00
 draft-mahy-mls-new-content-types = [] # draft-02
 draft-mahy-mls-private-external = ["draft-ietf-mls-extensions"] # draft-02
 draft-mahy-mls-ratchet-tree-options = ["draft-ietf-mls-ratchet-tree-options"] # alias since WG adoption (mahy-04 => ietf-01)

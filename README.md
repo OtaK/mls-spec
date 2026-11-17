@@ -25,7 +25,10 @@ There's also some definitions for the following drafted extensions, enabled by t
 - [`draft-ietf-mls-partial`](https://www.ietf.org/archive/id/draft-ietf-mls-partial-02.html) @ draft-02
 - [`draft-ietf-mls-combiner`](https://www.ietf.org/archive/id/draft-ietf-mls-combiner-02.html) @ draft-02++ (git:c511d87)
 - [`draft-ietf-mls-targeted-messages`](https://www.ietf.org/archive/id/draft-ietf-mls-targeted-messages-02.html) @ draft-02
+- [`draft-ietf-mls-pq-ciphersuites`](https://www.ietf.org/archive/id/draft-ietf-mls-pq-ciphersuites-07.html) @ draft-07
 - [`draft-kohbrok-mls-leaf-operation-intents`](https://www.ietf.org/archive/id/draft-kohbrok-mls-leaf-operation-intents-01.html) @ draft-01
+- [`draft-mahy-mls-credential-by-ref`](https://www.ietf.org/archive/id/draft-mahy-mls-credential-by-ref-00.html) @ draft-00
+  - uses the private-use codepoint `0xFB7F` for the `by_ref` credential type until IANA registration
 - [`draft-mahy-mls-new-content-types`](https://www.ietf.org/archive/id/draft-mahy-mls-new-content-types-02.html) @ draft-02
 - [`draft-mahy-mls-private-external`](https://www.ietf.org/archive/id/draft-mahy-mls-private-external-02.html) @ draft-02
 - [`draft-ietf-mls-ratchet-tree-options`](https://www.ietf.org/archive/id/draft-ietf-mls-ratchet-tree-options-02.html) @ draft-02

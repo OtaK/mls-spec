@@ -95,7 +95,29 @@ impl_spec_enum! {
     MLS_256_DHKEMX448_AES256GCM_SHA512_ED448 = 0x0004,
     MLS_256_DHKEMP521_AES256GCM_SHA512_P521 = 0x0005,
     MLS_256_DHKEMX448_CHACHA20POLY1305_SHA512_ED448 = 0x0006,
-    MLS_256_DHKEMP384_AES256GCM_SHA384_P384 = 0x0007
+    MLS_256_DHKEMP384_AES256GCM_SHA384_P384 = 0x0007,
+    #[cfg(feature = "draft-ietf-mls-pq-ciphersuites")]
+    MLS_128_MLKEM768X25519_AES128GCM_SHA256_ED25519 = crate::drafts::pq_ciphersuites::MLS_128_MLKEM768X25519_AES128GCM_SHA256_ED25519,
+    #[cfg(feature = "draft-ietf-mls-pq-ciphersuites")]
+    MLS_128_MLKEM768X25519_AES256GCM_SHA384_ED25519 = crate::drafts::pq_ciphersuites::MLS_128_MLKEM768X25519_AES256GCM_SHA384_ED25519,
+    #[cfg(feature = "draft-ietf-mls-pq-ciphersuites")]
+    MLS_128_MLKEM768P256_AES128GCM_SHA256_P256 = crate::drafts::pq_ciphersuites::MLS_128_MLKEM768P256_AES128GCM_SHA256_P256,
+    #[cfg(feature = "draft-ietf-mls-pq-ciphersuites")]
+    MLS_128_MLKEM768P256_AES256GCM_SHA384_P256 = crate::drafts::pq_ciphersuites::MLS_128_MLKEM768P256_AES256GCM_SHA384_P256,
+    #[cfg(feature = "draft-ietf-mls-pq-ciphersuites")]
+    MLS_192_MLKEM1024P384_AES256GCM_SHA384_P384 = crate::drafts::pq_ciphersuites::MLS_192_MLKEM1024P384_AES256GCM_SHA384_P384,
+    #[cfg(feature = "draft-ietf-mls-pq-ciphersuites")]
+    MLS_128_MLKEM768_AES256GCM_SHA384_ED25519 = crate::drafts::pq_ciphersuites::MLS_128_MLKEM768_AES256GCM_SHA384_ED25519,
+    #[cfg(feature = "draft-ietf-mls-pq-ciphersuites")]
+    MLS_128_MLKEM768_AES256GCM_SHA384_P256 = crate::drafts::pq_ciphersuites::MLS_128_MLKEM768_AES256GCM_SHA384_P256,
+    #[cfg(feature = "draft-ietf-mls-pq-ciphersuites")]
+    MLS_192_MLKEM1024_AES256GCM_SHA384_P384 = crate::drafts::pq_ciphersuites::MLS_192_MLKEM1024_AES256GCM_SHA384_P384,
+    #[cfg(feature = "draft-ietf-mls-pq-ciphersuites")]
+    MLS_128_MLKEM768X25519_CHACHA20POLY1305_SHA384_MLDSA44 = crate::drafts::pq_ciphersuites::MLS_128_MLKEM768X25519_CHACHA20POLY1305_SHA384_MLDSA44,
+    #[cfg(feature = "draft-ietf-mls-pq-ciphersuites")]
+    MLS_192_MLKEM768_AES256GCM_SHA384_MLDSA65 = crate::drafts::pq_ciphersuites::MLS_192_MLKEM768_AES256GCM_SHA384_MLDSA65,
+    #[cfg(feature = "draft-ietf-mls-pq-ciphersuites")]
+    MLS_256_MLKEM1024_AES256GCM_SHA384_MLDSA87 = crate::drafts::pq_ciphersuites::MLS_256_MLKEM1024_AES256GCM_SHA384_MLDSA87
 }
 
 impl Default for CiphersuiteId {
@@ -202,7 +224,9 @@ impl_spec_enum! {
     #[cfg(feature = "draft-mahy-mls-sd-cwt-credential")]
     SD_CWT_CREDENTIAL = crate::drafts::sd_cwt_credential::CREDENTIAL_SD_CWT,
     #[cfg(feature = "draft-mahy-mls-sd-cwt-credential")]
-    SD_JWT_CREDENTIAL = crate::drafts::sd_cwt_credential::CREDENTIAL_SD_JWT
+    SD_JWT_CREDENTIAL = crate::drafts::sd_cwt_credential::CREDENTIAL_SD_JWT,
+    #[cfg(feature = "draft-mahy-mls-credential-by-ref")]
+    BY_REF_CREDENTIAL = crate::drafts::credential_by_ref::CREDENTIAL_BY_REF
 }
 
 impl Default for CredentialType {

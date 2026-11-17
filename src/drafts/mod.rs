@@ -4,6 +4,8 @@ pub mod additional_wire_formats;
 pub mod apq_mls_combiner;
 #[cfg(feature = "draft-kohbrok-mls-associated-parties")]
 pub mod associated_parties;
+#[cfg(feature = "draft-mahy-mls-credential-by-ref")]
+pub mod credential_by_ref;
 #[cfg(feature = "draft-kohbrok-mls-leaf-operation-intents")]
 pub mod leaf_operation_intents;
 #[cfg(feature = "draft-ietf-mls-extensions")]
@@ -12,6 +14,8 @@ pub mod mls_extensions;
 pub mod mls_partial;
 #[cfg(feature = "draft-mahy-mls-new-content-types")]
 pub mod new_content_types;
+#[cfg(feature = "draft-ietf-mls-pq-ciphersuites")]
+pub mod pq_ciphersuites;
 #[cfg(feature = "draft-mahy-mls-private-external")]
 pub mod private_external;
 #[cfg(feature = "draft-ietf-mls-ratchet-tree-options")]

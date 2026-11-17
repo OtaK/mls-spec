@@ -65,6 +65,9 @@ pub enum Credential<'a> {
     #[cfg(feature = "draft-mahy-mls-sd-cwt-credential")]
     #[tlspl(discriminant = CredentialType::SD_JWT_CREDENTIAL.as_repr())]
     SdJwtCredential(crate::drafts::sd_cwt_credential::SdJwtCredential<'a>),
+    #[cfg(feature = "draft-mahy-mls-credential-by-ref")]
+    #[tlspl(discriminant = CredentialType::BY_REF_CREDENTIAL.as_repr())]
+    ByRef(crate::drafts::credential_by_ref::ByRefCredential<'a>),
 }
 
 impl Credential<'_> {
@@ -127,6 +130,8 @@ impl Credential<'_> {
                     },
                 })
             }
+            #[cfg(feature = "draft-mahy-mls-credential-by-ref")]
+            Credential::ByRef(by_ref) => Credential::ByRef(by_ref.to_owned()),
         }
     }
 
@@ -150,6 +155,8 @@ impl<'a> From<&'a Credential<'a>> for CredentialType {
             Credential::SdCwtCredential(_) => CredentialType::SD_CWT_CREDENTIAL,
             #[cfg(feature = "draft-mahy-mls-sd-cwt-credential")]
             Credential::SdJwtCredential(_) => CredentialType::SD_JWT_CREDENTIAL,
+            #[cfg(feature = "draft-mahy-mls-credential-by-ref")]
+            Credential::ByRef(_) => CredentialType::BY_REF_CREDENTIAL,
         }
     }
 }
@@ -170,5 +177,28 @@ mod tests {
             }],
         });
         assert_eq!(cred.to_owned(), cred);
+    }
+}
+
+#[cfg(all(test, feature = "draft-mahy-mls-credential-by-ref"))]
+mod by_ref_tests {
+    use super::*;
+    use crate::drafts::credential_by_ref::{ByRefCredential, CREDENTIAL_BY_REF};
+    use crate::{Parsable as _, Serializable as _};
+
+    #[test]
+    fn by_ref_credential_roundtrips_with_discriminant() {
+        let cred = Credential::ByRef(ByRefCredential {
+            referenced_credential_type: CredentialType::X509,
+            referenced_credential_hash: b"hash".to_vec().into(),
+        });
+        let bytes = cred.to_tls_bytes().unwrap();
+        assert_eq!(&bytes[..2], &CREDENTIAL_BY_REF.to_be_bytes());
+        assert_eq!(&bytes[2..], &[0x00, 0x02, 4, b'h', b'a', b's', b'h']);
+        assert_eq!(Credential::from_tls_bytes(&bytes).unwrap(), cred);
+        assert_eq!(
+            CredentialType::from(&cred),
+            CredentialType::BY_REF_CREDENTIAL
+        );
     }
 }
