@@ -28,7 +28,7 @@ static_assertions::const_assert!(
         && EXT_ENCRYPTION_INFO_ID <= *super::mls_extensions::COMPONENT_RESERVED_PRIVATE_RANGE.end()
 );
 
-/// <https://www.ietf.org/archive/id/draft-mahy-mls-private-external-01.html#section-3.2>
+/// <https://www.ietf.org/archive/id/draft-mahy-mls-private-external-02.html#section-3.2>
 ///
 /// ### TLS Presentation Language
 ///
@@ -49,7 +49,7 @@ impl<'a> safe_application::Component<'a> for RootPrivateSignature<'a> {
     }
 }
 
-/// <https://www.ietf.org/archive/id/draft-mahy-mls-private-external-01.html#section-3.2>
+/// <https://www.ietf.org/archive/id/draft-mahy-mls-private-external-02.html#section-3.2>
 ///
 /// ### TLS Presentation Language
 ///
@@ -74,7 +74,7 @@ pub struct ExternalEncryptionInfoTBS<'a> {
     pub root_public_signature_key: &'a SignaturePublicKey<'a>,
 }
 
-/// <https://www.ietf.org/archive/id/draft-mahy-mls-private-external-01.html#section-3.2>
+/// <https://www.ietf.org/archive/id/draft-mahy-mls-private-external-02.html#section-3.2>
 ///
 /// ### TLS Presentation Language
 ///
@@ -121,7 +121,7 @@ impl<'a> ExternalEncryptionInfo<'a> {
     }
 }
 
-/// <https://www.ietf.org/archive/id/draft-mahy-mls-private-external-01.html#section-3.3>
+/// <https://www.ietf.org/archive/id/draft-mahy-mls-private-external-02.html#section-3.3>
 ///
 /// ### TLS Presentation Language
 ///
@@ -133,7 +133,7 @@ impl<'a> ExternalEncryptionInfo<'a> {
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct PrivateExternalMessageContext;
 
-/// <https://www.ietf.org/archive/id/draft-mahy-mls-private-external-01.html#section-3.3>
+/// <https://www.ietf.org/archive/id/draft-mahy-mls-private-external-02.html#section-3.3>
 ///
 /// ### TLS Presentation Language
 ///

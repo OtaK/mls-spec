@@ -34,7 +34,7 @@ pub struct SdJwtDisclosure<'a> {
     pub disclosure: Cow<'a, [u8]>,
 }
 
-/// <https://www.ietf.org/archive/id/draft-mahy-mls-sd-cwt-credential-02.html#section-3.2>
+/// <https://www.ietf.org/archive/id/draft-mahy-mls-sd-cwt-credential-03.html#section-3.2>
 ///
 /// ### TLS Presentation Language
 ///

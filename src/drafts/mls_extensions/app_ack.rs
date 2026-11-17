@@ -2,7 +2,7 @@ use crate::defs::{Generation, SenderIndex};
 
 use super::safe_application::Component;
 
-/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-6.1>
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-11.html#section-6.1>
 ///
 /// ### TLS Presentation Language
 ///
@@ -23,7 +23,7 @@ impl<'a> Component<'a> for AppAck {
     }
 }
 
-/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-6.1>
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-11.html#section-6.1>
 ///
 /// ### TLS Presentation Language
 ///

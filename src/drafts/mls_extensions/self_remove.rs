@@ -1,4 +1,4 @@
-/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-6.3.1>
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-11.html#section-6.3.1>
 ///
 /// ### TLS Presentation Language
 ///

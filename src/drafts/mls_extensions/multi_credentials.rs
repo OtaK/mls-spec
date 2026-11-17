@@ -5,7 +5,7 @@ use crate::{
 pub const MULTI_CREDENTIAL: u16 = 0x0003;
 pub const WEAK_MULTI_CREDENTIAL: u16 = 0x0004;
 
-/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-6.5>
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-11.html#section-6.5>
 ///
 /// ### TLS Presentation Language
 ///
@@ -48,7 +48,7 @@ impl<'a> CredentialBinding<'a> {
     }
 }
 
-/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-6.5>
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-11.html#section-6.5>
 ///
 /// ### TLS Presentation Language
 ///
@@ -63,7 +63,7 @@ pub struct MultiCredential<'a> {
     pub bindings: Vec<CredentialBinding<'a>>,
 }
 
-/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-6.5>
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-11.html#section-6.5>
 ///
 /// ### TLS Presentation Language
 ///
@@ -78,7 +78,7 @@ pub struct WeakMultiCredential<'a> {
     pub bindings: Vec<CredentialBinding<'a>>,
 }
 
-/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-6.5.1>
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-11.html#section-6.5.1>
 ///
 /// ### TLS Presentation Language
 ///

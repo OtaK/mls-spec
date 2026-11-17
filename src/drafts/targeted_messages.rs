@@ -10,7 +10,7 @@ use crate::{
 
 pub const WIRE_FORMAT_MLS_TARGETED_MESSAGE: u16 = 0x0006;
 
-/// <https://www.ietf.org/archive/id/draft-ietf-mls-targeted-messages-01.html#section-3>
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-targeted-messages-02.html#section-3>
 ///
 /// ### TLS Presentation Language
 ///
@@ -29,28 +29,38 @@ pub struct TargetedMessageSenderAuthData<'a> {
     pub kem_output: SensitiveBytes<'a>,
 }
 
-/// <https://www.ietf.org/archive/id/draft-ietf-mls-targeted-messages-01.html#section-3>
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-targeted-messages-02.html#section-6.2>
 ///
 /// ### TLS Presentation Language
 ///
 /// ```notrust,ignore
 /// struct {
-///   opaque group_id<V>;
-///   uint64 epoch;
 ///   uint32 recipient_leaf_index;
-///   opaque authenticated_data<V>;
 ///   uint32 sender_leaf_index;
-///   opaque kem_output<V>;
-/// } TargetedMessageTBM;
+/// } TargetedMessageContextData;
+/// ```
+#[derive(Debug, Clone, Copy, PartialEq, Eq, thalassa::TlsplAll)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct TargetedMessageContextData {
+    pub recipient_leaf_index: LeafIndex,
+    pub sender_leaf_index: LeafIndex,
+}
+
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-targeted-messages-02.html#section-6.2>
+///
+/// ### TLS Presentation Language
+///
+/// ```notrust,ignore
+/// struct {
+///   opaque label<V> = "MLS 1.0 TargetedMessageData";
+///   TargetedMessageContextData context;
+/// } TargetedMessageContext;
 /// ```
 #[derive(Debug, Clone, PartialEq, Eq, thalassa::TlsplSerialize, thalassa::TlsplSize)]
-pub struct TargetedMessageTBM<'a> {
-    pub group_id: &'a GroupId<'a>,
-    pub epoch: &'a Epoch,
-    pub recipient_leaf_index: &'a LeafIndex,
-    pub authenticated_data: &'a [u8],
-    pub sender_leaf_index: LeafIndex,
-    pub kem_output: SensitiveBytes<'a>,
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+pub struct TargetedMessageContext<'a> {
+    pub label: &'a str,
+    pub context: TargetedMessageContextData,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -96,7 +106,7 @@ impl thalassa::TlsplSerialize for TargetedMessageTBS<'_> {
     }
 }
 
-/// <https://www.ietf.org/archive/id/draft-ietf-mls-targeted-messages-01.html#section-3>
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-targeted-messages-02.html#section-3>
 ///
 /// ### TLS Presentation Language
 ///
@@ -121,7 +131,7 @@ pub struct TargetedMessage<'a> {
     pub ciphertext: SensitiveBytes<'a>,
 }
 
-/// <https://www.ietf.org/archive/id/draft-ietf-mls-targeted-messages-01.html#section-3>
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-targeted-messages-02.html#section-3>
 ///
 /// ### TLS Presentation Language
 ///
@@ -167,7 +177,7 @@ impl thalassa::TlsplSerialize for TargetedMessagePreSharedKeyId<'_> {
     }
 }
 
-/// <https://www.ietf.org/archive/id/draft-ietf-mls-targeted-messages-01.html#section-6.3>
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-targeted-messages-02.html#section-6.3>
 ///
 /// ### TLS Presentation Language
 ///

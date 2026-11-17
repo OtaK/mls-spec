@@ -93,7 +93,7 @@ impl<'a> thalassa::TlsplDeserialize<'a> for ComponentOperationBaseLabel<'a> {
     }
 }
 
-/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-4.1>
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-11.html#section-4.1>
 ///
 /// ### TLS Presentation Language
 ///
@@ -112,7 +112,7 @@ pub struct ComponentOperationLabel<'a> {
     pub label: Cow<'a, [u8]>,
 }
 
-/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-4.6>
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-11.html#section-4.6>
 ///
 /// ### TLS Presentation Language
 ///
@@ -241,7 +241,7 @@ impl<'a> Into<Vec<ComponentData<'a>>> for ComponentDataMap<'a> {
 ///
 /// The conversion from/to a `Vec<ComponentData>` is done at serialization/deserialization time
 ///
-/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-4.6>
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-11.html#section-4.6>
 ///
 /// ### TLS Presentation Language
 ///
@@ -296,7 +296,7 @@ impl<'a> From<ApplicationDataDictionary<'a>> for crate::group::extensions::Exten
     }
 }
 
-/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-4.7>
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-11.html#section-4.7>
 ///
 /// ### TLS Presentation Language
 ///
@@ -330,7 +330,7 @@ pub enum ApplicationDataUpdateOperation<'a> {
     Remove,
 }
 
-/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-4.7>
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-11.html#section-4.7>
 ///
 /// ### TLS Presentation Language
 ///
@@ -376,7 +376,7 @@ impl<'a> AppDataUpdate<'a> {
     }
 }
 
-/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-4.8>
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-11.html#section-4.8>
 ///
 /// ### TLS Presentation Language
 ///
@@ -395,7 +395,7 @@ pub struct ApplicationData<'a> {
 
 pub type AppEphemeral<'a> = ApplicationData<'a>;
 
-/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-4.9>
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-11.html#section-4.9>
 ///
 /// ### TLS Presentation Language
 ///
@@ -442,7 +442,7 @@ impl<'a> SafeAadItemRef<'a> {
     }
 }
 
-/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-4.9>
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-11.html#section-4.9>
 ///
 /// ### TLS Presentation Language
 ///
@@ -521,7 +521,7 @@ impl<'a> From<&'a [&'a SafeAadItemRef<'a>]> for SafeAadRef<'a> {
     }
 }
 
-/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-5>
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-11.html#section-5>
 ///
 /// ### TLS Presentation Language
 ///
@@ -536,7 +536,7 @@ pub struct WireFormats {
     pub wire_formats: Vec<crate::defs::WireFormat>,
 }
 
-/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-5>
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-11.html#section-5>
 ///
 /// ### TLS Presentation Language
 ///

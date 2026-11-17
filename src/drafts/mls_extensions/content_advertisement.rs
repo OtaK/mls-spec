@@ -2,7 +2,7 @@ use std::borrow::Cow;
 
 use super::safe_application::{Component, ComponentId};
 
-/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-6.2.2>
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-11.html#section-6.2.2>
 ///
 /// ### TLS Presentation Language
 ///
@@ -21,7 +21,7 @@ pub struct Parameter<'a> {
     pub parameter_value: Cow<'a, str>,
 }
 
-/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-6.2.2>
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-11.html#section-6.2.2>
 ///
 /// ### TLS Presentation Language
 ///
@@ -62,7 +62,7 @@ impl<'a> MediaType<'a> {
     }
 }
 
-/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-6.2.2>
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-11.html#section-6.2.2>
 ///
 /// ### TLS Presentation Language
 ///
@@ -90,7 +90,7 @@ impl<'a> Component<'a> for ContentMediaTypes<'a> {
     }
 }
 
-/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-10.html#section-6.2.4>
+/// <https://www.ietf.org/archive/id/draft-ietf-mls-extensions-11.html#section-6.2.4>
 ///
 /// ### TLS Presentation Language
 ///

@@ -25,7 +25,7 @@ static_assertions::const_assert!(
 
 pub type ExternalReceiverRef<'a> = HashReference<'a>;
 
-/// <https://www.ietf.org/archive/id/draft-mahy-mls-semiprivatemessage-07.html#section-3>
+/// <https://www.ietf.org/archive/id/draft-mahy-mls-semiprivatemessage-08.html#section-3>
 ///
 /// ### TLS Presentation Language
 ///
@@ -74,7 +74,7 @@ pub struct PerMessageKeyAndNonces<'a> {
     pub sender_leaf_index: LeafIndex,
 }
 
-/// <https://www.ietf.org/archive/id/draft-mahy-mls-semiprivatemessage-07.html#section-3.1>
+/// <https://www.ietf.org/archive/id/draft-mahy-mls-semiprivatemessage-08.html#section-3.1>
 ///
 /// ### TLS Presentation Language
 ///
@@ -93,7 +93,7 @@ pub struct SemiPrivateMessageContext<'a> {
     pub partial_context_hash: &'a [u8],
 }
 
-/// <https://www.ietf.org/archive/id/draft-mahy-mls-semiprivatemessage-07.html#section-3.1>
+/// <https://www.ietf.org/archive/id/draft-mahy-mls-semiprivatemessage-08.html#section-3.1>
 ///
 /// ### TLS Presentation Language
 ///
@@ -126,7 +126,7 @@ pub mod messages {
 
     use super::KeyForExternalReceiver;
 
-    /// <https://www.ietf.org/archive/id/draft-mahy-mls-semiprivatemessage-07.html#section-3.1>
+    /// <https://www.ietf.org/archive/id/draft-mahy-mls-semiprivatemessage-08.html#section-3.1>
     ///
     /// ### TLS Presentation Language
     ///
@@ -255,7 +255,7 @@ pub mod messages {
         }
     }
 
-    /// <https://www.ietf.org/archive/id/draft-mahy-mls-semiprivatemessage-07.html#section-3.1>
+    /// <https://www.ietf.org/archive/id/draft-mahy-mls-semiprivatemessage-08.html#section-3.1>
     ///
     /// ### TLS Presentation Language
     ///

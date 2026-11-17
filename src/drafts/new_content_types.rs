@@ -5,7 +5,7 @@ pub const EXTENSION_REQUIRED_CONTENT_TYPES: u16 = 0x0010;
 pub const CONTENT_TYPE_STATUS: u8 = 0x04;
 pub const CONTENT_TYPE_EPHEMERAL: u8 = 0x05;
 
-/// <https://www.ietf.org/archive/id/draft-mahy-mls-new-content-types-01.html#section-3>
+/// <https://www.ietf.org/archive/id/draft-mahy-mls-new-content-types-02.html#section-3>
 ///
 /// ### TLS Presentation Language
 ///
