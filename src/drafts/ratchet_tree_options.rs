@@ -111,7 +111,9 @@ pub enum RatchetTreeOption<'a> {
     #[tlspl(discriminant = "RatchetTreeRepresentation::DistributionService")]
     DistributionService,
     #[tlspl(discriminant = "RatchetTreeRepresentation::DeflateZlibCompressed")]
-    DeflateZlibCompressed { ratchet_tree_compressed: Vec<u8> },
+    DeflateZlibCompressed {
+        ratchet_tree_compressed: Cow<'a, [u8]>,
+    },
 }
 
 /// <https://www.ietf.org/archive/id/draft-ietf-mls-ratchet-tree-options-01.html#section-4>
