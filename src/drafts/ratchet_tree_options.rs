@@ -110,7 +110,7 @@ pub enum RatchetTreeOption<'a> {
     OutOfBand,
     #[tlspl(discriminant = "RatchetTreeRepresentation::DistributionService")]
     DistributionService,
-    #[tls_codec(discriminant = "RatchetTreeRepresentation::DeflateZlibCompressed")]
+    #[tlspl(discriminant = "RatchetTreeRepresentation::DeflateZlibCompressed")]
     DeflateZlibCompressed { ratchet_tree_compressed: Vec<u8> },
 }
 
