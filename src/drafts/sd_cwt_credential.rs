@@ -12,7 +12,7 @@ pub struct SdCwtCredential<'a> {
 impl std::fmt::Debug for SdCwtCredential<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("SdCwtCredential")
-            .field("sd_kbt", &hex::encode(&self.sd_kbt))
+            .field("sd_kbt", &faster_hex::Hex::new(&self.sd_kbt))
             .finish()
     }
 }

@@ -81,7 +81,7 @@ impl std::fmt::Debug for SensitiveBytes<'_> {
 #[cfg(feature = "hazmat")]
 impl std::fmt::Display for SensitiveBytes<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", hex::encode(&*self.0))
+        write!(f, "{}", faster_hex::Hex::new(&*self.0))
     }
 }
 

@@ -1,6 +1,6 @@
 [package]
 name = "mls-spec"
-version = "3.0.0-pre.29"
+version = "3.0.0-pre.30"
 description = "This crate is a repository of MLS / RFC9420-related data structures."
 readme = "README.md"
 documentation = "https://docs.rs/mls-spec"
@@ -43,7 +43,7 @@ all-drafts = [
 ]
 alloc = []
 std = ["alloc"]
-hazmat = []
+hazmat = ["dep:faster-hex"]
 test-vectors = []
 test-utils = ["dep:pretty_assertions", "dep:color-eyre", "dep:postcard", "dep:serde_json"]
 serde = ["dep:serde", "dep:serde_repr", "zeroize/serde"]
@@ -71,7 +71,7 @@ draft-mahy-mls-new-content-types = [] # draft-02
 draft-mahy-mls-private-external = ["draft-ietf-mls-extensions"] # draft-02
 draft-mahy-mls-ratchet-tree-options = ["draft-ietf-mls-ratchet-tree-options"] # alias since WG adoption (mahy-04 => ietf-01)
 draft-mahy-mls-semiprivatemessage = ["draft-ietf-mls-extensions"] # draft-08
-draft-mahy-mls-sd-cwt-credential = [] # draft-03
+draft-mahy-mls-sd-cwt-credential = ["dep:faster-hex"] # draft-03
 draft-mularczyk-mls-splitcommit = [] # draft-00
 draft-pham-mls-additional-wire-formats = [
     "draft-ietf-mls-extensions",
@@ -85,7 +85,7 @@ thalassa = { version = "0.1.0-rc.8", features = ["derive"] }
 static_assertions = "1.1"
 subtle = "2.6"
 zeroize = { version = "1", features = ["derive"] }
-hex = "0.4"
+faster-hex = { version = "1", optional = true }
 mediatype = { version = "0.23", default-features = false, optional = true }
 serde = { version = "1", features = ["derive"], optional = true }
 serde_repr = { version = "0.1", optional = true }
